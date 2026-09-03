@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-obsidian: #101110;
+    --color-deep-petrol: #203A3A;
+    --color-porcelain: #F3EFE7;
+    --color-champagne: #C6A15B;
+    --color-deep-wine: #641F2B;
+    --color-charcoal: #211D19;
+    --border-hairline: 1px;
+    --radius-sharp: 0px;
+    --radius-minimal: 2px;
+    --container-max: 1600px;
+  }
+  
+  body {
+    @apply bg-obsidian text-porcelain font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+
+  /* Custom selection */
+  ::selection {
+    @apply bg-champagne-brass text-obsidian;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

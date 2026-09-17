@@ -3,7 +3,7 @@ import Link from "next/link";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: "primary" | "secondary" | "accent";
+  variant?: "primary" | "secondary" | "dark";
   href?: string;
   className?: string;
 }
@@ -16,15 +16,15 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-block px-8 py-3 border border-hairline transition-all duration-200 font-medium text-sm tracking-wide disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]";
+    "inline-block px-8 py-3.5 border transition-colors duration-200 font-medium text-sm rounded-none tracking-normal disabled:opacity-40 disabled:cursor-not-allowed text-center";
 
   const variantStyles = {
     primary:
       "bg-champagne-brass text-obsidian border-champagne-brass hover:bg-champagne-brass/90",
     secondary:
-      "bg-transparent text-porcelain border-porcelain hover:bg-porcelain hover:text-obsidian",
-    accent:
-      "bg-deep-wine text-porcelain border-deep-wine hover:bg-deep-wine/90",
+      "bg-transparent text-porcelain border-porcelain/40 hover:border-porcelain hover:text-porcelain",
+    dark:
+      "bg-obsidian text-porcelain border-champagne-brass/30 hover:border-champagne-brass hover:text-champagne-brass",
   };
 
   const combinedClassName = `${baseStyles} ${variantStyles[variant]} ${className}`;

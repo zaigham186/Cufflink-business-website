@@ -1,69 +1,128 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
 import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function HeroNoir() {
   const heroRef = useRef<HTMLElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const wordmarkRef = useRef<HTMLDivElement>(null);
+  const headlineLine1Ref = useRef<HTMLSpanElement>(null);
+  const headlineLine2Ref = useRef<HTMLSpanElement>(null);
+  const sublineRef = useRef<HTMLParagraphElement>(null);
+  const ctaGroupRef = useRef<HTMLDivElement>(null);
+  const brassRuleRef = useRef<HTMLDivElement>(null);
+  const contentWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
     if (prefersReducedMotion) {
-      // Show everything immediately
-      if (imageRef.current) gsap.set(imageRef.current, { opacity: 1, scale: 1 });
-      if (titleRef.current) gsap.set(titleRef.current, { opacity: 1, y: 0 });
-      if (subtitleRef.current) gsap.set(subtitleRef.current, { opacity: 1, y: 0 });
-      if (ctaRef.current) gsap.set(ctaRef.current, { opacity: 1, y: 0 });
-      if (lineRef.current) gsap.set(lineRef.current, { scaleX: 1 });
+      if (mediaRef.current) gsap.set(mediaRef.current, { opacity: 0.45, scale: 1, clipPath: "inset(0 0 0% 0)" });
+      if (wordmarkRef.current) gsap.set(wordmarkRef.current, { opacity: 0.8, y: 0 });
+      if (headlineLine1Ref.current) gsap.set(headlineLine1Ref.current, { opacity: 1, y: 0 });
+      if (headlineLine2Ref.current) gsap.set(headlineLine2Ref.current, { opacity: 1, y: 0 });
+      if (sublineRef.current) gsap.set(sublineRef.current, { opacity: 0.85, y: 0 });
+      if (ctaGroupRef.current) gsap.set(ctaGroupRef.current, { opacity: 1, y: 0 });
+      if (brassRuleRef.current) gsap.set(brassRuleRef.current, { scaleX: 1, opacity: 1 });
       return;
     }
 
     const ctx = gsap.context(() => {
+      // 1. Entrance Sequence (800–1500ms):
+      // bg settles → wordmark reveals → image reveals via clip-path → headline reveals line by line → CTA enters → thin brass rule draws in
       const tl = gsap.timeline({
-        defaults: { ease: "power3.out" }
+        defaults: { ease: "power3.out" },
       });
 
-      // Hero entrance sequence
-      tl.from(imageRef.current, {
-        clipPath: "inset(0 0 100% 0)",
-        scale: 1.1,
-        duration: 1.2,
-        ease: "power4.out"
-      })
-      .from(imageRef.current, {
-        scale: 1.1,
-        duration: 1.5,
-        ease: "power3.out"
-      }, "<")
-      .from(titleRef.current, {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-      }, "-=0.6")
-      .from(subtitleRef.current, {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-      }, "-=0.5")
-      .from(ctaRef.current, {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-      }, "-=0.4")
-      .from(lineRef.current, {
-        scaleX: 0,
-        duration: 1,
-        ease: "power3.inOut"
-      }, "-=0.6");
+      // Wordmark
+      tl.fromTo(
+        wordmarkRef.current,
+        { opacity: 0, y: -15 },
+        { opacity: 0.8, y: 0, duration: 0.8 }
+      )
+        // Image / Media reveals via clip-path
+        .fromTo(
+          mediaRef.current,
+          { clipPath: "inset(0 0 100% 0)", scale: 1.08, opacity: 0 },
+          {
+            clipPath: "inset(0 0 0% 0)",
+            scale: 1,
+            opacity: 0.45,
+            duration: 1.2,
+            ease: "power4.out",
+          },
+          "-=0.5"
+        )
+        // Headline line by line
+        .fromTo(
+          headlineLine1Ref.current,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
+          "-=0.7"
+        )
+        .fromTo(
+          headlineLine2Ref.current,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
+          "-=0.7"
+        )
+        // Subline
+        .fromTo(
+          sublineRef.current,
+          { opacity: 0, y: 25 },
+          { opacity: 0.85, y: 0, duration: 0.8 },
+          "-=0.5"
+        )
+        // CTA
+        .fromTo(
+          ctaGroupRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.7 },
+          "-=0.4"
+        )
+        // Thin brass rule draws in
+        .fromTo(
+          brassRuleRef.current,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 1.0, ease: "power3.inOut" },
+          "-=0.5"
+        );
+
+      // 2. Scroll-out via GSAP ScrollTrigger:
+      // product scales, headline exits, next section overlaps (transform/opacity/clip-path only)
+      if (heroRef.current) {
+        gsap.to(mediaRef.current, {
+          scale: 1.1,
+          opacity: 0.2,
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+
+        gsap.to(contentWrapRef.current, {
+          y: -80,
+          opacity: 0.2,
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+          },
+        });
+      }
     }, heroRef);
 
     return () => ctx.revert();
@@ -72,72 +131,95 @@ export default function HeroNoir() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen bg-obsidian text-porcelain flex items-center overflow-hidden"
+      className="relative w-full h-[100svh] min-h-[600px] bg-obsidian text-porcelain flex items-center overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-obsidian via-obsidian/95 to-obsidian z-10" />
-      
-      {/* Hero Image */}
+      {/* Background Media: Video placeholder with fallback editorial image */}
       <div
-        ref={imageRef}
-        className="absolute inset-0 opacity-40"
+        ref={mediaRef}
+        className="absolute inset-0 z-0 origin-center will-change-transform"
       >
-        <Image
-          src="/products/ivory-pave-gold-1.jpg"
-          alt="CuffKings premium cufflinks"
-          fill
-          className="object-cover"
-          priority
-          sizes="100vw"
-        />
+        {/* Placeholder video tag (if video exists, plays automatically; else shows fallback image) */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          poster="/editorial/hero-cufflinks.jpg"
+          className="w-full h-full object-cover"
+        >
+          <source src="/hero-video.mp4" type="video/mp4" />
+          {/* Fallback image */}
+          <Image
+            src="/editorial/hero-cufflinks.jpg"
+            alt="CuffKings cufflinks detail"
+            fill
+            priority
+            className="object-cover"
+            sizes="100vw"
+          />
+        </video>
+        {/* Obsidian overlay for contrast */}
+        <div className="absolute inset-0 bg-obsidian/60" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-20 max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      {/* Hero Content */}
+      <div
+        ref={contentWrapRef}
+        className="relative z-10 max-w-container mx-auto px-6 sm:px-8 lg:px-12 w-full pt-16 will-change-transform"
+      >
         <div className="max-w-4xl">
-          {/* Brand mark */}
-          <div className="mb-12 text-champagne-brass text-sm tracking-[0.3em] font-medium opacity-80">
+          {/* Wordmark */}
+          <div
+            ref={wordmarkRef}
+            className="mb-8 text-champagne-brass text-xs sm:text-sm tracking-[0.3em] font-medium"
+          >
             CUFFKINGS
           </div>
 
-          {/* Main headline */}
-          <h1
-            ref={titleRef}
-            className="text-h1 mb-8 leading-none"
-          >
-            The detail
-            <br />
-            changes everything.
+          {/* Headline - sentence case, line by line */}
+          <h1 className="text-display font-display leading-[0.95] tracking-tight mb-8">
+            <span ref={headlineLine1Ref} className="block">
+              The detail
+            </span>
+            <span ref={headlineLine2Ref} className="block">
+              changes everything.
+            </span>
           </h1>
 
-          {/* Supporting copy */}
+          {/* Subline - exact copy */}
           <p
-            ref={subtitleRef}
-            className="text-xl sm:text-2xl mb-12 max-w-2xl opacity-90 leading-relaxed"
+            ref={sublineRef}
+            className="text-body max-w-xl text-porcelain/85 mb-10 leading-relaxed"
           >
-            Cufflinks built around polished metal, considered patterns and the details of formal dressing.
+            Cufflinks built around polished metal, considered patterns and the
+            details of formal dressing.
           </p>
 
-          {/* CTAs */}
-          <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 mb-16">
-            <Button href="/shop" variant="primary">
+          {/* CTAs - exact copy */}
+          <div
+            ref={ctaGroupRef}
+            className="flex flex-col sm:flex-row gap-4 mb-12 items-start sm:items-center"
+          >
+            <Link
+              href="/shop"
+              className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+            >
               Shop the collection
-            </Button>
-            <Button href="/shop" variant="secondary">
+            </Link>
+            <Link
+              href="/shop"
+              className="inline-block px-8 py-3.5 bg-transparent text-porcelain text-sm font-medium border border-porcelain/30 hover:border-porcelain hover:text-porcelain transition-all duration-200"
+            >
               Explore the pieces
-            </Button>
+            </Link>
           </div>
 
-          {/* Brass line accent */}
+          {/* Thin Champagne Brass rule draws in */}
           <div
-            ref={lineRef}
-            className="h-px w-32 bg-champagne-brass origin-left"
+            ref={brassRuleRef}
+            className="h-px w-28 sm:w-36 bg-champagne-brass origin-left"
           />
         </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-        <div className="w-px h-16 bg-gradient-to-b from-champagne-brass to-transparent" />
       </div>
     </section>
   );

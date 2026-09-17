@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { getProductsByCategory, categories } from "@/lib/products";
 import ProductCard from "@/components/shop/ProductCard";
 import type { Metadata } from "next";
@@ -21,7 +22,7 @@ export async function generateMetadata({
 
   if (!category) {
     return {
-      title: "Category Not Found — CuffKings",
+      title: "Category not found — CuffKings",
     };
   }
 
@@ -42,49 +43,62 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const products = getProductsByCategory(categorySlug);
 
   return (
-    <div className="bg-khaddar-ivory min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12 space-y-3">
-          <nav className="flex items-center space-x-2 text-sm opacity-70">
-            <a href="/" className="hover:text-ink-green transition-colors">
+    <div className="bg-porcelain text-warm-charcoal min-h-screen pt-24 pb-24">
+      <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="mb-12 space-y-4 pb-8 border-b border-warm-charcoal/15">
+          <nav
+            className="flex items-center space-x-2 text-xs text-warm-charcoal/60"
+            aria-label="Breadcrumb"
+          >
+            <Link href="/" className="hover:text-warm-charcoal transition-colors">
               Home
-            </a>
+            </Link>
             <span>/</span>
-            <a
-              href="/shop"
-              className="hover:text-ink-green transition-colors"
-            >
+            <Link href="/shop" className="hover:text-warm-charcoal transition-colors">
               Shop
-            </a>
+            </Link>
             <span>/</span>
-            <span className="opacity-100 font-medium">{category.name}</span>
+            <span className="text-warm-charcoal">{category.name}</span>
           </nav>
-          <h1 className="text-4xl sm:text-5xl font-fraunces">
+
+          <h1 className="text-h2 font-display text-warm-charcoal leading-tight">
             {category.name}
           </h1>
-          <p className="text-base opacity-70">{category.description}</p>
-          <p className="text-sm opacity-60">
-            {products.length} {products.length === 1 ? "product" : "products"}
+          <p className="text-body text-warm-charcoal/80 max-w-2xl">
+            {category.description}
+          </p>
+          <p className="text-xs text-warm-charcoal/60">
+            {products.length} {products.length === 1 ? "piece" : "pieces"}
           </p>
         </div>
 
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
+            {products.map((product, index) => {
+              const span =
+                index === 0
+                  ? "lg:col-span-7"
+                  : index === 1
+                  ? "lg:col-span-5"
+                  : "lg:col-span-4";
+              return (
+                <div key={product.id} className={span}>
+                  <ProductCard product={product} />
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <p className="text-lg opacity-70 mb-4">
-              No products in this category yet
+          <div className="text-center py-20 border border-warm-charcoal/10 bg-porcelain space-y-4">
+            <p className="text-base text-warm-charcoal/70">
+              No cufflinks in this category yet.
             </p>
-            <a
+            <Link
               href="/shop"
-              className="text-sm text-antique-brass hover:text-ink-green transition-colors"
+              className="inline-block text-xs font-medium text-warm-charcoal underline underline-offset-4 hover:text-champagne-brass transition-colors"
             >
-              Browse all products
-            </a>
+              Browse all pieces →
+            </Link>
           </div>
         )}
       </div>

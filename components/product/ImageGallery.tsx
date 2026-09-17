@@ -2,58 +2,81 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import ProductPlaceholder from "@/components/ui/ProductPlaceholder";
 
 interface ImageGalleryProps {
   images: string[];
   productName: string;
-  hasPhotography: boolean;
 }
 
-export default function ImageGallery({
-  images,
-  productName,
-  hasPhotography,
-}: ImageGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
+export default function ImageGallery({ images, productName }: ImageGalleryProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const displayImages = images.length > 0 ? images : ["/products/ivory-pave-gold-1.jpg"];
 
   return (
     <div className="space-y-4">
-      {/* Main image */}
-      <div className="aspect-square bg-white border border-antique-brass/30 overflow-hidden">
-        {hasPhotography ? (
-          <Image
-            src={images[selectedImage]}
-            alt={`${productName} - View ${selectedImage + 1}`}
-            width={800}
-            height={800}
-            className="w-full h-full object-cover"
-            priority
-          />
-        ) : (
-          <ProductPlaceholder />
+      {/* Primary Image View */}
+      <div className="relative aspect-square w-full bg-obsidian border border-champagne-brass/25 overflow-hidden">
+        <Image
+          src={displayImages[selectedIndex]}
+          alt={`${productName} view ${selectedIndex + 1}`}
+          fill
+          priority
+          className="object-cover"
+          sizes="(max-width: 1024px) 100vw, 60vw"
+        />
+
+        {/* Mobile Swipe / Arrow Controls if multiple images */}
+        {displayImages.length > 1 && (
+          <div className="lg:hidden absolute bottom-3 right-3 flex space-x-2 z-10">
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedIndex((prev) =>
+                  prev === 0 ? displayImages.length - 1 : prev - 1
+                )
+              }
+              className="w-9 h-9 bg-obsidian/90 text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
+              aria-label="Previous image"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedIndex((prev) =>
+                  prev === displayImages.length - 1 ? 0 : prev + 1
+                )
+              }
+              className="w-9 h-9 bg-obsidian/90 text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
+              aria-label="Next image"
+            >
+              →
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Thumbnails */}
-      {hasPhotography && images.length > 1 && (
-        <div className="grid grid-cols-4 gap-3">
-          {images.map((image, index) => (
+      {/* Thumbnail Nav */}
+      {displayImages.length > 1 && (
+        <div className="flex gap-3">
+          {displayImages.map((img, idx) => (
             <button
-              key={index}
-              onClick={() => setSelectedImage(index)}
-              className={`aspect-square border overflow-hidden transition-all ${
-                selectedImage === index
-                  ? "border-ink-green"
-                  : "border-antique-brass/30 hover:border-antique-brass"
+              key={idx}
+              type="button"
+              onClick={() => setSelectedIndex(idx)}
+              className={`relative w-20 h-20 bg-obsidian overflow-hidden border transition-all ${
+                selectedIndex === idx
+                  ? "border-champagne-brass ring-1 ring-champagne-brass"
+                  : "border-warm-charcoal/20 opacity-70 hover:opacity-100"
               }`}
+              aria-label={`Select image ${idx + 1}`}
             >
               <Image
-                src={image}
-                alt={`${productName} thumbnail ${index + 1}`}
-                width={200}
-                height={200}
-                className="w-full h-full object-cover"
+                src={img}
+                alt={`${productName} thumbnail ${idx + 1}`}
+                fill
+                className="object-cover"
+                sizes="80px"
               />
             </button>
           ))}

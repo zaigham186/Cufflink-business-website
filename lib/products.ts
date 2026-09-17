@@ -120,7 +120,7 @@ const products: Product[] = [
     description:
       "Silver-tone metal with blue enamel and floral engraving. Polished finish, secure toggle closure.",
     price: 3600,
-    images: ["/products/placeholder-brass.jpg"],
+    images: ["/products/royal-blue-floral-1.jpg"],
     material: "Silver-tone metal, blue enamel",
     finish: "Polished with engraving",
     color: "Silver, Blue",
@@ -131,7 +131,7 @@ const products: Product[] = [
     stock: 6,
     sku: "CK-RBF-005",
     featured: false,
-    hasPhotography: false,
+    hasPhotography: true,
   },
   {
     id: "6",
@@ -142,7 +142,7 @@ const products: Product[] = [
     description:
       "Gunmetal with black enamel and engraved repeating pattern. Matte finish, filed edges, secure toggle closure.",
     price: 2950,
-    images: ["/products/placeholder-brass.jpg"],
+    images: ["/products/black-patterned-gunmetal-1.jpg"],
     material: "Gunmetal, black enamel",
     finish: "Matte gunmetal",
     color: "Gunmetal, Black",
@@ -153,7 +153,7 @@ const products: Product[] = [
     stock: 9,
     sku: "CK-BPG-006",
     featured: false,
-    hasPhotography: false,
+    hasPhotography: true,
   },
 ];
 

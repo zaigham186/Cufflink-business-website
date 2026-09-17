@@ -3,6 +3,7 @@ import { Instrument_Serif, Cormorant_Garamond, Manrope } from "next/font/google"
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
     <html lang="en" className={`${instrumentSerif.variable} ${cormorantGaramond.variable} ${manrope.variable}`}>
       <body>
         <Navbar />
+        <CartDrawer />
         <main>{children}</main>
         <Footer />
       </body>

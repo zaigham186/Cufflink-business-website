@@ -1,9 +1,14 @@
 import { notFound } from "next/navigation";
-import { getProductBySlug, getAllProducts } from "@/lib/products";
-import ImageGallery from "@/components/product/ImageGallery";
-import AddToCartButton from "@/components/product/AddToCartButton";
 import Link from "next/link";
 import type { Metadata } from "next";
+import {
+  getProductBySlug,
+  getAllProducts,
+  getProductsByCategory,
+} from "@/lib/products";
+import ImageGallery from "@/components/product/ImageGallery";
+import AddToCartButton from "@/components/product/AddToCartButton";
+import ProductCard from "@/components/shop/ProductCard";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -24,7 +29,7 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product Not Found — CuffKings",
+      title: "Product not found — CuffKings",
     };
   }
 
@@ -32,9 +37,9 @@ export async function generateMetadata({
     title: `${product.name} — CuffKings`,
     description: product.description,
     openGraph: {
-      title: product.name,
+      title: `${product.name} — CuffKings`,
       description: product.description,
-      images: product.hasPhotography ? [product.images[0]] : [],
+      images: product.images.length > 0 ? [product.images[0]] : [],
     },
   };
 }
@@ -47,127 +52,164 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const hasDiscount =
-    product.compareAtPrice && product.compareAtPrice > product.price;
+  // Related products from same category, excluding current product
+  const relatedProducts = getProductsByCategory(product.categorySlug)
+    .filter((p) => p.id !== product.id)
+    .slice(0, 3);
+
+  const isLowStock = product.stock > 0 && product.stock <= 5;
+  const isOutOfStock = product.stock === 0;
 
   return (
-    <div className="bg-khaddar-ivory min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center space-x-2 text-sm mb-8 opacity-70">
-          <Link
-            href="/"
-            className="hover:text-ink-green transition-colors"
-          >
+    <div className="bg-porcelain text-warm-charcoal min-h-screen pt-24 pb-24">
+      <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+        {/* Breadcrumb - subdued sentence case */}
+        <nav
+          className="flex items-center space-x-2 text-xs text-warm-charcoal/60 mb-10"
+          aria-label="Breadcrumb"
+        >
+          <Link href="/" className="hover:text-warm-charcoal transition-colors">
             Home
           </Link>
           <span>/</span>
           <Link
             href="/shop"
-            className="hover:text-ink-green transition-colors"
+            className="hover:text-warm-charcoal transition-colors"
           >
             Shop
           </Link>
           <span>/</span>
           <Link
-            href={`/shop/${product.categorySlug}`}
-            className="hover:text-ink-green transition-colors"
+            href={`/shop?category=${product.categorySlug}`}
+            className="hover:text-warm-charcoal transition-colors"
           >
             {product.category}
           </Link>
           <span>/</span>
-          <span className="opacity-100 font-medium">{product.name}</span>
+          <span className="text-warm-charcoal truncate">{product.name}</span>
         </nav>
 
-        {/* Product content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Left - Images */}
-          <ImageGallery
-            images={product.images}
-            productName={product.name}
-            hasPhotography={product.hasPhotography}
-          />
+        {/* 60/40 Split: Gallery & Info Panel */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Gallery (~60% = 7 cols on desktop) */}
+          <div className="lg:col-span-7">
+            <ImageGallery
+              images={product.images}
+              productName={product.name}
+            />
+          </div>
 
-          {/* Right - Info */}
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm uppercase tracking-wide text-antique-brass mb-2">
-                  {product.category}
-                </p>
-                <h1 className="text-3xl sm:text-4xl font-fraunces">
-                  {product.name}
-                </h1>
-              </div>
+          {/* Info Panel (~40% = 5 cols on desktop) */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Title & Price */}
+            <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+              <h1 className="text-3xl sm:text-4xl font-display leading-tight text-warm-charcoal">
+                {product.name}
+              </h1>
 
               <div className="flex items-baseline space-x-3">
-                <span className="text-2xl font-medium">
+                <span className="text-2xl font-medium text-warm-charcoal">
                   Rs. {product.price.toLocaleString()}
                 </span>
-                {hasDiscount && (
-                  <>
-                    <span className="text-lg opacity-50 line-through">
-                      Rs. {product.compareAtPrice?.toLocaleString()}
+                {product.compareAtPrice &&
+                  product.compareAtPrice > product.price && (
+                    <span className="text-sm text-warm-charcoal/50 line-through">
+                      Rs. {product.compareAtPrice.toLocaleString()}
                     </span>
-                    <span className="text-sm text-maroon font-medium">
-                      Save Rs.{" "}
-                      {(
-                        (product.compareAtPrice || 0) - product.price
-                      ).toLocaleString()}
-                    </span>
-                  </>
-                )}
+                  )}
               </div>
 
-              <p className="text-base leading-relaxed opacity-80">
-                {product.description}
-              </p>
-            </div>
-
-            {/* Product details */}
-            <div className="border-t border-b border-antique-brass/30 py-6 space-y-3">
-              <DetailRow label="Material" value={product.material} />
-              <DetailRow label="Finish" value={product.finish} />
-              <DetailRow label="Color" value={product.color} />
-              <DetailRow label="Shape" value={product.shape} />
-              <DetailRow label="Pattern" value={product.pattern} />
-              {product.isSet && (
-                <DetailRow
-                  label="Set includes"
-                  value={`${product.pairsCount} pair${
-                    product.pairsCount > 1 ? "s" : ""
+              {/* Availability */}
+              <div className="pt-1">
+                <span
+                  className={`text-xs font-medium ${
+                    isOutOfStock
+                      ? "text-deep-wine"
+                      : isLowStock
+                      ? "text-warm-charcoal"
+                      : "text-warm-charcoal/70"
                   }`}
-                />
-              )}
-              <DetailRow label="SKU" value={product.sku} />
+                >
+                  {isOutOfStock
+                    ? "Out of stock"
+                    : isLowStock
+                    ? `Only ${product.stock} pairs remaining`
+                    : "In stock"}
+                </span>
+              </div>
             </div>
 
-            {/* Add to cart */}
+            {/* Description */}
+            <div className="text-sm text-warm-charcoal/80 leading-relaxed">
+              <p>{product.description}</p>
+            </div>
+
+            {/* Specs: Material, Finish, Color */}
+            <div className="py-4 border-t border-b border-warm-charcoal/15 space-y-2.5 text-xs sm:text-sm">
+              <div className="flex justify-between">
+                <span className="text-warm-charcoal/60">Material</span>
+                <span className="text-warm-charcoal font-medium">
+                  {product.material}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-warm-charcoal/60">Finish</span>
+                <span className="text-warm-charcoal font-medium">
+                  {product.finish}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-warm-charcoal/60">Color</span>
+                <span className="text-warm-charcoal font-medium">
+                  {product.color}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-warm-charcoal/60">Closure</span>
+                <span className="text-warm-charcoal font-medium">
+                  Swivel toggle closure
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-warm-charcoal/60">Origin</span>
+                <span className="text-warm-charcoal font-medium">
+                  Peshawar, Pakistan
+                </span>
+              </div>
+            </div>
+
+            {/* Quantity and Add to Cart */}
             <AddToCartButton product={product} />
-
-            {/* Additional info */}
-            <div className="pt-6 space-y-4 text-sm opacity-70">
-              <p>
-                • Secure toggle closure
-                <br />
-                • Filed edges and polished finish
-                <br />
-                • Checked before packaging
-                <br />• Ships from Peshawar, Pakistan
-              </p>
-            </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between text-sm">
-      <span className="opacity-70">{label}</span>
-      <span className="font-medium">{value}</span>
+        {/* Related Products Section - Below */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-28 pt-16 border-t border-warm-charcoal/15">
+            <div className="mb-10 flex justify-between items-baseline">
+              <h2 className="text-2xl font-display text-warm-charcoal">
+                Related pieces
+              </h2>
+              <Link
+                href={`/shop?category=${product.categorySlug}`}
+                className="text-xs text-warm-charcoal/70 hover:text-warm-charcoal transition-colors"
+              >
+                More in {product.category} →
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+              {relatedProducts.map((related) => (
+                <ProductCard key={related.id} product={related} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

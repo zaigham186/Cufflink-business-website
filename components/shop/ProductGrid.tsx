@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
 import FilterSidebar from "./FilterSidebar";
@@ -10,116 +11,206 @@ interface ProductGridProps {
 }
 
 export default function ProductGrid({ products }: ProductGridProps) {
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") || "";
+
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedPrice, setSelectedPrice] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedFinish, setSelectedFinish] = useState("");
   const [sortBy, setSortBy] = useState("featured");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Filter and sort products
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products;
+  // Sync category with URL query param if changed
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
 
-    // Filter by category
+  const handleResetAll = () => {
+    setSelectedCategory("");
+    setSelectedPrice("");
+    setSelectedColor("");
+    setSelectedFinish("");
+    setSortBy("featured");
+  };
+
+  // Filter & Sort Logic
+  const filteredAndSortedProducts = useMemo(() => {
+    let result = [...products];
+
+    // 1. Category Filter
     if (selectedCategory) {
-      filtered = filtered.filter(
+      result = result.filter(
         (product) => product.categorySlug === selectedCategory
       );
     }
 
-    // Sort
-    let sorted = [...filtered];
+    // 2. Price Filter
+    if (selectedPrice) {
+      if (selectedPrice === "under-3000") {
+        result = result.filter((p) => p.price < 3000);
+      } else if (selectedPrice === "3000-3500") {
+        result = result.filter((p) => p.price >= 3000 && p.price <= 3500);
+      } else if (selectedPrice === "above-3500") {
+        result = result.filter((p) => p.price > 3500);
+      }
+    }
+
+    // 3. Color Filter
+    if (selectedColor) {
+      const targetColor = selectedColor.toLowerCase();
+      result = result.filter((p) =>
+        p.color.toLowerCase().includes(targetColor)
+      );
+    }
+
+    // 4. Finish Filter
+    if (selectedFinish) {
+      const targetFinish = selectedFinish.toLowerCase();
+      result = result.filter((p) =>
+        p.finish.toLowerCase().includes(targetFinish)
+      );
+    }
+
+    // 5. Sorting
     switch (sortBy) {
       case "price-asc":
-        sorted.sort((a, b) => a.price - b.price);
+        result.sort((a, b) => a.price - b.price);
         break;
       case "price-desc":
-        sorted.sort((a, b) => b.price - a.price);
+        result.sort((a, b) => b.price - a.price);
         break;
-      case "name":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      case "newest":
+        result.sort((a, b) => b.id.localeCompare(a.id));
         break;
       case "featured":
       default:
-        sorted.sort((a, b) => {
+        result.sort((a, b) => {
           if (a.featured && !b.featured) return -1;
           if (!a.featured && b.featured) return 1;
           return 0;
         });
+        break;
     }
 
-    return sorted;
-  }, [products, selectedCategory, sortBy]);
+    return result;
+  }, [
+    products,
+    selectedCategory,
+    selectedPrice,
+    selectedColor,
+    selectedFinish,
+    sortBy,
+  ]);
+
+  // Helper function to assign asymmetric grid spans on desktop
+  const getCardSpan = (index: number) => {
+    const cycle = index % 5;
+    if (cycle === 0) return "lg:col-span-7";
+    if (cycle === 1) return "lg:col-span-5";
+    if (cycle === 2) return "lg:col-span-4";
+    if (cycle === 3) return "lg:col-span-4";
+    if (cycle === 4) return "lg:col-span-4";
+    return "lg:col-span-6";
+  };
 
   return (
-    <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-      <div className="flex items-center justify-between mb-12 pb-8 border-b border-champagne-brass/20">
+    <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12 py-12 lg:py-16">
+      {/* Top Bar */}
+      <div className="flex items-baseline justify-between mb-10 pb-6 border-b border-warm-charcoal/15">
         <div>
-          <h2 className="text-2xl font-display text-warm-charcoal mb-2">
+          <h2 className="text-xl sm:text-2xl font-display text-warm-charcoal">
             {selectedCategory
               ? products.find((p) => p.categorySlug === selectedCategory)
-                  ?.category || "Shop"
+                  ?.category || "Selected pieces"
               : "All cufflinks"}
           </h2>
-          <p className="text-sm text-warm-charcoal/60">
+          <p className="text-xs sm:text-sm text-warm-charcoal/60 mt-1">
             {filteredAndSortedProducts.length}{" "}
-            {filteredAndSortedProducts.length === 1 ? "product" : "products"}
+            {filteredAndSortedProducts.length === 1 ? "piece" : "pieces"}{" "}
+            available
           </p>
         </div>
 
-        {/* Mobile filter button */}
+        {/* Mobile filter toggle */}
         <button
-          onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-          className="lg:hidden px-4 py-2 border border-champagne-brass/30 text-sm font-medium text-warm-charcoal hover:bg-obsidian hover:text-porcelain transition-all duration-200"
+          onClick={() => setMobileFiltersOpen(true)}
+          className="lg:hidden px-4 py-2 border border-warm-charcoal/30 text-xs font-medium text-warm-charcoal hover:bg-obsidian hover:text-porcelain transition-colors"
         >
-          Filters
+          Filters & Sort
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-12">
-        {/* Desktop Sidebar */}
+      <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+        {/* Desktop Filter Sidebar (260px) */}
         <div className="hidden lg:block w-64 flex-shrink-0">
           <FilterSidebar
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
+            selectedPrice={selectedPrice}
+            onPriceChange={setSelectedPrice}
+            selectedColor={selectedColor}
+            onColorChange={setSelectedColor}
+            selectedFinish={selectedFinish}
+            onFinishChange={setSelectedFinish}
             sortBy={sortBy}
             onSortChange={setSortBy}
+            onResetAll={handleResetAll}
           />
         </div>
 
-        {/* Mobile Filters */}
+        {/* Mobile Filter Overlay (solid porcelain, no glassmorphism) */}
         {mobileFiltersOpen && (
-          <div className="lg:hidden fixed inset-0 bg-obsidian/80 backdrop-blur-sm z-50">
-            <div className="absolute right-0 top-0 bottom-0 w-80 max-w-full bg-porcelain p-6 overflow-y-auto shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-display text-xl text-warm-charcoal">Filters</h2>
+          <div className="lg:hidden fixed inset-0 z-50">
+            <div
+              className="absolute inset-0 bg-obsidian/70"
+              onClick={() => setMobileFiltersOpen(false)}
+            />
+            <div className="absolute top-0 right-0 bottom-0 w-80 max-w-full bg-porcelain p-6 overflow-y-auto border-l border-warm-charcoal/15">
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-warm-charcoal/15">
+                <span className="font-display text-lg text-warm-charcoal">
+                  Filters
+                </span>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
-                  className="p-2 text-warm-charcoal hover:text-champagne-brass transition-colors"
+                  className="p-1 text-warm-charcoal/70 hover:text-warm-charcoal"
                   aria-label="Close filters"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  ✕
                 </button>
               </div>
+
               <FilterSidebar
                 selectedCategory={selectedCategory}
-                onCategoryChange={(cat) => {
-                  setSelectedCategory(cat);
+                onCategoryChange={(c) => {
+                  setSelectedCategory(c);
+                  setMobileFiltersOpen(false);
+                }}
+                selectedPrice={selectedPrice}
+                onPriceChange={(p) => {
+                  setSelectedPrice(p);
+                  setMobileFiltersOpen(false);
+                }}
+                selectedColor={selectedColor}
+                onColorChange={(col) => {
+                  setSelectedColor(col);
+                  setMobileFiltersOpen(false);
+                }}
+                selectedFinish={selectedFinish}
+                onFinishChange={(f) => {
+                  setSelectedFinish(f);
                   setMobileFiltersOpen(false);
                 }}
                 sortBy={sortBy}
-                onSortChange={(sort) => {
-                  setSortBy(sort);
+                onSortChange={(s) => {
+                  setSortBy(s);
+                  setMobileFiltersOpen(false);
+                }}
+                onResetAll={() => {
+                  handleResetAll();
                   setMobileFiltersOpen(false);
                 }}
               />
@@ -127,25 +218,27 @@ export default function ProductGrid({ products }: ProductGridProps) {
           </div>
         )}
 
-        {/* Product Grid */}
+        {/* Product Grid Area */}
         <div className="flex-1">
           {filteredAndSortedProducts.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {filteredAndSortedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+            /* 12-column Asymmetric Desktop Grid, 1-2 columns on mobile */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
+              {filteredAndSortedProducts.map((product, index) => (
+                <div key={product.id} className={getCardSpan(index)}>
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <p className="text-lg text-warm-charcoal/70">No products found</p>
+            <div className="text-center py-20 border border-warm-charcoal/10 bg-porcelain space-y-4">
+              <p className="text-base text-warm-charcoal/70">
+                No cufflinks match the selected filters.
+              </p>
               <button
-                onClick={() => {
-                  setSelectedCategory("");
-                  setSortBy("featured");
-                }}
-                className="mt-4 text-sm text-champagne-brass hover:text-obsidian transition-colors duration-200"
+                onClick={handleResetAll}
+                className="text-sm font-medium text-warm-charcoal underline underline-offset-4 hover:text-champagne-brass transition-colors"
               >
-                Clear filters
+                Clear all filters
               </button>
             </div>
           )}

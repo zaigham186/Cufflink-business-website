@@ -1,140 +1,150 @@
+import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About CuffKings — Premium men's cufflinks from Peshawar",
+  title: "About — CuffKings",
   description:
-    "CuffKings focuses on men's accessories for formal dressing. Based in Peshawar, Pakistan, we work with polished metal, enamel and engraved patterns.",
+    "Cufflinks built around polished metal, considered patterns and the details of formal dressing. Handcrafted in Peshawar, Pakistan.",
 };
 
 export default function AboutPage() {
   return (
-    <div className="bg-obsidian min-h-screen">
-      {/* Hero section */}
-      <div className="bg-obsidian text-porcelain pt-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-          <h1 className="text-h1 font-display mb-8 leading-tight">
-            Built around the details of formal dressing
-          </h1>
-          <p className="text-xl leading-relaxed opacity-90">
-            CuffKings focuses on men's accessories for formal dressing. Every
-            piece starts with polished metal, enamel work and engraved patterns
-            — finished and checked before it's packed.
-          </p>
-        </div>
-      </div>
-
-      {/* Brass divider */}
-      <div className="h-px bg-champagne-brass/20 max-w-container mx-auto" />
-
-      {/* Content */}
-      <div className="bg-porcelain">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 space-y-16">
-          {/* What we do */}
-          <section className="space-y-6">
-            <h2 className="text-3xl font-display text-warm-charcoal">What we do</h2>
-            <div className="space-y-4 text-base leading-relaxed text-warm-charcoal/80">
-              <p>
-                We design and source premium cufflinks for men who pay attention
-                to finishing details. Each piece is built around materials that
-                show quality up close: gold-tone metal, deep enamel, gunmetal
-                finishes, and crystal detailing.
-              </p>
-              <p>
-                Every cufflink is filed, polished, and checked before packaging.
-                The work shows in the surface, the weight, and the way light
-                catches engraved patterns.
-              </p>
+    <div className="min-h-screen bg-obsidian text-porcelain pt-20">
+      {/* 1. Header Block */}
+      <section className="py-20 lg:py-28 border-b border-champagne-brass/20">
+        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="max-w-3xl space-y-6">
+            <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium">
+              CUFFKINGS ATELIER
             </div>
-          </section>
-
-          {/* Materials */}
-          <section className="space-y-8">
-            <h2 className="text-3xl font-display text-warm-charcoal">Materials and finish</h2>
-            <div className="grid sm:grid-cols-2 gap-8 lg:gap-12">
-              <div className="space-y-3">
-                <h3 className="font-display text-lg text-warm-charcoal">Metal surfaces</h3>
-                <p className="text-sm leading-relaxed text-warm-charcoal/70">
-                  Gold-tone, silver-tone, and gunmetal finishes. Polished where
-                  light should catch it, matte where it shouldn't.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h3 className="font-display text-lg text-warm-charcoal">Enamel work</h3>
-                <p className="text-sm leading-relaxed text-warm-charcoal/70">
-                  Deep enamel fill in blue, black, and ivory. Applied carefully,
-                  leveled, and set to sit flush with metal edges.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h3 className="font-display text-lg text-warm-charcoal">Engraved patterns</h3>
-                <p className="text-sm leading-relaxed text-warm-charcoal/70">
-                  Fine line work, geometric repeats, and floral motifs. Cut into
-                  the metal to give surface texture and visual depth.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h3 className="font-display text-lg text-warm-charcoal">Crystal detailing</h3>
-                <p className="text-sm leading-relaxed text-warm-charcoal/70">
-                  Pavé-set crystals on select pieces. Small, precise, and set to
-                  catch light without looking excessive.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Location */}
-          <section className="space-y-6">
-            <h2 className="text-3xl font-display text-warm-charcoal">Based in Peshawar</h2>
-            <div className="space-y-4 text-base leading-relaxed text-warm-charcoal/80">
-              <p>
-                CuffKings operates from Peshawar, Pakistan. We work with local
-                suppliers and craftspeople who understand metal finishing and
-                detailed accessory work.
-              </p>
-              <p>
-                Orders ship from Peshawar to addresses across Pakistan. For
-                international orders or custom requests, contact us directly.
-              </p>
-            </div>
-            {/* Brass line accent */}
-            <div className="pt-4 flex items-center gap-4">
-              <div className="h-px w-24 bg-champagne-brass/40" />
-              <span className="text-sm text-champagne-brass/70">Peshawar, Pakistan</span>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      {/* Quality commitment section - Dark */}
-      <div className="bg-deep-petrol">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="space-y-8">
-            <h2 className="text-3xl font-display text-porcelain">Quality commitment</h2>
-            <ul className="space-y-3 text-base text-porcelain/80">
-              <li className="flex items-start gap-3">
-                <span className="text-champagne-brass mt-1">•</span>
-                <span>Each piece checked for surface finish and closure function</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-champagne-brass mt-1">•</span>
-                <span>Polished edges, secure toggle backs, weight-tested</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-champagne-brass mt-1">•</span>
-                <span>Enamel inspected for levelness and coverage</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-champagne-brass mt-1">•</span>
-                <span>Engraving checked for depth and clarity</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-champagne-brass mt-1">•</span>
-                <span>Packaged in protective boxes</span>
-              </li>
-            </ul>
+            <h1 className="text-display font-display leading-[0.95]">
+              The detail changes everything.
+            </h1>
+            <p className="text-body text-porcelain/80 leading-relaxed max-w-2xl pt-2">
+              CuffKings focuses on men's accessories for formal dressing. Every
+              pair starts with solid metal, filed surfaces and hand-set
+              enamel—finished and inspected in Peshawar before it is packed.
+            </p>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* 2. Large Editorial Photography Break */}
+      <section className="relative w-full aspect-[21/9] min-h-[350px] bg-obsidian border-b border-champagne-brass/20 overflow-hidden">
+        <Image
+          src="/editorial/craftsmanship-detail.jpg"
+          alt="Cufflink hand finishing and filing in Peshawar workshop"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-obsidian/30" />
+      </section>
+
+      {/* 3. Narrative & Materials on Porcelain */}
+      <section className="bg-porcelain text-warm-charcoal py-24 lg:py-32">
+        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            {/* Left Column: Peshawar & Craft */}
+            <div className="lg:col-span-6 space-y-8">
+              <h2 className="text-h2 font-display leading-[1.05] text-warm-charcoal">
+                Based in Peshawar. Focused on formal dressing.
+              </h2>
+              <div className="space-y-5 text-body text-warm-charcoal/80 leading-relaxed">
+                <p>
+                  Formal dressing leaves little room for excess. When a suit fits
+                  and a shirt cuff sits right at the wrist, the cufflink is the
+                  single point where craftsmanship, weight, and metal finish meet.
+                </p>
+                <p>
+                  Operating from Peshawar, Pakistan, we work closely with
+                  metalworkers and enamel craftspeople. We focus on finishing:
+                  filing sharp burrs, balancing weight so the cuff hangs cleanly,
+                  and testing toggle backings for reliable tension.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-warm-charcoal/15 flex items-center space-x-4">
+                <div className="h-px w-16 bg-champagne-brass" />
+                <span className="text-xs text-warm-charcoal/60 uppercase tracking-wider">
+                  Khyber Pakhtunkhwa, Pakistan
+                </span>
+              </div>
+            </div>
+
+            {/* Right Column: Materials Breakdown */}
+            <div className="lg:col-span-6 space-y-10">
+              <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+                <h3 className="text-xl font-display text-warm-charcoal">
+                  Solid metal surfaces
+                </h3>
+                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
+                  Gold-tone, silver-tone, and matte gunmetal. Each surface is
+                  filed and mirror-polished or wire-brushed so light reflects
+                  cleanly across edges.
+                </p>
+              </div>
+
+              <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+                <h3 className="text-xl font-display text-warm-charcoal">
+                  Deep mineral enamel
+                </h3>
+                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
+                  Sapphire blue, black, and ivory fills. Set flush with the
+                  cufflink perimeter to eliminate ridges that catch on fabric.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-xl font-display text-warm-charcoal">
+                  Engraving and crystal pavé
+                </h3>
+                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
+                  Geometric repeats, trellis lattice, and floral engraving cut
+                  deep enough to provide tactile texture without ostentation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Secondary Editorial Visual */}
+      <section className="bg-deep-petrol text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20">
+        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7 relative aspect-[16/10] bg-obsidian overflow-hidden border border-champagne-brass/20">
+              <Image
+                src="/editorial/peshawar-atelier.jpg"
+                alt="Peshawar workshop workbench"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 58vw"
+              />
+            </div>
+
+            <div className="lg:col-span-5 space-y-6">
+              <h3 className="text-2xl sm:text-3xl font-display text-porcelain">
+                Finished for the occasion.
+              </h3>
+              <p className="text-sm text-porcelain/80 leading-relaxed">
+                Whether selected for a wedding, evening formalwear, or black-tie
+                dress, our pieces are built to remain understated and sharp.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/shop"
+                  className="inline-block px-8 py-3 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+                >
+                  Explore the pieces
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

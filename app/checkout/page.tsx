@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import CheckoutForm from "@/components/checkout/CheckoutForm";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function CheckoutPage() {
   // Redirect if cart is empty
   useEffect(() => {
     if (items.length === 0) {
-      router.push("/cart");
+      router.push("/shop");
     }
   }, [items, router]);
 
@@ -23,39 +24,56 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-obsidian min-h-screen pt-20">
-      <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <h1 className="text-h2 font-display mb-12 text-porcelain">Checkout</h1>
+    <div className="bg-porcelain text-warm-charcoal min-h-screen pt-24 pb-24">
+      <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="mb-10 pb-6 border-b border-warm-charcoal/15 flex justify-between items-baseline">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-display text-warm-charcoal">
+              Order confirmation
+            </h1>
+            <p className="text-xs sm:text-sm text-warm-charcoal/60 mt-1">
+              Complete your delivery details to prepare your WhatsApp order.
+            </p>
+          </div>
+          <Link
+            href="/shop"
+            className="text-xs text-warm-charcoal/70 hover:text-warm-charcoal transition-colors"
+          >
+            ← Back to shop
+          </Link>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Left - Form */}
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left - Checkout Form (7 cols) */}
+          <div className="lg:col-span-7">
             <CheckoutForm />
           </div>
 
-          {/* Right - Order summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-deep-petrol border border-champagne-brass/20 p-6 lg:p-8 space-y-6 sticky top-24">
-              <h2 className="font-display text-xl text-porcelain">Order summary</h2>
+          {/* Right - Order summary (5 cols) */}
+          <div className="lg:col-span-5">
+            <div className="bg-obsidian text-porcelain border border-champagne-brass/25 p-6 sm:p-8 space-y-6 sticky top-28">
+              <h2 className="font-display text-xl text-porcelain">
+                Order summary
+              </h2>
 
               {/* Items */}
-              <div className="space-y-4 max-h-[400px] overflow-y-auto">
+              <div className="space-y-4 max-h-[360px] overflow-y-auto pr-2 divide-y divide-champagne-brass/15">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="w-16 h-16 border border-champagne-brass/20 flex-shrink-0">
+                  <div key={item.id} className="pt-3 first:pt-0 flex gap-4">
+                    <div className="relative w-16 h-16 border border-champagne-brass/20 flex-shrink-0 bg-obsidian overflow-hidden">
                       <Image
                         src={item.image}
                         alt={item.name}
-                        width={64}
-                        height={64}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="64px"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-porcelain line-clamp-1">
                         {item.name}
                       </p>
-                      <p className="text-xs text-porcelain/60 mt-1">
+                      <p className="text-xs text-porcelain/60 mt-0.5">
                         Qty: {item.quantity}
                       </p>
                       <p className="text-sm font-medium text-champagne-brass mt-1">
@@ -66,27 +84,31 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              {/* Total */}
-              <div className="border-t border-champagne-brass/20 pt-4 space-y-3">
-                <div className="flex justify-between text-porcelain">
-                  <span className="opacity-70">Subtotal</span>
-                  <span className="font-medium">
+              {/* Subtotal & WhatsApp details */}
+              <div className="border-t border-champagne-brass/20 pt-4 space-y-3 text-sm">
+                <div className="flex justify-between text-porcelain/80">
+                  <span>Subtotal</span>
+                  <span className="font-medium text-porcelain">
                     Rs. {subtotal.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between text-porcelain">
-                  <span className="opacity-70">Shipping</span>
-                  <span className="text-sm opacity-60">TBD</span>
+                <div className="flex justify-between text-porcelain/80">
+                  <span>Delivery</span>
+                  <span className="text-xs text-porcelain/60">
+                    Confirmed via WhatsApp
+                  </span>
                 </div>
-                <div className="border-t border-champagne-brass/20 pt-3">
-                  <div className="flex justify-between text-lg font-medium text-porcelain">
-                    <span>Total</span>
-                    <span className="text-champagne-brass">Rs. {subtotal.toLocaleString()}</span>
-                  </div>
-                  <p className="text-xs text-porcelain/50 mt-2">
-                    + shipping (calculated after order)
-                  </p>
+                <div className="border-t border-champagne-brass/20 pt-3 flex justify-between items-baseline">
+                  <span className="font-medium text-porcelain">Total</span>
+                  <span className="text-lg font-medium text-champagne-brass">
+                    Rs. {subtotal.toLocaleString()}
+                  </span>
                 </div>
+              </div>
+
+              <div className="p-4 bg-deep-petrol/60 border border-champagne-brass/20 text-xs text-porcelain/80 leading-relaxed">
+                Orders are handled directly via WhatsApp from Peshawar,
+                Pakistan. No upfront card payment required on site.
               </div>
             </div>
           </div>

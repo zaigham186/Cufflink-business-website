@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -11,205 +12,197 @@ if (typeof window !== "undefined") {
 
 const categories = [
   {
-    name: "Gold Cufflinks",
+    name: "Gold cufflinks",
     slug: "gold-cufflinks",
-    description: "Gold-tone metal with polished finishes",
-    size: "large",
+    description: "Gold-tone metal with polished surfaces and engraved lattice work.",
+    images: ["/products/ivory-pave-gold-1.jpg", "/products/gold-trellis-crystal-1.jpg"],
+    featured: true,
   },
   {
-    name: "Silver Cufflinks",
+    name: "Silver cufflinks",
     slug: "silver-cufflinks",
-    description: "Silver-tone with enamel detailing",
-    size: "small",
+    description: "Silver-tone metal paired with sapphire and deep blue enamel work.",
+    images: ["/products/sapphire-ornamental-1.jpg"],
+    featured: false,
   },
   {
-    name: "Gunmetal Cufflinks",
+    name: "Gunmetal cufflinks",
     slug: "gunmetal-cufflinks",
-    description: "Matte gunmetal with black enamel",
-    size: "small",
-  },
-  {
-    name: "Statement Cufflinks",
-    slug: "statement-cufflinks",
-    description: "Bold designs and unique patterns",
-    size: "wide",
-  },
-  {
-    name: "Enamel Cufflinks",
-    slug: "enamel-cufflinks",
-    description: "Deep enamel with engraved patterns",
-    size: "medium",
-  },
-  {
-    name: "Gift Sets",
-    slug: "gift-sets",
-    description: "Curated sets in presentation boxes",
-    size: "medium",
+    description: "Matte gunmetal finish paired with black onyx geometric patterns.",
+    images: ["/products/onyx-geometric-1.jpg"],
+    featured: false,
   },
 ];
 
 export default function CategoryGrid() {
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const cardsRef = useRef<(HTMLAnchorElement | null)[]>([]);
 
   useEffect(() => {
-    const section = sectionRef.current;
-    const title = titleRef.current;
-    const cards = cardsRef.current.filter(Boolean);
-
-    if (!section || !title) return;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // Title animation
-      gsap.from(title, {
-        opacity: 0,
-        y: 30,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: title,
-          start: "top 85%",
-        },
-      });
-
-      // Cards stagger animation
-      cards.forEach((card, i) => {
-        gsap.from(card, {
-          opacity: 0,
-          y: 40,
-          duration: 0.7,
-          delay: i * 0.08,
+      // Heading entrance
+      gsap.fromTo(
+        headingRef.current,
+        { opacity: 0, y: 35 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          ease: "power3.out",
           scrollTrigger: {
-            trigger: card,
-            start: "top 90%",
+            trigger: sectionRef.current,
+            start: "top 75%",
           },
-        });
+        }
+      );
+
+      // Cards staggered entrance
+      cardsRef.current.forEach((card, index) => {
+        if (!card) return;
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 40 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            delay: index * 0.15,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 80%",
+            },
+          }
+        );
       });
-    }, section);
+    }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
+  const featuredCategory = categories[0];
+  const secondaryCategories = categories.slice(1);
+
   return (
-    <section ref={sectionRef} className="bg-deep-petrol py-section">
-      <div className="max-w-container mx-auto px-6 lg:px-12">
-        <h2
-          ref={titleRef}
-          className="text-h2 font-display text-porcelain mb-12 lg:mb-16"
-        >
-          Shop by collection
-        </h2>
-
-        {/* Asymmetric grid - desktop */}
-        <div className="hidden lg:grid grid-cols-4 gap-4 auto-rows-[280px]">
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[0] = el;
-            }}
-            className="col-span-2 row-span-2"
-          >
-            <CategoryCard category={categories[0]} />
+    <section
+      ref={sectionRef}
+      className="bg-obsidian text-porcelain py-24 lg:py-32 border-t border-champagne-brass/20"
+    >
+      <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="mb-12 lg:mb-16 flex justify-between items-end">
+          <div>
+            <h2
+              ref={headingRef}
+              className="text-h2 font-display text-porcelain"
+            >
+              Shop by category
+            </h2>
+            <p className="text-body text-porcelain/60 mt-2">
+              Three core finishes for formal and black-tie dressing.
+            </p>
           </div>
 
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[1] = el;
-            }}
-            className="col-span-1"
+          <Link
+            href="/shop"
+            className="hidden sm:inline-block text-sm text-champagne-brass hover:text-porcelain transition-colors"
           >
-            <CategoryCard category={categories[1]} />
-          </div>
-
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[2] = el;
-            }}
-            className="col-span-1"
-          >
-            <CategoryCard category={categories[2]} />
-          </div>
-
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[3] = el;
-            }}
-            className="col-span-1"
-          >
-            <CategoryCard category={categories[4]} />
-          </div>
-
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[4] = el;
-            }}
-            className="col-span-1"
-          >
-            <CategoryCard category={categories[5]} />
-          </div>
-
-          <div
-            ref={(el) => {
-              if (el) cardsRef.current[5] = el;
-            }}
-            className="col-span-4"
-          >
-            <CategoryCard category={categories[3]} />
-          </div>
+            All pieces →
+          </Link>
         </div>
 
-        {/* Mobile stack */}
-        <div className="lg:hidden space-y-4">
-          {categories.map((category, index) => (
-            <div
-              key={category.slug}
-              ref={(el) => {
-                if (el) cardsRef.current[index] = el;
-              }}
-            >
-              <CategoryCard category={category} />
+        {/* 12-Column Asymmetric Grid: 1 Featured Large, 2 Smaller */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          {/* Featured Large Block (7 Columns) */}
+          <Link
+            href={`/shop?category=${featuredCategory.slug}`}
+            ref={(el) => {
+              cardsRef.current[0] = el;
+            }}
+            className="lg:col-span-7 group block bg-obsidian border border-champagne-brass/25 hover:border-champagne-brass transition-all duration-300 overflow-hidden"
+          >
+            <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-obsidian">
+              <Image
+                src={featuredCategory.images[0]}
+                alt={featuredCategory.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                sizes="(max-width: 1024px) 100vw, 58vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent opacity-80" />
             </div>
-          ))}
+
+            <div className="p-6 sm:p-8 flex flex-col justify-between">
+              <div>
+                <div className="text-xs tracking-wider text-champagne-brass mb-2">
+                  Featured category
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-display text-porcelain group-hover:text-champagne-brass transition-colors">
+                  {featuredCategory.name}
+                </h3>
+                <p className="text-sm text-porcelain/70 mt-2 max-w-lg leading-relaxed">
+                  {featuredCategory.description}
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center text-sm font-medium text-champagne-brass">
+                <span>Explore category</span>
+                <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
+                  →
+                </span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Two Smaller Blocks (5 Columns, stacked) */}
+          <div className="lg:col-span-5 flex flex-col gap-6 lg:gap-8">
+            {secondaryCategories.map((category, idx) => (
+              <Link
+                key={category.slug}
+                href={`/shop?category=${category.slug}`}
+                ref={(el) => {
+                  cardsRef.current[idx + 1] = el;
+                }}
+                className="group flex-1 flex flex-col justify-between bg-obsidian border border-champagne-brass/25 hover:border-champagne-brass transition-all duration-300 overflow-hidden"
+              >
+                <div className="relative aspect-[16/8] w-full overflow-hidden bg-obsidian">
+                  <Image
+                    src={category.images[0]}
+                    alt={category.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent opacity-70" />
+                </div>
+
+                <div className="p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-display text-porcelain group-hover:text-champagne-brass transition-colors">
+                      {category.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-porcelain/70 mt-1 leading-relaxed line-clamp-2">
+                      {category.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex items-center text-xs sm:text-sm font-medium text-champagne-brass">
+                    <span>Explore category</span>
+                    <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
+                      →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function CategoryCard({
-  category,
-}: {
-  category: { name: string; slug: string; description: string };
-}) {
-  return (
-    <Link
-      href={`/shop/${category.slug}`}
-      className="group block h-full bg-obsidian border border-champagne-brass/20 hover:border-champagne-brass transition-all duration-300 overflow-hidden"
-    >
-      <div className="h-full flex flex-col justify-between p-8">
-        <div className="space-y-2">
-          <h3 className="text-xl font-display text-porcelain group-hover:text-champagne-brass transition-colors duration-300">
-            {category.name}
-          </h3>
-          <p className="text-sm text-porcelain/60">{category.description}</p>
-        </div>
-
-        <div className="flex items-center text-sm font-medium text-champagne-brass">
-          <span>View collection</span>
-          <svg
-            className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </div>
-      </div>
-    </Link>
   );
 }

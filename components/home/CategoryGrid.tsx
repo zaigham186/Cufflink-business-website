@@ -18,7 +18,7 @@ const collections = [
     slug: "premium",
     description:
       "Fine hand-engraving, crystal pavé borders, and intricate stone settings calibrated for black-tie occasions.",
-    images: ["/products/ivory-pave-gold-1.jpg"],
+    images: ["/products/premium 1.jpeg"],
     featured: true,
   },
   {
@@ -28,7 +28,7 @@ const collections = [
     slug: "signature",
     description:
       "Deep mineral enamel and tactile surface textures built for men who dress with elevated intention.",
-    images: ["/products/sapphire-ornamental-1.jpg"],
+    images: ["/products/signature 1.jpeg"],
     featured: false,
   },
   {
@@ -38,7 +38,7 @@ const collections = [
     slug: "classical",
     description:
       "Essential cufflinks finished with clean beveled edges and balanced proportions for everyday formalwear.",
-    images: ["/products/onyx-geometric-1.jpg"],
+    images: ["/products/classic 2.jpeg"],
     featured: false,
   },
 ];

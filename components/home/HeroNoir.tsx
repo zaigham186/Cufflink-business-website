@@ -17,24 +17,28 @@ interface HeroNoirProps {
 
 const KEN_BURNS_SLIDES = [
   {
-    src: "/products/ivory-pave-gold-1.jpg",
-    alt: "Ivory Pavé Gold Cufflinks detail",
+    src: "/products/premium 1.jpeg",
+    alt: "Premium Pavé Crystal Cufflinks",
   },
   {
-    src: "/editorial/hero-cufflinks.jpg",
-    alt: "CuffKings formalwear atelier detail",
+    src: "/products/signature 1.jpeg",
+    alt: "Signature Sapphire Floral Cufflinks",
   },
   {
-    src: "/products/sapphire-ornamental-1.jpg",
-    alt: "Sapphire Ornamental Cufflinks detail",
+    src: "/products/classic 2.jpeg",
+    alt: "Classical Silver Brushed Cufflinks",
   },
   {
-    src: "/products/onyx-geometric-1.jpg",
-    alt: "Onyx Geometric Cufflinks detail",
+    src: "/products/premium 5.jpeg",
+    alt: "Premium Faceted Gunmetal Cufflinks",
   },
   {
-    src: "/products/gold-trellis-crystal-1.jpg",
-    alt: "Gold Trellis Crystal Cufflinks detail",
+    src: "/products/signature 8.jpeg",
+    alt: "Signature Cobalt Starburst Cufflinks",
+  },
+  {
+    src: "/products/classic1.jpeg",
+    alt: "Classical Minimalist Gold Cufflinks",
   },
 ];
 
@@ -277,8 +281,8 @@ export default function HeroNoir({ heroVideo }: HeroNoirProps) {
             CUFFKINGS
           </div>
 
-          {/* Headline: "Cufflinks, finished the way formalwear demands." */}
-          <h1 className="text-display font-display leading-[0.95] tracking-tight mb-8">
+          {/* Headline: "Cufflinks, finished the way formalwear demands." - Decent, refined size */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-display leading-[1.15] tracking-tight mb-6 max-w-2xl">
             <span ref={headlineLine1Ref} className="block">
               Cufflinks, finished the way
             </span>

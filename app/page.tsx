@@ -1,17 +1,18 @@
 import HeroNoir from "@/components/home/HeroNoir";
 import CollectionIntro from "@/components/home/CollectionIntro";
-import FeaturedProductStory from "@/components/home/FeaturedProductStory";
-import ProcessDetails from "@/components/home/ProcessDetails";
-import HorizontalCollection from "@/components/home/HorizontalCollection";
 import CategoryGrid from "@/components/home/CategoryGrid";
+import FeaturedCollectionsShowcase from "@/components/home/FeaturedCollectionsShowcase";
 import BrandStory from "@/components/home/BrandStory";
 import FinalCTA from "@/components/home/FinalCTA";
 import BrassLine from "@/components/ui/BrassLine";
+import { getAllProducts } from "@/lib/products";
 
 export default function Home() {
+  const products = getAllProducts();
+
   return (
     <>
-      {/* 01. Hero */}
+      {/* 01. Hero (Refined decent headline & real Ken Burns images) */}
       <HeroNoir />
       <BrassLine />
 
@@ -19,27 +20,19 @@ export default function Home() {
       <CollectionIntro />
       <BrassLine />
 
-      {/* 03. Featured Product Story (Ivory Pavé Gold Cufflinks) */}
-      <FeaturedProductStory />
-      <BrassLine />
-
-      {/* 04. Material Story / Process Details */}
-      <ProcessDetails />
-      <BrassLine />
-
-      {/* 05. Horizontal Collection ("Choose your finish" Gold → Blue → Silver → Gunmetal) */}
-      <HorizontalCollection />
-      <BrassLine />
-
-      {/* 06. Category Grid */}
+      {/* 03. Shop by Collection (Classical, Signature, Premium interactive tiles) */}
       <CategoryGrid />
       <BrassLine />
 
-      {/* 07. Editorial Brand Story (Deep Petrol background) */}
+      {/* 04. Curated Collections Showcase with Professional Product Cards */}
+      <FeaturedCollectionsShowcase products={products} />
+      <BrassLine />
+
+      {/* 05. Editorial Brand Story */}
       <BrandStory />
       <BrassLine />
 
-      {/* 08. Final CTA */}
+      {/* 06. Final CTA */}
       <FinalCTA />
     </>
   );

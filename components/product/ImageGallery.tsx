@@ -2,32 +2,41 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import ProductMedia from "@/components/product/ProductMedia";
 
 interface ImageGalleryProps {
   images: string[];
   productName: string;
+  video?: string;
 }
 
-export default function ImageGallery({ images, productName }: ImageGalleryProps) {
+export default function ImageGallery({
+  images,
+  productName,
+  video,
+}: ImageGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const displayImages = images.length > 0 ? images : ["/products/ivory-pave-gold-1.jpg"];
+  const displayImages =
+    images && images.length > 0 ? images : ["/products/ivory-pave-gold-1.jpg"];
 
   return (
     <div className="space-y-4">
-      {/* Primary Image View */}
-      <div className="relative aspect-square w-full bg-obsidian border border-champagne-brass/25 overflow-hidden">
-        <Image
-          src={displayImages[selectedIndex]}
-          alt={`${productName} view ${selectedIndex + 1}`}
-          fill
-          priority
-          className="object-cover"
-          sizes="(max-width: 1024px) 100vw, 60vw"
-        />
+      {/* Primary View: Video or Ken Burns Crossfade */}
+      <ProductMedia
+        images={displayImages}
+        productName={productName}
+        video={video}
+        aspectRatio="aspect-square"
+        activeImageIndex={selectedIndex}
+        onAngleChange={(newIdx) => setSelectedIndex(newIdx)}
+        priority
+      />
 
-        {/* Mobile Swipe / Arrow Controls if multiple images */}
-        {displayImages.length > 1 && (
-          <div className="lg:hidden absolute bottom-3 right-3 flex space-x-2 z-10">
+      {/* Mobile Swipe / Arrow Controls if multiple images */}
+      {displayImages.length > 1 && (
+        <div className="flex lg:hidden justify-between items-center text-xs text-warm-charcoal/60 px-1">
+          <span>Angle {selectedIndex + 1} of {displayImages.length}</span>
+          <div className="flex space-x-2">
             <button
               type="button"
               onClick={() =>
@@ -35,7 +44,7 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
                   prev === 0 ? displayImages.length - 1 : prev - 1
                 )
               }
-              className="w-9 h-9 bg-obsidian/90 text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
+              className="w-8 h-8 bg-obsidian text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
               aria-label="Previous image"
             >
               ←
@@ -47,18 +56,18 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
                   prev === displayImages.length - 1 ? 0 : prev + 1
                 )
               }
-              className="w-9 h-9 bg-obsidian/90 text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
+              className="w-8 h-8 bg-obsidian text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
               aria-label="Next image"
             >
               →
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Thumbnail Nav */}
       {displayImages.length > 1 && (
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           {displayImages.map((img, idx) => (
             <button
               key={idx}
@@ -69,7 +78,7 @@ export default function ImageGallery({ images, productName }: ImageGalleryProps)
                   ? "border-champagne-brass ring-1 ring-champagne-brass"
                   : "border-warm-charcoal/20 opacity-70 hover:opacity-100"
               }`}
-              aria-label={`Select image ${idx + 1}`}
+              aria-label={`Select angle ${idx + 1}`}
             >
               <Image
                 src={img}

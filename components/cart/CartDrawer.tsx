@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { useCartStore } from "@/store/cartStore";
+import Magnetic from "@/components/motion/Magnetic";
 
 export default function CartDrawer() {
   const {
@@ -234,13 +235,15 @@ export default function CartDrawer() {
             </p>
 
             <div className="space-y-2 pt-2">
-              <Link
-                href="/checkout"
-                onClick={closeDrawer}
-                className="block w-full py-3 text-center bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
-              >
-                Proceed to checkout
-              </Link>
+              <Magnetic className="w-full">
+                <Link
+                  href="/checkout"
+                  onClick={closeDrawer}
+                  className="block w-full py-3 text-center bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+                >
+                  Proceed to checkout
+                </Link>
+              </Magnetic>
               <button
                 onClick={closeDrawer}
                 className="block w-full py-2.5 text-center text-xs text-porcelain/70 hover:text-porcelain transition-colors"

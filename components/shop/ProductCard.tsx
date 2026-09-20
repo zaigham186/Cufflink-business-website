@@ -16,6 +16,7 @@ export default function ProductCard({ product, className = "" }: ProductCardProp
   return (
     <Link
       href={`/product/${product.slug}`}
+      data-cursor="view"
       className={`group block bg-obsidian border border-champagne-brass/20 hover:border-champagne-brass/60 transition-all duration-300 overflow-hidden transform hover:-translate-y-1 ${className}`}
     >
       {/* Image Container */}

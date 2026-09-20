@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Product } from "@/lib/products";
 import ProductCard from "./ProductCard";
 import FilterSidebar from "./FilterSidebar";
+import Reveal from "@/components/motion/Reveal";
 
 interface ProductGridProps {
   products: Product[];
@@ -222,10 +223,12 @@ export default function ProductGrid({ products }: ProductGridProps) {
         <div className="flex-1">
           {filteredAndSortedProducts.length > 0 ? (
             /* 12-column Asymmetric Desktop Grid, 1-2 columns on mobile */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8 transition-opacity duration-300">
               {filteredAndSortedProducts.map((product, index) => (
                 <div key={product.id} className={getCardSpan(index)}>
-                  <ProductCard product={product} />
+                  <Reveal delay={(index % 6) * 0.08} direction="up" className="h-full">
+                    <ProductCard product={product} />
+                  </Reveal>
                 </div>
               ))}
             </div>

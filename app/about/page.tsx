@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import Reveal from "@/components/motion/Reveal";
+import ImageReveal from "@/components/motion/ImageReveal";
+import MoreAboutCufflinks from "@/components/home/MoreAboutCufflinks";
+import Magnetic from "@/components/motion/Magnetic";
 
 export const metadata: Metadata = {
   title: "About — CuffKings",
@@ -14,7 +18,7 @@ export default function AboutPage() {
       {/* 1. Header Block */}
       <section className="py-20 lg:py-28 border-b border-champagne-brass/20">
         <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-3xl space-y-6">
+          <Reveal direction="up" delay={0.1} className="max-w-3xl space-y-6">
             <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium">
               CUFFKINGS ATELIER
             </div>
@@ -26,21 +30,25 @@ export default function AboutPage() {
               pair starts with solid metal, filed surfaces and hand-set
               enamel—finished and inspected in Peshawar before it is packed.
             </p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* 2. Large Editorial Photography Break */}
+      {/* 2. Large Editorial Photography Break with ImageReveal */}
       <section className="relative w-full aspect-[21/9] min-h-[350px] bg-obsidian border-b border-champagne-brass/20 overflow-hidden">
-        <Image
-          src="/editorial/craftsmanship-detail.jpg"
-          alt="Cufflink hand finishing and filing in Peshawar workshop"
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-obsidian/30" />
+        <ImageReveal direction="up" duration={1.3} className="w-full h-full">
+          <div className="relative w-full h-[45vw] min-h-[350px]">
+            <Image
+              src="/editorial/craftsmanship-detail.jpg"
+              alt="Cufflink hand finishing and filing in Peshawar workshop"
+              fill
+              priority
+              className="object-cover"
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-obsidian/30" />
+          </div>
+        </ImageReveal>
       </section>
 
       {/* 3. Narrative & Materials on Porcelain */}
@@ -49,10 +57,12 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             {/* Left Column: Peshawar & Craft */}
             <div className="lg:col-span-6 space-y-8">
-              <h2 className="text-h2 font-display leading-[1.05] text-warm-charcoal">
-                Based in Peshawar. Focused on formal dressing.
-              </h2>
-              <div className="space-y-5 text-body text-warm-charcoal/80 leading-relaxed">
+              <Reveal direction="up" delay={0.1}>
+                <h2 className="text-h2 font-display leading-[1.05] text-warm-charcoal">
+                  Based in Peshawar. Focused on formal dressing.
+                </h2>
+              </Reveal>
+              <Reveal direction="up" delay={0.2} className="space-y-5 text-body text-warm-charcoal/80 leading-relaxed">
                 <p>
                   Formal dressing leaves little room for excess. When a suit fits
                   and a shirt cuff sits right at the wrist, the cufflink is the
@@ -64,7 +74,7 @@ export default function AboutPage() {
                   filing sharp burrs, balancing weight so the cuff hangs cleanly,
                   and testing toggle backings for reliable tension.
                 </p>
-              </div>
+              </Reveal>
 
               <div className="pt-4 border-t border-warm-charcoal/15 flex items-center space-x-4">
                 <div className="h-px w-16 bg-champagne-brass" />
@@ -76,7 +86,7 @@ export default function AboutPage() {
 
             {/* Right Column: Materials Breakdown */}
             <div className="lg:col-span-6 space-y-10">
-              <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+              <Reveal direction="up" delay={0.1} className="space-y-3 pb-6 border-b border-warm-charcoal/15">
                 <h3 className="text-xl font-display text-warm-charcoal">
                   Solid metal surfaces
                 </h3>
@@ -85,9 +95,9 @@ export default function AboutPage() {
                   filed and mirror-polished or wire-brushed so light reflects
                   cleanly across edges.
                 </p>
-              </div>
+              </Reveal>
 
-              <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+              <Reveal direction="up" delay={0.2} className="space-y-3 pb-6 border-b border-warm-charcoal/15">
                 <h3 className="text-xl font-display text-warm-charcoal">
                   Deep mineral enamel
                 </h3>
@@ -95,9 +105,9 @@ export default function AboutPage() {
                   Sapphire blue, black, and ivory fills. Set flush with the
                   cufflink perimeter to eliminate ridges that catch on fabric.
                 </p>
-              </div>
+              </Reveal>
 
-              <div className="space-y-3">
+              <Reveal direction="up" delay={0.3} className="space-y-3">
                 <h3 className="text-xl font-display text-warm-charcoal">
                   Engraving and crystal pavé
                 </h3>
@@ -105,44 +115,37 @@ export default function AboutPage() {
                   Geometric repeats, trellis lattice, and floral engraving cut
                   deep enough to provide tactile texture without ostentation.
                 </p>
-              </div>
+              </Reveal>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. Secondary Editorial Visual */}
-      <section className="bg-deep-petrol text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20">
-        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7 relative aspect-[16/10] bg-obsidian overflow-hidden border border-champagne-brass/20">
-              <Image
-                src="/editorial/peshawar-atelier.jpg"
-                alt="Peshawar workshop workbench"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 58vw"
-              />
-            </div>
+      {/* 4. Atelier Weight & Sartorial Anatomy (Moved from Home for Pacing) */}
+      <MoreAboutCufflinks />
 
-            <div className="lg:col-span-5 space-y-6">
-              <h3 className="text-2xl sm:text-3xl font-display text-porcelain">
-                Finished for the occasion.
-              </h3>
-              <p className="text-sm text-porcelain/80 leading-relaxed">
-                Whether selected for a wedding, evening formalwear, or black-tie
-                dress, our pieces are built to remain understated and sharp.
-              </p>
-              <div className="pt-2">
+      {/* 5. Concluding Atelier CTA */}
+      <section className="bg-obsidian text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20 text-center">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 space-y-6">
+          <Reveal direction="up">
+            <h3 className="text-2xl sm:text-3xl font-display text-porcelain">
+              Finished for the occasion.
+            </h3>
+            <p className="text-sm text-porcelain/80 leading-relaxed max-w-xl mx-auto pt-2">
+              Whether selected for a wedding, evening formalwear, or black-tie
+              dress, our pieces are built to remain understated and sharp.
+            </p>
+            <div className="pt-6">
+              <Magnetic>
                 <Link
                   href="/shop"
-                  className="inline-block px-8 py-3 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+                  className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
                 >
                   Explore the pieces
                 </Link>
-              </div>
+              </Magnetic>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
     </div>

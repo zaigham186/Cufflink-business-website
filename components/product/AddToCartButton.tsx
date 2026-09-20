@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/lib/products";
+import Magnetic from "@/components/motion/Magnetic";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -73,18 +74,20 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       </div>
 
       {/* Add to Cart CTA */}
-      <button
-        type="button"
-        onClick={handleAddToCart}
-        disabled={isOutOfStock}
-        className="w-full py-4 px-8 bg-obsidian text-porcelain text-sm font-medium border border-obsidian hover:bg-obsidian/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {isOutOfStock
-          ? "Out of stock"
-          : added
-          ? "Added to cart"
-          : "Add to cart"}
-      </button>
+      <Magnetic className="w-full">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className="w-full py-4 px-8 bg-obsidian text-porcelain text-sm font-medium border border-obsidian hover:bg-obsidian/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isOutOfStock
+            ? "Out of stock"
+            : added
+            ? "Added to cart"
+            : "Add to cart"}
+        </button>
+      </Magnetic>
     </div>
   );
 }

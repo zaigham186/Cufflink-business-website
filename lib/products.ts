@@ -19,6 +19,8 @@ export interface Product {
   sku: string;
   featured: boolean;
   hasPhotography: boolean;
+  video?: string;
+  heroVideo?: string;
 }
 
 // Static product data - designed to be swapped for database queries later

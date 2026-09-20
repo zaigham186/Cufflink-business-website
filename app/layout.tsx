@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CartDrawer from "@/components/cart/CartDrawer";
+import CustomCursor from "@/components/motion/CustomCursor";
+import PageTransition from "@/components/motion/PageTransition";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -26,6 +28,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cuffkings.pk"),
   title: "CuffKings — Premium men's cufflinks",
   description: "Cufflinks built around polished metal, considered patterns and the details of formal dressing. Based in Peshawar, Pakistan.",
   openGraph: {
@@ -42,7 +45,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${instrumentSerif.variable} ${cormorantGaramond.variable} ${manrope.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
+        <CustomCursor />
+        <PageTransition />
         <Navbar />
         <CartDrawer />
         <main>{children}</main>

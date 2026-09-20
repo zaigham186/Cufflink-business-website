@@ -6,6 +6,8 @@ import { useCartStore } from "@/store/cartStore";
 import { generateWhatsAppURL } from "@/lib/whatsapp";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validators";
 import Button from "@/components/ui/Button";
+import Reveal from "@/components/motion/Reveal";
+import Magnetic from "@/components/motion/Magnetic";
 
 export default function CheckoutForm() {
   const router = useRouter();
@@ -77,32 +79,34 @@ export default function CheckoutForm() {
 
   if (showConfirmation) {
     return (
-      <div className="bg-deep-petrol border border-champagne-brass/30 p-8 lg:p-12 text-center space-y-8">
-        <div className="w-20 h-20 mx-auto bg-champagne-brass/20 border border-champagne-brass/40 flex items-center justify-center">
-          <svg
-            className="w-10 h-10 text-champagne-brass"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
+      <Reveal direction="up" duration={0.6} className="w-full">
+        <div className="bg-deep-petrol border border-champagne-brass/30 p-8 lg:p-12 text-center space-y-8">
+          <div className="w-20 h-20 mx-auto bg-champagne-brass/20 border border-champagne-brass/40 flex items-center justify-center">
+            <svg
+              className="w-10 h-10 text-champagne-brass"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <div>
+            <h2 className="text-2xl lg:text-3xl font-display mb-4 text-porcelain">Order details ready</h2>
+            <p className="text-base text-porcelain/80 leading-relaxed max-w-md mx-auto">
+              Your order details are ready in WhatsApp. Send the message there to
+              confirm your order. We'll respond shortly with payment and delivery
+              details.
+            </p>
+          </div>
+          <div className="h-px w-24 bg-champagne-brass/40 mx-auto" />
         </div>
-        <div>
-          <h2 className="text-2xl lg:text-3xl font-display mb-4 text-porcelain">Order details ready</h2>
-          <p className="text-base text-porcelain/80 leading-relaxed max-w-md mx-auto">
-            Your order details are ready in WhatsApp. Send the message there to
-            confirm your order. We'll respond shortly with payment and delivery
-            details.
-          </p>
-        </div>
-        <div className="h-px w-24 bg-champagne-brass/40 mx-auto" />
-      </div>
+      </Reveal>
     );
   }
 
@@ -214,14 +218,16 @@ export default function CheckoutForm() {
         </ol>
       </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={isSubmitting}
-        className="w-full"
-      >
-        {isSubmitting ? "Opening WhatsApp..." : "Complete order on WhatsApp"}
-      </Button>
+      <Magnetic className="w-full">
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isSubmitting}
+          className="w-full"
+        >
+          {isSubmitting ? "Opening WhatsApp..." : "Complete order on WhatsApp"}
+        </Button>
+      </Magnetic>
     </form>
   );
 }

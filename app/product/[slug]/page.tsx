@@ -9,6 +9,7 @@ import {
 import ImageGallery from "@/components/product/ImageGallery";
 import AddToCartButton from "@/components/product/AddToCartButton";
 import ProductCard from "@/components/shop/ProductCard";
+import Reveal from "@/components/motion/Reveal";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -96,12 +97,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <ImageGallery
               images={product.images}
               productName={product.name}
+              video={product.video}
             />
           </div>
 
           {/* Info Panel (~40% = 5 cols on desktop) */}
-          <div className="lg:col-span-5 space-y-6">
-            {/* Title & Price */}
+          <div className="lg:col-span-5">
+            <Reveal direction="up" delay={0.1} className="space-y-6">
+              {/* Title & Price */}
             <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
               <h1 className="text-3xl sm:text-4xl font-display leading-tight text-warm-charcoal">
                 {product.name}
@@ -184,12 +187,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
             {/* Quantity and Add to Cart */}
             <AddToCartButton product={product} />
+            </Reveal>
           </div>
         </div>
 
         {/* Related Products Section - Below */}
         {relatedProducts.length > 0 && (
-          <div className="mt-28 pt-16 border-t border-warm-charcoal/15">
+          <Reveal direction="up" delay={0.2} className="mt-28 pt-16 border-t border-warm-charcoal/15">
             <div className="mb-10 flex justify-between items-baseline">
               <h2 className="text-2xl font-display text-warm-charcoal">
                 Related pieces
@@ -207,7 +211,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <ProductCard key={related.id} product={related} />
               ))}
             </div>
-          </div>
+          </Reveal>
         )}
       </div>
     </div>

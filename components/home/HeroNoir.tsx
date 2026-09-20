@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Magnetic from "@/components/motion/Magnetic";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -137,27 +138,16 @@ export default function HeroNoir() {
       <div
         ref={mediaRef}
         className="absolute inset-0 z-0 origin-center will-change-transform"
+        data-cursor="explore"
       >
-        {/* Placeholder video tag (if video exists, plays automatically; else shows fallback image) */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster="/editorial/hero-cufflinks.jpg"
-          className="w-full h-full object-cover"
-        >
-          <source src="/hero-video.mp4" type="video/mp4" />
-          {/* Fallback image */}
-          <Image
-            src="/editorial/hero-cufflinks.jpg"
-            alt="CuffKings cufflinks detail"
-            fill
-            priority
-            className="object-cover"
-            sizes="100vw"
-          />
-        </video>
+        <Image
+          src="/editorial/hero-cufflinks.jpg"
+          alt="CuffKings cufflinks detail"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
         {/* Obsidian overlay for contrast */}
         <div className="absolute inset-0 bg-obsidian/60" />
       </div>
@@ -200,12 +190,14 @@ export default function HeroNoir() {
             ref={ctaGroupRef}
             className="flex flex-col sm:flex-row gap-4 mb-12 items-start sm:items-center"
           >
-            <Link
-              href="/shop"
-              className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
-            >
-              Shop the collection
-            </Link>
+            <Magnetic>
+              <Link
+                href="/shop"
+                className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+              >
+                Shop the collection
+              </Link>
+            </Magnetic>
             <Link
               href="/shop"
               className="inline-block px-8 py-3.5 bg-transparent text-porcelain text-sm font-medium border border-porcelain/30 hover:border-porcelain hover:text-porcelain transition-all duration-200"

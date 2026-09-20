@@ -22,12 +22,12 @@ export async function generateMetadata({
 
   if (!category) {
     return {
-      title: "Category not found — CuffKings",
+      title: "Collection not found — CuffKings",
     };
   }
 
   return {
-    title: `${category.name} — CuffKings`,
+    title: `${category.name} Collection — CuffKings`,
     description: category.description,
   };
 }
@@ -58,11 +58,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               Shop
             </Link>
             <span>/</span>
-            <span className="text-warm-charcoal">{category.name}</span>
+            <span className="text-warm-charcoal">{category.name} Collection</span>
           </nav>
 
           <h1 className="text-h2 font-display text-warm-charcoal leading-tight">
-            {category.name}
+            {category.name} Collection
           </h1>
           <p className="text-body text-warm-charcoal/80 max-w-2xl">
             {category.description}
@@ -91,7 +91,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         ) : (
           <div className="text-center py-20 border border-warm-charcoal/10 bg-porcelain space-y-4">
             <p className="text-base text-warm-charcoal/70">
-              No cufflinks in this category yet.
+              No cufflinks in this collection yet.
             </p>
             <Link
               href="/shop"

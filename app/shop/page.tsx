@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Shop All Cufflinks — CuffKings",
   description:
-    "Browse our complete collection of premium men's cufflinks. Gold-tone, silver, gunmetal, enamel and crystal detailing.",
+    "Browse our complete collection across Classical, Signature, and Premium tiers. Polished metal, deep enamel, and precise engraving.",
 };
 
 export default function ShopPage() {

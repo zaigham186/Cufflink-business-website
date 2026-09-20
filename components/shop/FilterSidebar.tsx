@@ -9,6 +9,8 @@ interface FilterSidebarProps {
   onColorChange: (color: string) => void;
   selectedFinish: string;
   onFinishChange: (finish: string) => void;
+  selectedMaterial?: string;
+  onMaterialChange?: (material: string) => void;
   sortBy: string;
   onSortChange: (sort: string) => void;
   onResetAll: () => void;
@@ -23,23 +25,35 @@ export default function FilterSidebar({
   onColorChange,
   selectedFinish,
   onFinishChange,
+  selectedMaterial = "",
+  onMaterialChange,
   sortBy,
   onSortChange,
   onResetAll,
 }: FilterSidebarProps) {
-  const categories = [
-    { label: "All categories", value: "" },
-    { label: "Gold cufflinks", value: "gold-cufflinks" },
-    { label: "Silver cufflinks", value: "silver-cufflinks" },
-    { label: "Gunmetal cufflinks", value: "gunmetal-cufflinks" },
-    { label: "Enamel cufflinks", value: "enamel-cufflinks" },
+  // Three primary collections per prompt specification
+  const collections = [
+    { label: "All collections", value: "" },
+    { label: "Classical", value: "classical" },
+    { label: "Signature", value: "signature" },
+    { label: "Premium", value: "premium" },
   ];
 
+  // Secondary attribute filters
   const priceRanges = [
     { label: "All prices", value: "" },
     { label: "Under Rs. 3,000", value: "under-3000" },
     { label: "Rs. 3,000 – Rs. 3,500", value: "3000-3500" },
     { label: "Above Rs. 3,500", value: "above-3500" },
+  ];
+
+  const materials = [
+    { label: "All materials", value: "" },
+    { label: "Gold-tone metal", value: "gold" },
+    { label: "Silver-tone metal", value: "silver" },
+    { label: "Gunmetal finish", value: "gunmetal" },
+    { label: "Enamel", value: "enamel" },
+    { label: "Crystal pavé", value: "crystal" },
   ];
 
   const colors = [
@@ -70,7 +84,8 @@ export default function FilterSidebar({
     Boolean(selectedCategory) ||
     Boolean(selectedPrice) ||
     Boolean(selectedColor) ||
-    Boolean(selectedFinish);
+    Boolean(selectedFinish) ||
+    Boolean(selectedMaterial);
 
   return (
     <div className="space-y-8 text-warm-charcoal">
@@ -86,7 +101,7 @@ export default function FilterSidebar({
               onClick={() => onSortChange(opt.value)}
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 sortBy === opt.value
-                  ? "font-medium text-warm-charcoal"
+                  ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
                   : "text-warm-charcoal/60 hover:text-warm-charcoal"
               }`}
             >
@@ -96,29 +111,97 @@ export default function FilterSidebar({
         </div>
       </div>
 
-      {/* Category Filter */}
+      {/* Primary Collection Filter */}
       <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
         <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
-          Category
+          Collection
         </h3>
         <div className="space-y-1">
-          {categories.map((cat) => (
+          {collections.map((col) => (
             <button
-              key={cat.value}
-              onClick={() => onCategoryChange(cat.value)}
+              key={col.value}
+              onClick={() => onCategoryChange(col.value)}
               className={`block w-full text-left py-1 text-sm transition-colors ${
-                selectedCategory === cat.value
-                  ? "font-medium text-warm-charcoal"
+                selectedCategory.toLowerCase() === col.value.toLowerCase()
+                  ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
                   : "text-warm-charcoal/60 hover:text-warm-charcoal"
               }`}
             >
-              {cat.label}
+              {col.label}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Price Filter */}
+      {/* Secondary Attribute Filter: Material */}
+      {onMaterialChange && (
+        <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+          <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
+            Material
+          </h3>
+          <div className="space-y-1">
+            {materials.map((m) => (
+              <button
+                key={m.value}
+                onClick={() => onMaterialChange(m.value)}
+                className={`block w-full text-left py-1 text-sm transition-colors ${
+                  selectedMaterial.toLowerCase() === m.value.toLowerCase()
+                    ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
+                    : "text-warm-charcoal/60 hover:text-warm-charcoal"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Secondary Attribute Filter: Finish */}
+      <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+        <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
+          Finish
+        </h3>
+        <div className="space-y-1">
+          {finishes.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => onFinishChange(f.value)}
+              className={`block w-full text-left py-1 text-sm transition-colors ${
+                selectedFinish.toLowerCase() === f.value.toLowerCase()
+                  ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
+                  : "text-warm-charcoal/60 hover:text-warm-charcoal"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Secondary Attribute Filter: Color */}
+      <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
+        <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
+          Color
+        </h3>
+        <div className="space-y-1">
+          {colors.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => onColorChange(c.value)}
+              className={`block w-full text-left py-1 text-sm transition-colors ${
+                selectedColor.toLowerCase() === c.value.toLowerCase()
+                  ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
+                  : "text-warm-charcoal/60 hover:text-warm-charcoal"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Secondary Attribute Filter: Price */}
       <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
         <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
           Price
@@ -130,55 +213,11 @@ export default function FilterSidebar({
               onClick={() => onPriceChange(range.value)}
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 selectedPrice === range.value
-                  ? "font-medium text-warm-charcoal"
+                  ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
                   : "text-warm-charcoal/60 hover:text-warm-charcoal"
               }`}
             >
               {range.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Color Filter */}
-      <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
-        <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
-          Color
-        </h3>
-        <div className="space-y-1">
-          {colors.map((c) => (
-            <button
-              key={c.value}
-              onClick={() => onColorChange(c.value)}
-              className={`block w-full text-left py-1 text-sm transition-colors ${
-                selectedColor === c.value
-                  ? "font-medium text-warm-charcoal"
-                  : "text-warm-charcoal/60 hover:text-warm-charcoal"
-              }`}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Finish Filter */}
-      <div className="space-y-3 pb-6 border-b border-warm-charcoal/15">
-        <h3 className="text-xs tracking-wider uppercase font-medium text-warm-charcoal/70">
-          Finish
-        </h3>
-        <div className="space-y-1">
-          {finishes.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => onFinishChange(f.value)}
-              className={`block w-full text-left py-1 text-sm transition-colors ${
-                selectedFinish === f.value
-                  ? "font-medium text-warm-charcoal"
-                  : "text-warm-charcoal/60 hover:text-warm-charcoal"
-              }`}
-            >
-              {f.label}
             </button>
           ))}
         </div>

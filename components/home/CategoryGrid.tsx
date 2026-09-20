@@ -10,25 +10,34 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const categories = [
+const collections = [
   {
-    name: "Gold cufflinks",
-    slug: "gold-cufflinks",
-    description: "Gold-tone metal with polished surfaces and engraved lattice work.",
-    images: ["/products/ivory-pave-gold-1.jpg", "/products/gold-trellis-crystal-1.jpg"],
+    name: "Premium Collection",
+    tier: "Artisanal finishing & stones",
+    priceRange: "Rs. 1,500–2,500",
+    slug: "premium",
+    description:
+      "Fine hand-engraving, crystal pavé borders, and intricate stone settings calibrated for black-tie occasions.",
+    images: ["/products/ivory-pave-gold-1.jpg"],
     featured: true,
   },
   {
-    name: "Silver cufflinks",
-    slug: "silver-cufflinks",
-    description: "Silver-tone metal paired with sapphire and deep blue enamel work.",
+    name: "Signature Collection",
+    tier: "Rich enamel & texture",
+    priceRange: "Rs. 1,000–1,400",
+    slug: "signature",
+    description:
+      "Deep mineral enamel and tactile surface textures built for men who dress with elevated intention.",
     images: ["/products/sapphire-ornamental-1.jpg"],
     featured: false,
   },
   {
-    name: "Gunmetal cufflinks",
-    slug: "gunmetal-cufflinks",
-    description: "Matte gunmetal finish paired with black onyx geometric patterns.",
+    name: "Classical Collection",
+    tier: "Timeless essentials",
+    priceRange: "Rs. 700–800",
+    slug: "classical",
+    description:
+      "Essential cufflinks finished with clean beveled edges and balanced proportions for everyday formalwear.",
     images: ["/products/onyx-geometric-1.jpg"],
     featured: false,
   },
@@ -86,8 +95,8 @@ export default function CategoryGrid() {
     return () => ctx.revert();
   }, []);
 
-  const featuredCategory = categories[0];
-  const secondaryCategories = categories.slice(1);
+  const featuredCollection = collections[0];
+  const secondaryCollections = collections.slice(1);
 
   return (
     <section
@@ -101,10 +110,10 @@ export default function CategoryGrid() {
               ref={headingRef}
               className="text-h2 font-display text-porcelain"
             >
-              Shop by category
+              Shop by collection
             </h2>
             <p className="text-body text-porcelain/60 mt-2">
-              Three core finishes for formal and black-tie dressing.
+              Three curated tiers designed for formal and black-tie dressing.
             </p>
           </div>
 
@@ -120,7 +129,7 @@ export default function CategoryGrid() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Featured Large Block (7 Columns) */}
           <Link
-            href={`/shop?category=${featuredCategory.slug}`}
+            href={`/shop?category=${featuredCollection.slug}`}
             ref={(el) => {
               cardsRef.current[0] = el;
             }}
@@ -128,8 +137,8 @@ export default function CategoryGrid() {
           >
             <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-obsidian">
               <Image
-                src={featuredCategory.images[0]}
-                alt={featuredCategory.name}
+                src={featuredCollection.images[0]}
+                alt={featuredCollection.name}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 sizes="(max-width: 1024px) 100vw, 58vw"
@@ -139,19 +148,20 @@ export default function CategoryGrid() {
 
             <div className="p-6 sm:p-8 flex flex-col justify-between">
               <div>
-                <div className="text-xs tracking-wider text-champagne-brass mb-2">
-                  Featured category
+                <div className="flex items-center justify-between text-xs tracking-wider text-champagne-brass mb-2">
+                  <span>Featured collection</span>
+                  <span className="text-porcelain/60">{featuredCollection.priceRange}</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-display text-porcelain group-hover:text-champagne-brass transition-colors">
-                  {featuredCategory.name}
+                  {featuredCollection.name}
                 </h3>
                 <p className="text-sm text-porcelain/70 mt-2 max-w-lg leading-relaxed">
-                  {featuredCategory.description}
+                  {featuredCollection.description}
                 </p>
               </div>
 
               <div className="mt-6 flex items-center text-sm font-medium text-champagne-brass">
-                <span>Explore category</span>
+                <span>Explore collection</span>
                 <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
                   →
                 </span>
@@ -161,10 +171,10 @@ export default function CategoryGrid() {
 
           {/* Two Smaller Blocks (5 Columns, stacked) */}
           <div className="lg:col-span-5 flex flex-col gap-6 lg:gap-8">
-            {secondaryCategories.map((category, idx) => (
+            {secondaryCollections.map((collection, idx) => (
               <Link
-                key={category.slug}
-                href={`/shop?category=${category.slug}`}
+                key={collection.slug}
+                href={`/shop?category=${collection.slug}`}
                 ref={(el) => {
                   cardsRef.current[idx + 1] = el;
                 }}
@@ -172,8 +182,8 @@ export default function CategoryGrid() {
               >
                 <div className="relative aspect-[16/8] w-full overflow-hidden bg-obsidian">
                   <Image
-                    src={category.images[0]}
-                    alt={category.name}
+                    src={collection.images[0]}
+                    alt={collection.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                     sizes="(max-width: 1024px) 100vw, 42vw"
@@ -183,16 +193,20 @@ export default function CategoryGrid() {
 
                 <div className="p-6 flex flex-col justify-between">
                   <div>
+                    <div className="flex items-center justify-between text-xs tracking-wider text-champagne-brass/80 mb-1">
+                      <span>{collection.tier}</span>
+                      <span className="text-porcelain/60">{collection.priceRange}</span>
+                    </div>
                     <h3 className="text-xl font-display text-porcelain group-hover:text-champagne-brass transition-colors">
-                      {category.name}
+                      {collection.name}
                     </h3>
                     <p className="text-xs sm:text-sm text-porcelain/70 mt-1 leading-relaxed line-clamp-2">
-                      {category.description}
+                      {collection.description}
                     </p>
                   </div>
 
                   <div className="mt-4 flex items-center text-xs sm:text-sm font-medium text-champagne-brass">
-                    <span>Explore category</span>
+                    <span>Explore collection</span>
                     <span className="ml-2 group-hover:translate-x-1 transition-transform duration-300">
                       →
                     </span>

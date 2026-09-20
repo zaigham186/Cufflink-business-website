@@ -40,11 +40,10 @@ export default function FinalCTA() {
         <div ref={contentRef} className="space-y-8">
           <div className="space-y-6">
             <h2 className="text-h2 font-display">
-              Find the right finish
+              Three collections, one standard.
             </h2>
             <p className="text-xl opacity-80 max-w-2xl mx-auto leading-relaxed">
-              Gold-tone, silver, gunmetal, or enamel. Each piece filed,
-              polished and checked.
+              Classical, Signature and Premium — each finished to the same level of care, priced for where you want to start.
             </p>
           </div>
 

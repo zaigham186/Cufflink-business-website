@@ -17,7 +17,7 @@ const finishes = [
     description:
       "Gold-tone metal paired with ivory enamel and crystal pavé detailing. Mirror-polished surfaces built for evening occasions.",
     image: "/products/ivory-pave-gold-1.jpg",
-    category: "gold-cufflinks",
+    filterHref: "/shop?finish=polished",
     tag: "01 / GOLD",
   },
   {
@@ -26,7 +26,7 @@ const finishes = [
     description:
       "Sapphire blue and midnight tones leveled flush with the perimeter to eliminate snagging on shirts.",
     image: "/products/sapphire-ornamental-1.jpg",
-    category: "enamel-cufflinks",
+    filterHref: "/shop?color=blue",
     tag: "02 / BLUE",
   },
   {
@@ -35,7 +35,7 @@ const finishes = [
     description:
       "Reflective silver plating filed by hand and wire-brushed for light-catching edges that contrast against dark suiting.",
     image: "/products/royal-blue-floral-1.jpg",
-    category: "silver-cufflinks",
+    filterHref: "/shop?color=silver",
     tag: "03 / SILVER",
   },
   {
@@ -44,7 +44,7 @@ const finishes = [
     description:
       "Understated charcoal finish paired with geometric onyx patterns. Weight-tested for modern formalwear.",
     image: "/products/onyx-geometric-1.jpg",
-    category: "gunmetal-cufflinks",
+    filterHref: "/shop?finish=matte",
     tag: "04 / GUNMETAL",
   },
 ];
@@ -176,7 +176,7 @@ export default function HorizontalCollection() {
 
                   <div className="pt-2">
                     <Link
-                      href={`/shop?category=${item.category}`}
+                      href={item.filterHref}
                       className="inline-block text-xs font-medium text-champagne-brass hover:text-porcelain transition-colors border-b border-champagne-brass/40 hover:border-porcelain pb-1 tracking-wider uppercase"
                     >
                       Explore {item.title.toLowerCase()} →

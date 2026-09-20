@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Reveal from "@/components/motion/Reveal";
 import Magnetic from "@/components/motion/Magnetic";

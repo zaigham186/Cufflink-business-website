@@ -67,18 +67,12 @@ export default function BrandStory() {
             </h2>
             <div ref={contentRef} className="space-y-6 text-lg opacity-90 leading-relaxed">
               <p>
-                CuffKings focuses on men's accessories for formal dressing.
-                Every piece starts with polished metal, enamel work and
-                engraved patterns — finished and checked before it's packed.
-              </p>
-              <p>
-                Based in Peshawar, Pakistan, we work with materials that show
-                attention to surface and structure: gold-tone metal, deep
-                enamel, gunmetal finishes, and crystal detailing.
-              </p>
-              <p>
-                Each cufflink is made to be noticed up close — the kind of
-                detail that matters when the rest is done right.
+                CuffKings makes cufflinks for men who dress with intention —
+                three collections, Classical, Signature and Premium, each built
+                around a different level of detail and finish. Based in Peshawar,
+                Pakistan, we work with metal, enamel and stone across every tier,
+                from a clean Classical finish to Premium pieces set with fine
+                engraving.
               </p>
             </div>
           </div>

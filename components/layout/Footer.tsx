@@ -36,26 +36,26 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/shop?category=gold-cufflinks"
+                  href="/shop?category=classical"
                   className="hover:text-champagne-brass transition-colors"
                 >
-                  Gold cufflinks
+                  Classical collection
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/shop?category=silver-cufflinks"
+                  href="/shop?category=signature"
                   className="hover:text-champagne-brass transition-colors"
                 >
-                  Silver cufflinks
+                  Signature collection
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/shop?category=gunmetal-cufflinks"
+                  href="/shop?category=premium"
                   className="hover:text-champagne-brass transition-colors"
                 >
-                  Gunmetal cufflinks
+                  Premium collection
                 </Link>
               </li>
             </ul>

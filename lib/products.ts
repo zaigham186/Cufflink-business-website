@@ -1,9 +1,12 @@
+export type CollectionCategory = "Classical" | "Signature" | "Premium";
+export type CollectionSlug = "classical" | "signature" | "premium";
+
 export interface Product {
   id: string;
   name: string;
   slug: string;
-  category: string;
-  categorySlug: string;
+  category: CollectionCategory;
+  categorySlug: CollectionSlug;
   description: string;
   price: number;
   compareAtPrice?: number;
@@ -23,14 +26,24 @@ export interface Product {
   heroVideo?: string;
 }
 
-// Static product data - designed to be swapped for database queries later
+/**
+ * Price guidance per tier (informational for new products):
+ * - Classical: Rs. 700–800
+ * - Signature: Rs. 1,000–1,400
+ * - Premium: Rs. 1,500–2,500
+ *
+ * ⚠️ PRICING MISMATCH FLAG:
+ * The current 6 seeded products (Rs. 2,850–4,100) all exceed the new Premium
+ * ceiling of Rs. 2,500. Assigned all 6 to "Premium" for now since they are closest.
+ * This pricing mismatch requires client input before treating as final — do not quietly re-price.
+ */
 const products: Product[] = [
   {
     id: "1",
     name: "Ivory Pavé Gold Cufflinks",
     slug: "ivory-pave-gold-cufflinks",
-    category: "Gold Cufflinks",
-    categorySlug: "gold-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Gold-tone metal paired with ivory enamel and crystal pavé detailing. Filed edges, polished surface, secure toggle closure.",
     price: 3200,
@@ -51,8 +64,8 @@ const products: Product[] = [
     id: "2",
     name: "Sapphire Ornamental Cufflinks",
     slug: "sapphire-ornamental-cufflinks",
-    category: "Silver Cufflinks",
-    categorySlug: "silver-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Silver-tone metal with deep blue enamel and engraved floral detailing. Polished edges, secure toggle closure.",
     price: 4100,
@@ -73,8 +86,8 @@ const products: Product[] = [
     id: "3",
     name: "Onyx Geometric Cufflinks",
     slug: "onyx-geometric-cufflinks",
-    category: "Gunmetal Cufflinks",
-    categorySlug: "gunmetal-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Gunmetal finish with black enamel and engraved geometric pattern. Matte surface, filed edges, secure toggle closure.",
     price: 2850,
@@ -95,8 +108,8 @@ const products: Product[] = [
     id: "4",
     name: "Gold Trellis Crystal Cufflinks",
     slug: "gold-trellis-crystal-cufflinks",
-    category: "Gold Cufflinks",
-    categorySlug: "gold-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Gold-tone metal with crystal detailing and engraved lattice pattern. Polished surface, filed edges, secure toggle closure.",
     price: 3450,
@@ -117,8 +130,8 @@ const products: Product[] = [
     id: "5",
     name: "Royal Blue Floral Cufflinks",
     slug: "royal-blue-floral-cufflinks",
-    category: "Enamel Cufflinks",
-    categorySlug: "enamel-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Silver-tone metal with blue enamel and floral engraving. Polished finish, secure toggle closure.",
     price: 3600,
@@ -139,8 +152,8 @@ const products: Product[] = [
     id: "6",
     name: "Black Patterned Gunmetal Cufflinks",
     slug: "black-patterned-gunmetal-cufflinks",
-    category: "Gunmetal Cufflinks",
-    categorySlug: "gunmetal-cufflinks",
+    category: "Premium",
+    categorySlug: "premium",
     description:
       "Gunmetal with black enamel and engraved repeating pattern. Matte finish, filed edges, secure toggle closure.",
     price: 2950,
@@ -177,52 +190,45 @@ export function getProductsByCategory(categorySlug: string): Product[] {
 }
 
 export function searchProducts(query: string): Product[] {
-  const lowerQuery = query.toLowerCase();
+  if (!query || !query.trim()) return [];
+  const lowerQuery = query.toLowerCase().trim();
   return products.filter(
     (product) =>
       product.name.toLowerCase().includes(lowerQuery) ||
       product.description.toLowerCase().includes(lowerQuery) ||
       product.category.toLowerCase().includes(lowerQuery) ||
-      product.material.toLowerCase().includes(lowerQuery)
+      product.material.toLowerCase().includes(lowerQuery) ||
+      product.finish.toLowerCase().includes(lowerQuery) ||
+      product.color.toLowerCase().includes(lowerQuery) ||
+      product.pattern.toLowerCase().includes(lowerQuery)
   );
 }
 
-// Category data
+// Collection / Category data
 export interface Category {
-  name: string;
-  slug: string;
+  name: CollectionCategory;
+  slug: CollectionSlug;
   description: string;
+  priceRange: string;
 }
 
 export const categories: Category[] = [
   {
-    name: "Gold Cufflinks",
-    slug: "gold-cufflinks",
-    description: "Gold-tone metal with polished and engraved finishes",
+    name: "Classical",
+    slug: "classical",
+    description: "Essential formal cufflinks with a clean finish and timeless proportions.",
+    priceRange: "Rs. 700–800",
   },
   {
-    name: "Silver Cufflinks",
-    slug: "silver-cufflinks",
-    description: "Silver-tone metal with enamel and crystal detailing",
+    name: "Signature",
+    slug: "signature",
+    description: "Refined details, rich mineral enamel, and subtle surface textures.",
+    priceRange: "Rs. 1,000–1,400",
   },
   {
-    name: "Gunmetal Cufflinks",
-    slug: "gunmetal-cufflinks",
-    description: "Matte gunmetal finish with black enamel",
-  },
-  {
-    name: "Enamel Cufflinks",
-    slug: "enamel-cufflinks",
-    description: "Deep enamel detailing with engraved patterns",
-  },
-  {
-    name: "Statement Cufflinks",
-    slug: "statement-cufflinks",
-    description: "Bold designs and unique patterns",
-  },
-  {
-    name: "Gift Sets",
-    slug: "gift-sets",
-    description: "Curated sets in presentation boxes",
+    name: "Premium",
+    slug: "premium",
+    description: "Artisanal pieces featuring fine engraving, crystal pavé, and stone detailing.",
+    priceRange: "Rs. 1,500–2,500",
   },
 ];

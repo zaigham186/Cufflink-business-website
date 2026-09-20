@@ -62,7 +62,7 @@ export default function CollectionIntro() {
             ref={textRef}
             className="text-xl opacity-80 leading-relaxed max-w-2xl mx-auto"
           >
-            Every piece starts with polished metal, enamel work and engraved patterns — finished and checked before it's packed.
+            Every cufflink begins as a flat blank of raw metal — cut, shaped, then finished by hand across three collections: Classical, Signature, and Premium.
           </p>
         </div>
       </div>

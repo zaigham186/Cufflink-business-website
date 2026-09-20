@@ -26,9 +26,10 @@ export default function AboutPage() {
               The detail changes everything.
             </h1>
             <p className="text-body text-porcelain/80 leading-relaxed max-w-2xl pt-2">
-              CuffKings focuses on men's accessories for formal dressing. Every
-              pair starts with solid metal, filed surfaces and hand-set
-              enamel—finished and inspected in Peshawar before it is packed.
+              CuffKings focuses on men&apos;s accessories for formal dressing.
+              Crafted across three collections — Classical, Signature, and Premium —
+              every pair starts with solid metal, filed surfaces and hand-set
+              enamel, finished and inspected in Peshawar before it is packed.
             </p>
           </Reveal>
         </div>

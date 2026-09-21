@@ -11,11 +11,7 @@ export function generateWhatsAppURL(
   items: CartItem[],
   customer: CustomerDetails
 ): string {
-  const businessNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
-
-  if (!businessNumber) {
-    throw new Error("WhatsApp business number not configured");
-  }
+  const businessNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923001234567";
 
   // Calculate totals
   const subtotal = items.reduce(
@@ -48,3 +44,22 @@ export function generateWhatsAppURL(
 
   return `https://wa.me/${businessNumber}?text=${encodedMessage}`;
 }
+
+export interface InquiryDetails {
+  name: string;
+  inquiryType: string;
+  message: string;
+}
+
+export function generateInquiryWhatsAppURL(inquiry: InquiryDetails): string {
+  const businessNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923001234567";
+
+  let text = `*New Inquiry — CuffKings Atelier*\n\n`;
+  text += `*Client Name:* ${inquiry.name}\n`;
+  text += `*Inquiry Type:* ${inquiry.inquiryType}\n\n`;
+  text += `*Message:*\n${inquiry.message}\n\n`;
+  text += `Sent from the CuffKings website contact page.`;
+
+  return `https://wa.me/${businessNumber}?text=${encodeURIComponent(text)}`;
+}
+

@@ -3,9 +3,6 @@ import { Instrument_Serif, Cormorant_Garamond, Manrope } from "next/font/google"
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import CartDrawer from "@/components/cart/CartDrawer";
-import CustomCursor from "@/components/motion/CustomCursor";
-import PageTransition from "@/components/motion/PageTransition";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -44,12 +41,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${instrumentSerif.variable} ${cormorantGaramond.variable} ${manrope.variable}`}>
-      <body suppressHydrationWarning>
-        <CustomCursor />
-        <PageTransition />
+    <html 
+      lang="en" 
+      className={`${instrumentSerif.variable} ${cormorantGaramond.variable} ${manrope.variable}`}
+      suppressHydrationWarning
+    >
+      <body>
         <Navbar />
-        <CartDrawer />
         <main>{children}</main>
         <Footer />
       </body>

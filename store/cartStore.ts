@@ -13,25 +13,18 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
-  isDrawerOpen: boolean;
   addItem: (item: Omit<CartItem, "quantity">) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   getSubtotal: () => number;
   getTotalQuantity: () => number;
-  openDrawer: () => void;
-  closeDrawer: () => void;
 }
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      isDrawerOpen: false,
-
-      openDrawer: () => set({ isDrawerOpen: true }),
-      closeDrawer: () => set({ isDrawerOpen: false }),
 
       addItem: (item) => {
         const items = get().items;
@@ -39,14 +32,12 @@ export const useCartStore = create<CartStore>()(
 
         if (existingItem) {
           set({
-            isDrawerOpen: true,
             items: items.map((i) =>
               i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
             ),
           });
         } else {
           set({
-            isDrawerOpen: true,
             items: [...items, { ...item, quantity: 1 }],
           });
         }

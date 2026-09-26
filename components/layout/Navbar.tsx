@@ -20,7 +20,6 @@ export default function Navbar() {
   const router = useRouter();
 
   const cartItems = useCartStore((state) => state.items);
-  const openDrawer = useCartStore((state) => state.openDrawer);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   // Close mobile menu and search dropdown on route change
@@ -232,10 +231,9 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* 4. Cart Button (Opens drawer) */}
-              <button
-                type="button"
-                onClick={openDrawer}
+              {/* 4. Cart Button (Links to cart page) */}
+              <Link
+                href="/cart"
                 className="relative text-porcelain hover:text-champagne-brass transition-colors duration-200 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0"
                 aria-label={`Shopping cart with ${totalQuantity} items`}
               >
@@ -257,7 +255,7 @@ export default function Navbar() {
                     {totalQuantity}
                   </span>
                 )}
-              </button>
+              </Link>
 
               {/* Mobile menu toggle */}
               <button
@@ -308,12 +306,9 @@ export default function Navbar() {
             </Link>
 
             <div className="flex items-center space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openDrawer();
-                }}
+              <Link
+                href="/cart"
+                onClick={() => setMobileMenuOpen(false)}
                 className="relative p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-porcelain"
                 aria-label="Cart"
               >
@@ -335,7 +330,7 @@ export default function Navbar() {
                     {totalQuantity}
                   </span>
                 )}
-              </button>
+              </Link>
 
               <button
                 type="button"

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923001234567";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923719145871";
 
   return (
     <footer className="bg-obsidian text-porcelain border-t border-champagne-brass/25">
@@ -100,7 +100,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:info@cuffkings.pk"
+                  href="mailto:info@cufflinks.store"
                   className="hover:text-champagne-brass transition-colors"
                 >
                   Email

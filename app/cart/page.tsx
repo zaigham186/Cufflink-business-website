@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
@@ -7,7 +8,26 @@ import Button from "@/components/ui/Button";
 import Link from "next/link";
 
 export default function CartPage() {
+  const [mounted, setMounted] = useState(false);
   const items = useCartStore((state) => state.items);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="bg-obsidian min-h-screen pt-20">
+        <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 animate-pulse">
+          <div className="h-10 w-48 bg-white/10 rounded mb-12" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            <div className="lg:col-span-2 h-96 bg-white/5 rounded" />
+            <div className="lg:col-span-1 h-64 bg-white/5 rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (

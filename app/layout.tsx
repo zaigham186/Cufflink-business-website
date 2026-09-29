@@ -46,7 +46,31 @@ export default function RootLayout({
       className={`${instrumentSerif.variable} ${cormorantGaramond.variable} ${manrope.variable}`}
       suppressHydrationWarning
     >
-      <body>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(event) {
+                if (
+                  event &&
+                  (
+                    (event.message && (event.message.indexOf('Loading chunk') !== -1 || event.message.indexOf('ChunkLoadError') !== -1)) ||
+                    (event.error && event.error.name === 'ChunkLoadError')
+                  )
+                ) {
+                  var lastReload = sessionStorage.getItem('chunk_reload');
+                  var now = Date.now();
+                  if (!lastReload || (now - parseInt(lastReload, 10)) > 10000) {
+                    sessionStorage.setItem('chunk_reload', String(now));
+                    window.location.reload();
+                  }
+                }
+              });
+            `,
+          }}
+        />
+      </head>
+      <body suppressHydrationWarning>
         <Navbar />
         <main>{children}</main>
         <Footer />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { Product } from "@/lib/products";
 import Magnetic from "@/components/motion/Magnetic";
@@ -10,6 +11,7 @@ interface AddToCartButtonProps {
 }
 
 export default function AddToCartButton({ product }: AddToCartButtonProps) {
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
@@ -26,14 +28,33 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         name: product.name,
         slug: product.slug,
         price: product.price,
-        image: product.images[0] || "/products/ivory-pave-gold-1.jpg",
+        image: product.images[0] || "/products/classic1.jpeg",
         material: product.material,
       });
     }
 
     setAdded(true);
-    openDrawer();
-    setTimeout(() => setAdded(false), 2000);
+    if (typeof openDrawer === "function") {
+      openDrawer();
+    }
+    setTimeout(() => setAdded(false), 2500);
+  };
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) return;
+
+    for (let i = 0; i < quantity; i++) {
+      addItem({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: product.price,
+        image: product.images[0] || "/products/classic1.jpeg",
+        material: product.material,
+      });
+    }
+
+    router.push("/checkout");
   };
 
   return (
@@ -73,21 +94,35 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
         </div>
       </div>
 
-      {/* Add to Cart CTA */}
-      <Magnetic className="w-full">
-        <button
-          type="button"
-          onClick={handleAddToCart}
-          disabled={isOutOfStock}
-          className="w-full py-4 px-8 bg-obsidian text-porcelain text-sm font-medium border border-obsidian hover:bg-obsidian/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {isOutOfStock
-            ? "Out of stock"
-            : added
-            ? "Added to cart"
-            : "Add to cart"}
-        </button>
-      </Magnetic>
+      {/* Action Buttons: Add to Cart + Buy Now */}
+      <div className="space-y-3">
+        <Magnetic className="w-full">
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={isOutOfStock}
+            className="w-full py-4 px-8 bg-obsidian text-porcelain text-sm font-medium border border-obsidian hover:bg-obsidian/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {isOutOfStock
+              ? "Out of stock"
+              : added
+              ? "✓ Added to cart"
+              : "Add to cart"}
+          </button>
+        </Magnetic>
+
+        {!isOutOfStock && (
+          <Magnetic className="w-full">
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              className="w-full py-3.5 px-8 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
+            >
+              Buy now with WhatsApp →
+            </button>
+          </Magnetic>
+        )}
+      </div>
     </div>
   );
 }

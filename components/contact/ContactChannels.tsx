@@ -5,13 +5,13 @@ interface ContactChannelsProps {
 }
 
 export default function ContactChannels({
-  whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923001234567",
+  whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923719145871",
 }: ContactChannelsProps) {
   const channels = [
     {
       id: "whatsapp",
       title: "WhatsApp Direct",
-      value: `+${whatsappNumber}`,
+      value: "+92 371 9145871",
       subtitle: "Instant order support & availability",
       href: `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
         "Hello CuffKings, I am inquiring about your cufflinks."
@@ -34,9 +34,9 @@ export default function ContactChannels({
     {
       id: "email",
       title: "Direct Email",
-      value: "info@cuffkings.pk",
+      value: "info@cufflinks.store",
       subtitle: "For partnerships & corporate gifts",
-      href: "mailto:info@cuffkings.pk",
+      href: "mailto:info@cufflinks.store",
       isExternal: false,
       icon: (
         <svg

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923001234567";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "923719145871";
 
   return (
     <div className="min-h-screen">
@@ -50,7 +50,7 @@ export default function ContactPage() {
                   Contact form
                 </h2>
                 <p className="text-sm text-warm-charcoal/70 leading-relaxed">
-                  Fill in your details below and we'll respond via WhatsApp within a few hours during business hours.
+                  Fill in your details below and we&apos;ll respond via WhatsApp within a few hours during business hours.
                 </p>
               </div>
 

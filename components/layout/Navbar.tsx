@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { searchProducts, Product } from "@/lib/products";
+import CartDrawer from "@/components/cart/CartDrawer";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,8 +20,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
   const cartItems = useCartStore((state) => state.items);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close mobile menu and search dropdown on route change
   useEffect(() => {
@@ -235,7 +241,7 @@ export default function Navbar() {
               <Link
                 href="/cart"
                 className="relative text-porcelain hover:text-champagne-brass transition-colors duration-200 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0"
-                aria-label={`Shopping cart with ${totalQuantity} items`}
+                aria-label={mounted && totalQuantity > 0 ? `Shopping cart with ${totalQuantity} items` : "Shopping cart"}
               >
                 <svg
                   className="w-5 h-5"
@@ -250,7 +256,7 @@ export default function Navbar() {
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                   />
                 </svg>
-                {totalQuantity > 0 && (
+                {mounted && totalQuantity > 0 && (
                   <span className="absolute top-1 right-1 bg-champagne-brass text-obsidian text-[10px] font-bold rounded-[2px] min-w-[18px] h-[18px] px-1 flex items-center justify-center leading-none">
                     {totalQuantity}
                   </span>
@@ -310,7 +316,7 @@ export default function Navbar() {
                 href="/cart"
                 onClick={() => setMobileMenuOpen(false)}
                 className="relative p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-porcelain"
-                aria-label="Cart"
+                aria-label={mounted && totalQuantity > 0 ? `Shopping cart with ${totalQuantity} items` : "Cart"}
               >
                 <svg
                   className="w-5 h-5"
@@ -325,7 +331,7 @@ export default function Navbar() {
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                   />
                 </svg>
-                {totalQuantity > 0 && (
+                {mounted && totalQuantity > 0 && (
                   <span className="absolute top-1 right-1 bg-champagne-brass text-obsidian text-[10px] font-bold rounded-[2px] min-w-[18px] h-[18px] px-1 flex items-center justify-center leading-none">
                     {totalQuantity}
                   </span>
@@ -439,6 +445,7 @@ export default function Navbar() {
           </div>
         </div>
       )}
+      <CartDrawer />
     </>
   );
 }

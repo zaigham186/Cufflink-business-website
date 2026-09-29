@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
@@ -8,6 +8,7 @@ import { useCartStore } from "@/store/cartStore";
 import Magnetic from "@/components/motion/Magnetic";
 
 export default function CartDrawer() {
+  const [mounted, setMounted] = useState(false);
   const {
     items,
     isDrawerOpen,
@@ -20,6 +21,10 @@ export default function CartDrawer() {
   const drawerRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const subtotal = getSubtotal();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on Escape key
   useEffect(() => {
@@ -36,9 +41,9 @@ export default function CartDrawer() {
   useEffect(() => {
     if (!drawerRef.current || !backdropRef.current) return;
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (isDrawerOpen) {
       document.body.style.overflow = "hidden";
@@ -87,6 +92,8 @@ export default function CartDrawer() {
     };
   }, [isDrawerOpen]);
 
+  if (!mounted) return null;
+
   return (
     <div
       aria-hidden={!isDrawerOpen}
@@ -94,7 +101,7 @@ export default function CartDrawer() {
         isDrawerOpen ? "pointer-events-auto" : ""
       }`}
     >
-      {/* Solid dark backdrop (no blur) */}
+      {/* Solid dark backdrop */}
       <div
         ref={backdropRef}
         onClick={closeDrawer}
@@ -154,7 +161,7 @@ export default function CartDrawer() {
               <div key={item.id} className="py-4 flex gap-4">
                 <div className="relative w-20 h-20 bg-obsidian border border-champagne-brass/20 flex-shrink-0 overflow-hidden">
                   <Image
-                    src={item.image}
+                    src={item.image || "/products/classic1.jpeg"}
                     alt={item.name}
                     fill
                     className="object-cover"
@@ -231,7 +238,7 @@ export default function CartDrawer() {
             </div>
 
             <p className="text-xs text-porcelain/50 leading-relaxed">
-              Shipping calculated upon WhatsApp order confirmation.
+              Nationwide delivery confirmed on WhatsApp from Peshawar.
             </p>
 
             <div className="space-y-2 pt-2">
@@ -241,15 +248,24 @@ export default function CartDrawer() {
                   onClick={closeDrawer}
                   className="block w-full py-3 text-center bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
                 >
-                  Proceed to checkout
+                  Proceed to checkout →
                 </Link>
               </Magnetic>
-              <button
-                onClick={closeDrawer}
-                className="block w-full py-2.5 text-center text-xs text-porcelain/70 hover:text-porcelain transition-colors"
-              >
-                Continue shopping
-              </button>
+              <div className="flex justify-between items-center pt-1 text-xs">
+                <Link
+                  href="/cart"
+                  onClick={closeDrawer}
+                  className="text-porcelain/60 hover:text-champagne-brass transition-colors underline"
+                >
+                  View full cart page
+                </Link>
+                <button
+                  onClick={closeDrawer}
+                  className="text-porcelain/60 hover:text-porcelain transition-colors"
+                >
+                  Continue shopping
+                </button>
+              </div>
             </div>
           </div>
         )}

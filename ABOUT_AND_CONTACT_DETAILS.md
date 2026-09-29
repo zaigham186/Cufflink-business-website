@@ -166,8 +166,8 @@
 
 | Channel | Label | Target / Value | Action / Link | Icon |
 | :--- | :--- | :--- | :--- | :--- |
-| **WhatsApp Direct** | `WhatsApp Direct` | `+92 300 1234567` | WhatsApp deep-link | Chat bubble icon |
-| **Direct Email** | `Direct Email` | `info@cuffkings.pk` | `mailto:info@cuffkings.pk` | Envelope icon |
+| **WhatsApp Direct** | `WhatsApp Direct` | `+92 371 9145871` | WhatsApp deep-link | Chat bubble icon |
+| **Direct Email** | `Direct Email` | `info@cufflinks.store` | `mailto:info@cufflinks.store` | Envelope icon |
 | **Social** | `Instagram` | `@cuffkings` | `https://instagram.com` | Camera glyph |
 | **Workshop & Atelier** | `Workshop & Atelier` | `Peshawar, Pakistan` | Display text | Atelier pin icon |
 

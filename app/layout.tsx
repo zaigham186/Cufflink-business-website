@@ -3,6 +3,8 @@ import { Instrument_Serif, Cormorant_Garamond, Manrope } from "next/font/google"
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import ScrollProgress from "@/components/motion/ScrollProgress";
+import PageTransition from "@/components/motion/PageTransition";
 
 const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -71,6 +73,8 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <ScrollProgress />
+        <PageTransition />
         <Navbar />
         <main>{children}</main>
         <Footer />

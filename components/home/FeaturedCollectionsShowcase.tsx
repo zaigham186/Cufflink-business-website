@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Product, CollectionCategory } from "@/lib/products";
 import ProductCard from "@/components/shop/ProductCard";
 import Reveal from "@/components/motion/Reveal";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface FeaturedCollectionsShowcaseProps {
   products: Product[];
@@ -15,6 +21,13 @@ export default function FeaturedCollectionsShowcase({
 }: FeaturedCollectionsShowcaseProps) {
   const [activeTab, setActiveTab] = useState<"All" | CollectionCategory>("All");
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const tagRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+
   const tabs: ("All" | CollectionCategory)[] = [
     "All",
     "Classical",
@@ -23,10 +36,12 @@ export default function FeaturedCollectionsShowcase({
   ];
 
   // Filter products for the showcase
-  const displayedProducts = products.filter((p) => {
-    if (activeTab === "All") return p.featured;
-    return p.category === activeTab;
-  }).slice(0, 6);
+  const displayedProducts = products
+    .filter((p) => {
+      if (activeTab === "All") return p.featured;
+      return p.category === activeTab;
+    })
+    .slice(0, 6);
 
   const getCollectionHref = () => {
     if (activeTab === "Classical") return "/shop?category=classical";
@@ -48,16 +63,100 @@ export default function FeaturedCollectionsShowcase({
     }
   };
 
+  // Header entrance
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: headerRef.current,
+          start: "top 78%",
+          once: true,
+        },
+      });
+
+      tl.fromTo(
+        tagRef.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      )
+        .fromTo(
+          titleRef.current,
+          { opacity: 0, y: 40, skewY: 1.5 },
+          { opacity: 1, y: 0, skewY: 0, duration: 0.9, ease: "power4.out" },
+          "-=0.3"
+        )
+        .fromTo(
+          tabsRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" },
+          "-=0.5"
+        )
+        .fromTo(
+          dividerRef.current,
+          { scaleX: 0, transformOrigin: "left" },
+          { scaleX: 1, duration: 0.8, ease: "power3.inOut" },
+          "-=0.3"
+        );
+    }, headerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // CTA entrance
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    if (!ctaRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        ctaRef.current,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ctaRef.current,
+            start: "top 88%",
+            once: true,
+          },
+        }
+      );
+    }, ctaRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="bg-obsidian text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20">
+    <section className="bg-obsidian text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20 overflow-hidden">
       <div className="max-w-container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header with collection tabs */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6 border-b border-champagne-brass/20">
+        <div
+          ref={headerRef}
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 pb-6"
+        >
           <div>
-            <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-2">
+            <div
+              ref={tagRef}
+              className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-2 opacity-0"
+            >
               Curated Selection
             </div>
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-display text-porcelain">
+            <h2
+              ref={titleRef}
+              className="text-2xl sm:text-3xl lg:text-4xl font-display text-porcelain opacity-0"
+              style={{ willChange: "transform" }}
+            >
               Featured Pieces
             </h2>
             <p className="text-xs sm:text-sm text-porcelain/60 mt-1">
@@ -66,7 +165,7 @@ export default function FeaturedCollectionsShowcase({
           </div>
 
           {/* Collection Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div ref={tabsRef} className="flex flex-wrap items-center gap-2 sm:gap-3 opacity-0">
             {tabs.map((tab) => (
               <button
                 key={tab}
@@ -83,6 +182,13 @@ export default function FeaturedCollectionsShowcase({
           </div>
         </div>
 
+        {/* Divider line */}
+        <div
+          ref={dividerRef}
+          className="h-px bg-champagne-brass/20 mb-12"
+          style={{ transform: "scaleX(0)", transformOrigin: "left" }}
+        />
+
         {/* 6-Grid of Professional Product Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {displayedProducts.map((product, index) => (
@@ -93,7 +199,10 @@ export default function FeaturedCollectionsShowcase({
         </div>
 
         {/* Action Link to Shop Category */}
-        <div className="mt-14 pt-8 border-t border-champagne-brass/15 text-center">
+        <div
+          ref={ctaRef}
+          className="mt-14 pt-8 border-t border-champagne-brass/15 text-center opacity-0"
+        >
           <Link
             href={getCollectionHref()}
             className="inline-flex items-center gap-3 px-8 py-3.5 bg-transparent border border-champagne-brass text-champagne-brass hover:bg-champagne-brass hover:text-obsidian text-xs sm:text-sm font-medium tracking-wider uppercase transition-all duration-300 group"

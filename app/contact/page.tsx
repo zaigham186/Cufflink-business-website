@@ -3,6 +3,7 @@ import ContactInquiryForm from "@/components/contact/ContactInquiryForm";
 import ContactChannels from "@/components/contact/ContactChannels";
 import ContactFAQ from "@/components/contact/ContactFAQ";
 import BrassLine from "@/components/ui/BrassLine";
+import ContactHero from "@/components/contact/ContactHero";
 
 export const metadata: Metadata = {
   title: "Contact — CuffKings",
@@ -14,26 +15,8 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Professional and Clean */}
-      <section className="bg-obsidian pt-32 pb-16 lg:pt-40 lg:pb-20">
-        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <div className="inline-block">
-              <span className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase">
-                CuffKings Peshawar
-              </span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-display text-porcelain leading-tight">
-              Get in touch
-            </h1>
-            <p className="text-lg text-porcelain/75 leading-relaxed max-w-2xl mx-auto">
-              For order confirmations, custom requests, and product inquiries. We respond directly via WhatsApp and email.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <BrassLine className="max-w-container mx-auto" />
+      {/* Animated Hero */}
+      <ContactHero />
 
       {/* Main Contact Section - Form & Channels */}
       <section className="bg-porcelain py-20 lg:py-28">

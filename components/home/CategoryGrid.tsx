@@ -46,7 +46,11 @@ const collections = [
 export default function CategoryGrid() {
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const subRef = useRef<HTMLParagraphElement>(null);
+  const linkRef = useRef<HTMLAnchorElement>(null);
   const cardsRef = useRef<(HTMLAnchorElement | null)[]>([]);
+  const tagRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -55,40 +59,108 @@ export default function CategoryGrid() {
     if (prefersReducedMotion) return;
 
     const ctx = gsap.context(() => {
-      // Heading entrance
-      gsap.fromTo(
-        headingRef.current,
-        { opacity: 0, y: 35 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 75%",
-          },
-        }
-      );
+      // Header sequence
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 75%",
+          once: true,
+        },
+      });
 
-      // Cards staggered entrance
+      tl.fromTo(
+        tagRef.current,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+      )
+        .fromTo(
+          lineRef.current,
+          { scaleX: 0, transformOrigin: "left" },
+          { scaleX: 1, duration: 0.8, ease: "power3.inOut" },
+          "-=0.3"
+        )
+        .fromTo(
+          headingRef.current,
+          { opacity: 0, y: 45, skewY: 1.5 },
+          { opacity: 1, y: 0, skewY: 0, duration: 1, ease: "power4.out" },
+          "-=0.5"
+        )
+        .fromTo(
+          subRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 0.6, y: 0, duration: 0.7, ease: "power3.out" },
+          "-=0.6"
+        )
+        .fromTo(
+          linkRef.current,
+          { opacity: 0, x: 10 },
+          { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" },
+          "-=0.4"
+        );
+
+      // Cards: clip-path reveal + image scale
       cardsRef.current.forEach((card, index) => {
         if (!card) return;
+
+        const img = card.querySelector(".card-img-wrap");
+        const content = card.querySelector(".card-content");
+
         gsap.fromTo(
           card,
-          { opacity: 0, y: 40 },
+          {
+            opacity: 0,
+            clipPath: "inset(0 0 100% 0)",
+          },
           {
             opacity: 1,
-            y: 0,
+            clipPath: "inset(0 0 0% 0)",
             duration: 0.9,
             delay: index * 0.15,
-            ease: "power3.out",
+            ease: "power4.out",
             scrollTrigger: {
               trigger: card,
-              start: "top 80%",
+              start: "top 82%",
+              once: true,
             },
           }
         );
+
+        if (img) {
+          gsap.fromTo(
+            img,
+            { scale: 1.12 },
+            {
+              scale: 1,
+              duration: 1.2,
+              delay: index * 0.15,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 82%",
+                once: true,
+              },
+            }
+          );
+        }
+
+        if (content) {
+          gsap.fromTo(
+            content,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              delay: index * 0.15 + 0.3,
+              ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 82%",
+                once: true,
+              },
+            }
+          );
+        }
       });
     }, sectionRef);
 
@@ -101,25 +173,45 @@ export default function CategoryGrid() {
   return (
     <section
       ref={sectionRef}
-      className="bg-obsidian text-porcelain py-24 lg:py-32 border-t border-champagne-brass/20"
+      className="bg-obsidian text-porcelain py-24 lg:py-32 border-t border-champagne-brass/20 overflow-hidden"
     >
       <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
         <div className="mb-12 lg:mb-16 flex justify-between items-end">
           <div>
+            {/* Tag */}
+            <div
+              ref={tagRef}
+              className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-3 opacity-0"
+            >
+              Shop by Collection
+            </div>
+
+            {/* Brass accent line */}
+            <div
+              ref={lineRef}
+              className="h-px w-16 bg-champagne-brass mb-4"
+              style={{ transform: "scaleX(0)", transformOrigin: "left" }}
+            />
+
             <h2
               ref={headingRef}
-              className="text-h2 font-display text-porcelain"
+              className="text-h2 font-display text-porcelain opacity-0"
+              style={{ willChange: "transform" }}
             >
               Shop by collection
             </h2>
-            <p className="text-body text-porcelain/60 mt-2">
+            <p
+              ref={subRef}
+              className="text-body text-porcelain/60 mt-2 opacity-0"
+            >
               Three curated tiers designed for formal and black-tie dressing.
             </p>
           </div>
 
           <Link
             href="/shop"
-            className="hidden sm:inline-block text-sm text-champagne-brass hover:text-porcelain transition-colors"
+            ref={linkRef}
+            className="hidden sm:inline-block text-sm text-champagne-brass hover:text-porcelain transition-colors opacity-0"
           >
             All pieces →
           </Link>
@@ -136,17 +228,19 @@ export default function CategoryGrid() {
             className="lg:col-span-7 group block bg-obsidian border border-champagne-brass/25 hover:border-champagne-brass transition-all duration-300 overflow-hidden"
           >
             <div className="relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden bg-obsidian">
-              <Image
-                src={featuredCollection.images[0]}
-                alt={featuredCollection.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                sizes="(max-width: 1024px) 100vw, 58vw"
-              />
+              <div className="card-img-wrap absolute inset-0 will-change-transform">
+                <Image
+                  src={featuredCollection.images[0]}
+                  alt={featuredCollection.name}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                />
+              </div>
               <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/40 to-transparent opacity-80" />
             </div>
 
-            <div className="p-6 sm:p-8 flex flex-col justify-between">
+            <div className="card-content p-6 sm:p-8 flex flex-col justify-between opacity-0">
               <div>
                 <div className="flex items-center justify-between text-xs tracking-wider text-champagne-brass mb-2">
                   <span>Featured collection</span>
@@ -181,17 +275,19 @@ export default function CategoryGrid() {
                 className="group flex-1 flex flex-col justify-between bg-obsidian border border-champagne-brass/25 hover:border-champagne-brass transition-all duration-300 overflow-hidden"
               >
                 <div className="relative aspect-[16/8] w-full overflow-hidden bg-obsidian">
-                  <Image
-                    src={collection.images[0]}
-                    alt={collection.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    sizes="(max-width: 1024px) 100vw, 42vw"
-                  />
+                  <div className="card-img-wrap absolute inset-0 will-change-transform">
+                    <Image
+                      src={collection.images[0]}
+                      alt={collection.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                      sizes="(max-width: 1024px) 100vw, 42vw"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/30 to-transparent opacity-70" />
                 </div>
 
-                <div className="p-6 flex flex-col justify-between">
+                <div className="card-content p-6 flex flex-col justify-between opacity-0">
                   <div>
                     <div className="flex items-center justify-between text-xs tracking-wider text-champagne-brass/80 mb-1">
                       <span>{collection.tier}</span>

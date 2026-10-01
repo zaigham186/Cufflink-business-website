@@ -51,35 +51,32 @@ The website's identity is a **black-and-gold theme**:
 ## Project Structure
 
 ```
-app/
-├── layout.tsx          # Root layout with fonts & navigation
-├── page.tsx            # Homepage
-├── shop/               # Shop pages
-│   ├── page.tsx        # All products with filtering
-│   └── [category]/     # Category-specific pages
-├── product/[slug]/     # Product detail pages
-├── cart/               # Cart page
-├── checkout/           # Checkout with WhatsApp
-├── about/              # About page
-├── contact/            # Contact page
-└── not-found.tsx       # 404 page
-
-components/
-├── home/               # Homepage sections
-├── shop/               # Shop components
-├── product/            # Product detail components
-├── cart/               # Cart components
-├── checkout/           # Checkout components
-├── layout/             # Navbar, Footer
-└── ui/                 # Reusable UI components
-
-lib/
-├── products.ts         # Static product data + accessor functions
-├── whatsapp.ts         # WhatsApp URL generation
-└── validators.ts       # Zod schemas
-
-store/
-└── cartStore.ts        # Zustand cart state
+cufflinks-website/
+├── frontend/                   # Customer-facing Next.js storefront
+│   ├── app/                    # Storefront pages & layouts
+│   ├── components/             # Storefront UI components (home, shop, cart, ui, etc.)
+│   ├── lib/                    # Client data-access, WhatsApp, validators
+│   ├── public/                 # Product photography & editorial assets
+│   ├── store/                  # Zustand cart store
+│   ├── types/                  # Shared TypeScript interfaces
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── backend/                    # Node.js & Express REST API
+│   ├── src/
+│   │   ├── config/db.ts        # Mongoose / MongoDB connection
+│   │   ├── middleware/auth.ts  # JWT authentication
+│   │   ├── models/             # Mongoose schemas (Product, Collection, Content)
+│   │   ├── routes/             # REST endpoints (auth, products, collections, upload)
+│   │   ├── services/blob.ts    # Vercel Blob helpers
+│   │   └── server.ts           # Express server entrypoint
+│   ├── scripts/                # Migration & image compression scripts
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── docs/                       # Noir Atelier design system & specifications
+├── package.json                # Root orchestrator (dev:frontend, dev:backend)
+└── README.md
 ```
 
 ## Key Architecture Decisions

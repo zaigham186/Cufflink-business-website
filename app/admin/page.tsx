@@ -83,27 +83,27 @@ export default async function AdminDashboardPage() {
   const deliveryFee = siteContent?.deliveryFeePkr ?? 180;
 
   return (
-    <div className="space-y-10 max-w-7xl">
+    <div className="space-y-6 sm:space-y-8 lg:space-y-10 max-w-7xl">
       {/* Top Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-champagne-brass/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-champagne-brass/20">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-3xl font-display text-porcelain tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight">
               Atelier Executive Desk
             </h1>
-            <span className="px-2.5 py-0.5 text-[10px] uppercase font-mono tracking-widest bg-champagne-brass/10 border border-champagne-brass/30 text-champagne-brass">
+            <span className="px-2 py-0.5 text-[9px] sm:text-[10px] uppercase font-mono tracking-widest bg-champagne-brass/10 border border-champagne-brass/30 text-champagne-brass">
               Live Operations
             </span>
           </div>
-          <p className="text-xs text-porcelain/60 uppercase tracking-widest font-sans mt-1">
+          <p className="text-[11px] sm:text-xs text-porcelain/60 uppercase tracking-widest font-sans mt-1">
             Genuine catalog asset analytics, inventory replenishment &amp; order fulfillment
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0">
           <Link
             href="/admin/orders"
-            className="inline-flex items-center px-4 py-2.5 bg-white/5 border border-champagne-brass/30 text-champagne-brass text-xs uppercase tracking-wider hover:bg-champagne-brass/10 transition-colors"
+            className="inline-flex items-center justify-center px-4 py-2.5 bg-white/5 border border-champagne-brass/30 text-champagne-brass text-xs uppercase tracking-wider hover:bg-champagne-brass/10 transition-colors"
           >
             <span>Orders Desk</span>
             {pendingOrders > 0 && (
@@ -114,7 +114,7 @@ export default async function AdminDashboardPage() {
           </Link>
           <Link
             href="/admin/products/new"
-            className="inline-flex items-center justify-center px-5 py-2.5 bg-champagne-brass text-obsidian text-xs font-medium uppercase tracking-widest hover:bg-champagne-brass/90 transition-all duration-200 shadow"
+            className="inline-flex items-center justify-center px-5 py-2.5 bg-champagne-brass text-obsidian text-xs font-medium uppercase tracking-widest hover:bg-champagne-brass/90 transition-all duration-200 shadow text-center"
           >
             + Add New Product
           </Link>
@@ -122,16 +122,16 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* 4 High-Impact KPI Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* KPI 1: Inventory Valuation */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-6 relative overflow-hidden">
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
               Inventory Asset Value
             </span>
             <span className="text-[11px] font-mono text-porcelain/40">PKR</span>
           </div>
-          <div className="text-3xl font-display text-porcelain tracking-tight">
+          <div className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight truncate" title={`Rs. ${totalAssetValuation.toLocaleString()}`}>
             Rs. {totalAssetValuation.toLocaleString()}
           </div>
           <p className="text-[11px] text-porcelain/50 mt-2 font-mono">
@@ -144,7 +144,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* KPI 2: Catalog Volume */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-6 relative overflow-hidden">
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
               Catalog Volume
@@ -152,10 +152,10 @@ export default async function AdminDashboardPage() {
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-display text-porcelain">{totalProducts}</span>
+            <span className="text-2xl sm:text-3xl font-display text-porcelain">{totalProducts}</span>
             <span className="text-xs text-porcelain/40">bespoke designs</span>
           </div>
-          <p className="text-[11px] text-porcelain/50 mt-2">
+          <p className="text-[11px] text-porcelain/50 mt-2 truncate">
             Classical ({classicalCount}) • Signature ({signatureCount}) • Premium ({premiumCount})
           </p>
           <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
@@ -165,7 +165,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* KPI 3: Orders & Dispatches */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-6 relative overflow-hidden">
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
               Fulfillment Desk
@@ -175,7 +175,7 @@ export default async function AdminDashboardPage() {
             </span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-display text-porcelain">{pendingOrders}</span>
+            <span className="text-2xl sm:text-3xl font-display text-porcelain">{pendingOrders}</span>
             <span className="text-xs text-amber-200/60">pending dispatch</span>
           </div>
           <p className="text-[11px] text-porcelain/50 mt-2 font-mono">
@@ -188,7 +188,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* KPI 4: Stock Health Ratio */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-6 relative overflow-hidden">
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
               Inventory Health
@@ -196,7 +196,7 @@ export default async function AdminDashboardPage() {
             <span className="text-[11px] font-mono text-porcelain/40">{stockHealthRate}%</span>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-3xl font-display text-porcelain">
+            <span className="text-2xl sm:text-3xl font-display text-porcelain">
               {totalProducts - lowStockList.length}
             </span>
             <span className="text-xs text-porcelain/40">healthy / {totalProducts}</span>
@@ -216,7 +216,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Atelier Operational Status Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-[#0f1015] border border-champagne-brass/20 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-5 bg-[#0f1015] border border-champagne-brass/20 text-xs">
         <div>
           <span className="text-[10px] uppercase text-champagne-brass font-sans block">Client Hotline</span>
           <span className="font-mono text-porcelain mt-1 block">+{hotline}</span>

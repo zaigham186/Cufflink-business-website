@@ -16,29 +16,29 @@ export default async function AdminOrdersPage() {
   return (
     <div className="space-y-8 max-w-7xl">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-champagne-brass/20">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-champagne-brass/20">
         <div>
-          <h1 className="text-3xl font-display text-porcelain tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight">
             Orders &amp; Dispatch Desk
           </h1>
-          <p className="text-xs text-porcelain/60 uppercase tracking-widest font-sans mt-1">
+          <p className="text-[11px] sm:text-xs text-porcelain/60 uppercase tracking-widest font-sans mt-1">
             Nationwide fulfillment, courier tracking &amp; client communication
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 w-full sm:w-auto">
           <Link
             href="/admin"
-            className="px-4 py-2 border border-champagne-brass/30 text-champagne-brass text-xs uppercase tracking-wider hover:bg-champagne-brass/10 transition-colors"
+            className="flex-1 sm:flex-none text-center px-3.5 sm:px-4 py-2 border border-champagne-brass/30 text-champagne-brass text-xs uppercase tracking-wider hover:bg-champagne-brass/10 transition-colors"
           >
             ← Overview
           </Link>
           <Link
             href="/shop"
             target="_blank"
-            className="px-4 py-2 bg-champagne-brass text-obsidian text-xs font-medium uppercase tracking-wider hover:bg-champagne-brass/90 transition-colors"
+            className="flex-1 sm:flex-none text-center px-3.5 sm:px-4 py-2 bg-champagne-brass text-obsidian text-xs font-medium uppercase tracking-wider hover:bg-champagne-brass/90 transition-colors"
           >
-            Live Store ↗
+            Store ↗
           </Link>
         </div>
       </div>

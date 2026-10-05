@@ -58,7 +58,7 @@ export default function CollectionEditor({ initialCollections }: CollectionEdito
         return (
           <div
             key={item.tier}
-            className="bg-white/5 border border-champagne-brass/25 p-6 flex flex-col justify-between space-y-6"
+            className="bg-white/5 border border-champagne-brass/25 p-4 sm:p-6 flex flex-col justify-between space-y-4 sm:space-y-6"
           >
             <div className="space-y-4">
               <div className="border-b border-champagne-brass/20 pb-3 flex items-center justify-between">

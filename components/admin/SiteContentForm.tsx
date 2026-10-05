@@ -196,7 +196,7 @@ export default function SiteContentForm({ initialContent }: SiteContentFormProps
         <button
           type="submit"
           disabled={saving}
-          className="px-8 py-3 bg-champagne-brass text-obsidian text-xs uppercase tracking-widest font-medium hover:bg-champagne-brass/90 transition-all duration-200 shadow-xl disabled:opacity-50"
+          className="w-full sm:w-auto px-8 py-3 bg-champagne-brass text-obsidian text-xs uppercase tracking-widest font-medium hover:bg-champagne-brass/90 transition-all duration-200 shadow-xl disabled:opacity-50 text-center"
         >
           {saving ? "Saving Storefront Settings..." : "Save Storefront Settings"}
         </button>

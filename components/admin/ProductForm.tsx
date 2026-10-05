@@ -513,11 +513,11 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-4">
+      <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-6 py-3 border border-white/20 text-porcelain/80 text-xs uppercase tracking-wider hover:bg-white/5 transition-colors"
+          className="w-full sm:w-auto px-6 py-3 border border-white/20 text-porcelain/80 text-xs uppercase tracking-wider hover:bg-white/5 transition-colors text-center"
         >
           Cancel
         </button>
@@ -525,7 +525,7 @@ export default function ProductForm({ product }: ProductFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="px-8 py-3 bg-champagne-brass text-obsidian text-xs uppercase tracking-widest font-medium hover:bg-champagne-brass/90 transition-all duration-200 shadow-xl disabled:opacity-50"
+          className="w-full sm:w-auto px-8 py-3 bg-champagne-brass text-obsidian text-xs uppercase tracking-widest font-medium hover:bg-champagne-brass/90 transition-all duration-200 shadow-xl disabled:opacity-50 text-center"
         >
           {loading ? "Saving to Catalog..." : isEditing ? "Save Changes" : "Create Product"}
         </button>

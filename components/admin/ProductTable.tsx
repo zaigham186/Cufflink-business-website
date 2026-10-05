@@ -62,40 +62,51 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
       const res = await fetch(`/api/products/${product._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ featured: newFeatured, isFeatured: newFeatured }),
+        body: JSON.stringify({ featured: newFeatured }),
       });
 
       if (res.ok) {
         setProducts((prev) =>
           prev.map((p) =>
-            p._id === product._id ? { ...p, featured: newFeatured, isFeatured: newFeatured } : p
+            p._id === product._id ? { ...p, featured: newFeatured } : p
           )
         );
       }
     } catch (err) {
-      console.error("Failed to toggle featured status:", err);
+      console.error("Toggle featured failed:", err);
     }
   };
 
+  const getStockBadgeClass = (stockCount?: number, stockStatus?: string) => {
+    const count = stockCount ?? 10;
+    if (count === 0 || stockStatus === "out-of-stock") {
+      return "bg-red-950/50 text-red-300 border-red-500/40";
+    }
+    if (count <= 5 || stockStatus === "low-stock") {
+      return "bg-amber-950/40 text-amber-200 border-amber-500/40";
+    }
+    return "bg-emerald-950/30 text-emerald-300 border-emerald-500/30";
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-white/5 border border-champagne-brass/20 p-4">
-        <div className="flex-1 max-w-md">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Search and Filters Bar (Responsive Grid/Flex) */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center bg-white/5 border border-champagne-brass/20 p-3 sm:p-4">
+        <div className="flex-1 w-full sm:max-w-md">
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, material, or SKU..."
-            className="w-full px-4 py-2 bg-black/40 border border-champagne-brass/20 text-porcelain text-xs focus:outline-none focus:border-champagne-brass placeholder-porcelain/40"
+            className="w-full px-3.5 py-2.5 bg-black/40 border border-champagne-brass/20 text-porcelain text-xs focus:outline-none focus:border-champagne-brass placeholder-porcelain/40"
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 bg-obsidian border border-champagne-brass/20 text-porcelain text-xs focus:outline-none focus:border-champagne-brass"
+            className="flex-1 sm:flex-none px-3 py-2.5 bg-obsidian border border-champagne-brass/20 text-porcelain text-xs focus:outline-none focus:border-champagne-brass"
           >
             <option value="all">All Collections</option>
             <option value="classical">Classical</option>
@@ -103,7 +114,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
             <option value="premium">Premium</option>
           </select>
 
-          <span className="text-xs text-porcelain/60 whitespace-nowrap font-mono">
+          <span className="text-[11px] text-porcelain/60 whitespace-nowrap font-mono shrink-0">
             {filteredProducts.length} items
           </span>
         </div>
@@ -115,9 +126,102 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
         </div>
       )}
 
-      {/* Table Container */}
-      <div className="bg-white/5 border border-champagne-brass/20 overflow-x-auto">
-        <table className="w-full text-left text-xs">
+      {/* MOBILE VIEW: Responsive Product Cards (< 640px) */}
+      <div className="block sm:hidden space-y-3">
+        {filteredProducts.length === 0 ? (
+          <div className="p-8 text-center text-porcelain/40 bg-white/5 border border-white/10 text-xs">
+            No products matched your criteria.
+          </div>
+        ) : (
+          filteredProducts.map((p) => (
+            <div
+              key={p._id}
+              className="bg-white/5 border border-white/10 p-3.5 space-y-3"
+            >
+              <div className="flex items-start space-x-3">
+                <div className="w-14 h-14 relative bg-black border border-white/10 shrink-0 overflow-hidden">
+                  {p.images && p.images[0] ? (
+                    <Image
+                      src={p.images[0]}
+                      alt={p.name}
+                      fill
+                      className="object-cover"
+                      unoptimized={p.images[0].startsWith("http") || p.images[0].startsWith("data:")}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-[10px] text-porcelain/30">
+                      N/A
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-1.5 py-0.5 border border-champagne-brass/30 text-champagne-brass text-[9px] uppercase font-sans">
+                      {p.category}
+                    </span>
+                    <span className="text-xs font-mono font-medium text-champagne-brass">
+                      Rs. {p.price.toLocaleString()}
+                    </span>
+                  </div>
+
+                  <p className="font-medium text-porcelain text-xs truncate mt-1">
+                    {p.name}
+                  </p>
+                  <p className="text-[10px] text-porcelain/40 font-mono mt-0.5">
+                    SKU: {p.sku}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`inline-block px-2 py-0.5 border text-[10px] font-mono ${getStockBadgeClass(
+                      p.stockCount,
+                      p.stockStatus
+                    )}`}
+                  >
+                    {p.stockCount ?? 10} units
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleFeatured(p)}
+                    className={`text-[10px] uppercase font-mono px-2 py-0.5 border transition-colors ${
+                      p.featured
+                        ? "bg-champagne-brass/20 text-champagne-brass border-champagne-brass/40 font-medium"
+                        : "border-white/10 text-porcelain/40"
+                    }`}
+                  >
+                    {p.featured ? "★ Featured" : "☆ Standard"}
+                  </button>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  <Link
+                    href={`/admin/products/${p._id}/edit`}
+                    className="text-champagne-brass text-xs uppercase tracking-wider font-medium hover:underline"
+                  >
+                    Edit
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(p)}
+                    className="text-red-400 text-xs uppercase tracking-wider hover:text-red-300"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* DESKTOP/TABLET VIEW: Structured Data Table (>= 640px) */}
+      <div className="hidden sm:block bg-white/5 border border-champagne-brass/20 overflow-x-auto">
+        <table className="w-full text-left text-xs min-w-[680px]">
           <thead>
             <tr className="border-b border-champagne-brass/20 text-champagne-brass uppercase tracking-widest font-sans bg-black/40">
               <th className="py-3.5 px-4 font-medium">Piece</th>
@@ -138,12 +242,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
               </tr>
             ) : (
               filteredProducts.map((p) => {
-                const stockColor =
-                  p.stockCount === 0 || p.stockStatus === "out-of-stock"
-                    ? "bg-red-950/50 text-red-300 border-red-500/40"
-                    : (p.stockCount ?? 10) <= 5 || p.stockStatus === "low-stock"
-                    ? "bg-amber-950/40 text-amber-200 border-amber-500/40"
-                    : "bg-emerald-950/30 text-emerald-300 border-emerald-500/30";
+                const stockBadge = getStockBadgeClass(p.stockCount, p.stockStatus);
 
                 return (
                   <tr key={p._id} className="hover:bg-white/5 transition-colors">
@@ -156,6 +255,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
                               alt={p.name}
                               fill
                               className="object-cover"
+                              unoptimized={p.images[0].startsWith("http") || p.images[0].startsWith("data:")}
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-[9px] text-porcelain/30">
@@ -164,7 +264,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-porcelain truncate max-w-[220px]">
+                          <p className="font-medium text-porcelain truncate max-w-[200px] lg:max-w-[260px]">
                             {p.name}
                           </p>
                           <p className="text-[10px] text-porcelain/40 font-mono">
@@ -184,13 +284,13 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
                       {p.sku}
                     </td>
 
-                    <td className="py-3 px-4 font-mono">
+                    <td className="py-3 px-4 font-mono font-medium">
                       Rs. {p.price.toLocaleString()}
                     </td>
 
                     <td className="py-3 px-4">
                       <span
-                        className={`inline-block px-2 py-0.5 border text-[10px] font-mono ${stockColor}`}
+                        className={`inline-block px-2 py-0.5 border text-[10px] font-mono ${stockBadge}`}
                       >
                         {p.stockCount ?? 10} units
                       </span>
@@ -217,7 +317,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
                       <div className="inline-flex items-center space-x-3">
                         <Link
                           href={`/admin/products/${p._id}/edit`}
-                          className="text-champagne-brass hover:underline uppercase text-[11px] tracking-wider"
+                          className="text-champagne-brass hover:underline uppercase text-[11px] tracking-wider font-medium"
                         >
                           Edit
                         </Link>
@@ -238,10 +338,10 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
         </table>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal (Fully Responsive) */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-obsidian border border-deep-wine/60 p-6 max-w-md w-full space-y-5 shadow-2xl">
+          <div className="bg-obsidian border border-deep-wine/60 p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl">
             <h3 className="text-lg font-display text-porcelain">Confirm Deletion</h3>
             <p className="text-xs text-porcelain/70 leading-relaxed">
               Are you sure you want to permanently delete{" "}
@@ -249,12 +349,12 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
               {deleteTarget.sku})? This action cannot be undone.
             </p>
 
-            <div className="flex items-center justify-end space-x-3 pt-3 border-t border-white/10">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
-                className="px-4 py-2 border border-white/20 text-porcelain text-xs uppercase tracking-wider hover:bg-white/5 transition-colors"
+                className="px-4 py-2.5 border border-white/20 text-porcelain text-xs uppercase tracking-wider hover:bg-white/5 transition-colors text-center"
               >
                 Cancel
               </button>
@@ -262,7 +362,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
                 type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs uppercase tracking-wider font-medium transition-colors disabled:opacity-50"
+                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs uppercase tracking-wider font-medium transition-colors disabled:opacity-50 text-center"
               >
                 {deleting ? "Deleting..." : "Permanently Delete"}
               </button>

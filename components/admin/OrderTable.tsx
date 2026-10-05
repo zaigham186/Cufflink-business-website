@@ -78,30 +78,35 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
 
   // Handle tracking number update
   const handleSaveTracking = async (orderId: string) => {
-    const code = trackingInputs[orderId];
-    if (code === undefined) return;
+    const tracking = trackingInputs[orderId];
+    if (tracking === undefined) return;
 
     try {
       setSavingTrackingId(orderId);
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courierTrackingNumber: code }),
+        body: JSON.stringify({ courierTrackingNumber: tracking }),
       });
 
       if (res.ok) {
         setOrders((prev) =>
           prev.map((o) =>
             o.orderId === orderId || o._id === orderId
-              ? { ...o, courierTrackingNumber: code }
+              ? { ...o, courierTrackingNumber: tracking }
               : o
           )
         );
+        if (selectedOrder && (selectedOrder.orderId === orderId || selectedOrder._id === orderId)) {
+          setSelectedOrder((prev: any) => ({ ...prev, courierTrackingNumber: tracking }));
+        }
+        alert("Courier tracking code updated.");
       } else {
-        alert("Failed to save tracking number.");
+        alert("Failed to save tracking.");
       }
     } catch (err) {
       console.error("Save tracking error:", err);
+      alert("Network error updating tracking.");
     } finally {
       setSavingTrackingId(null);
     }
@@ -110,21 +115,30 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
   // Handle delete order
   const handleDeleteOrder = async () => {
     if (!deleteTarget) return;
-    setIsDeleting(true);
+
     try {
-      const id = deleteTarget.orderId || deleteTarget._id;
-      const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+      setIsDeleting(true);
+      const res = await fetch(`/api/orders/${deleteTarget.orderId || deleteTarget._id}`, {
+        method: "DELETE",
+      });
+
       if (res.ok) {
-        setOrders((prev) => prev.filter((o) => o.orderId !== deleteTarget.orderId));
-        setDeleteTarget(null);
+        setOrders((prev) =>
+          prev.filter(
+            (o) =>
+              o.orderId !== deleteTarget.orderId && o._id !== deleteTarget._id
+          )
+        );
         if (selectedOrder?.orderId === deleteTarget.orderId) {
           setSelectedOrder(null);
         }
+        setDeleteTarget(null);
       } else {
-        alert("Failed to delete order");
+        alert("Failed to delete order from registry.");
       }
     } catch (err) {
-      console.error("Delete error:", err);
+      console.error("Delete order error:", err);
+      alert("Network error deleting order.");
     } finally {
       setIsDeleting(false);
     }
@@ -132,7 +146,7 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
 
   // Direct WhatsApp Bridge
   const createWhatsAppLink = (order: any) => {
-    let cleanPhone = order.phone.replace(/[^0-9]/g, "");
+    let cleanPhone = (order.phone || "").replace(/[^0-9]/g, "");
     if (cleanPhone.startsWith("0")) {
       cleanPhone = "92" + cleanPhone.slice(1);
     } else if (!cleanPhone.startsWith("92")) {
@@ -148,12 +162,12 @@ Order ID: #${order.orderId}
 Dear ${order.customerName},
 
 Thank you for your order with Cuffkings.
-*Order Status:* ${order.status.toUpperCase()}
+*Order Status:* ${(order.status || "PENDING").toUpperCase()}
 ${order.courierTrackingNumber ? `*Courier Tracking:* ${order.courierTrackingNumber}\n` : ""}
 *Items Ordered:*
 ${itemsSummary}
 
-*Total Payable:* Rs. ${order.total.toLocaleString()} (${order.paymentMethod || "Cash on Delivery"})
+*Total Payable:* Rs. ${order.total?.toLocaleString()} (${order.paymentMethod || "Cash on Delivery"})
 *Delivery Destination:* ${order.city}
 
 If you have any questions or require custom assistance, our atelier team is at your disposal.`;
@@ -166,37 +180,37 @@ If you have any questions or require custom assistance, our atelier team is at y
     switch (status) {
       case "pending":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-amber-950/40 text-amber-300 border border-amber-800/40">
-            Pending Confirmation
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-amber-950/40 text-amber-300 border border-amber-800/40">
+            Pending
           </span>
         );
       case "confirmed":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-blue-950/40 text-blue-300 border border-blue-800/40">
-            Confirmed & Packing
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-blue-950/40 text-blue-300 border border-blue-800/40">
+            Confirmed
           </span>
         );
       case "dispatched":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-purple-950/40 text-purple-300 border border-purple-800/40">
-            Dispatched via Courier
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-purple-950/40 text-purple-300 border border-purple-800/40">
+            Dispatched
           </span>
         );
       case "delivered":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
             Delivered
           </span>
         );
       case "cancelled":
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-red-950/40 text-red-300 border border-red-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-red-950/40 text-red-300 border border-red-800/40">
             Cancelled
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-white/10 text-porcelain/60">
+          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-white/10 text-porcelain/60">
             {status}
           </span>
         );
@@ -204,13 +218,13 @@ If you have any questions or require custom assistance, our atelier team is at y
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Filter Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/5 border border-champagne-brass/20 p-4">
-        {/* Status Tabs */}
-        <div className="flex flex-wrap items-center gap-1">
+    <div className="space-y-4 sm:space-y-6">
+      {/* Top Filter Bar (Responsive Flex / Horizontal Scroll) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-champagne-brass/20 p-3 sm:p-4">
+        {/* Status Tabs (Horizontally scrollable on mobile) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {[
-            { id: "all", label: "All Orders", count: counts.all },
+            { id: "all", label: "All", count: counts.all },
             { id: "pending", label: "Pending", count: counts.pending },
             { id: "confirmed", label: "Confirmed", count: counts.confirmed },
             { id: "dispatched", label: "Dispatched", count: counts.dispatched },
@@ -220,7 +234,7 @@ If you have any questions or require custom assistance, our atelier team is at y
             <button
               key={tab.id}
               onClick={() => setSelectedStatus(tab.id)}
-              className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 ${
+              className={`px-2.5 sm:px-3 py-1.5 text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
                 selectedStatus === tab.id
                   ? "bg-champagne-brass text-obsidian font-medium shadow"
                   : "text-porcelain/70 hover:text-porcelain hover:bg-white/5"
@@ -241,7 +255,7 @@ If you have any questions or require custom assistance, our atelier team is at y
         </div>
 
         {/* Search */}
-        <div className="w-full md:w-72">
+        <div className="w-full md:w-72 shrink-0">
           <input
             type="text"
             value={search}
@@ -252,10 +266,183 @@ If you have any questions or require custom assistance, our atelier team is at y
         </div>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white/5 border border-champagne-brass/20 overflow-hidden">
+      {/* MOBILE ORDER CARDS (< 768px) */}
+      <div className="block md:hidden space-y-3">
+        {filteredOrders.length === 0 ? (
+          <div className="p-8 text-center text-porcelain/40 bg-white/5 border border-white/10 text-xs">
+            No orders match the selected criteria.
+          </div>
+        ) : (
+          filteredOrders.map((order) => {
+            const currentTracking =
+              trackingInputs[order.orderId] !== undefined
+                ? trackingInputs[order.orderId]
+                : order.courierTrackingNumber || "";
+
+            return (
+              <div
+                key={order._id || order.orderId}
+                className="bg-white/5 border border-white/10 p-3.5 space-y-3"
+              >
+                {/* Order Top Line: Ref & Date & Price */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-medium text-champagne-brass text-xs">
+                        #{order.orderId}
+                      </span>
+                      {getStatusBadge(order.status)}
+                    </div>
+                    <p className="text-[10px] text-porcelain/40 font-mono mt-0.5">
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString("en-PK", {
+                            day: "numeric",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "Atelier Desk"}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="font-mono font-semibold text-champagne-brass text-xs">
+                      Rs. {order.total?.toLocaleString()}
+                    </span>
+                    <span className="block text-[10px] text-porcelain/40">
+                      {order.paymentMethod || "COD"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customer Details */}
+                <div className="bg-black/30 p-2.5 border border-white/5 text-xs space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-porcelain">{order.customerName}</span>
+                    <span className="text-[11px] text-porcelain/60 font-mono">{order.city}</span>
+                  </div>
+                  <div className="text-[11px] font-mono text-champagne-brass">
+                    {order.phone}
+                  </div>
+                </div>
+
+                {/* Items preview */}
+                <div className="flex items-center space-x-2">
+                  {order.items?.slice(0, 3).map((it: any, i: number) => (
+                    <div
+                      key={i}
+                      className="relative w-9 h-9 rounded border border-white/10 overflow-hidden bg-black/40 shrink-0"
+                    >
+                      {it.image ? (
+                        <Image
+                          src={it.image}
+                          alt={it.name}
+                          fill
+                          sizes="36px"
+                          className="object-cover"
+                          unoptimized={it.image.startsWith("http") || it.image.startsWith("data:")}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[9px] text-porcelain/30">
+                          CK
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-porcelain/60 truncate flex-1 font-sans">
+                    {order.items?.map((it: any) => `${it.quantity}x ${it.name}`).join(", ")}
+                  </p>
+                </div>
+
+                {/* Status selector & tracking */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-white/5">
+                  <div>
+                    <label className="block text-[9px] uppercase tracking-wider text-porcelain/50 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={order.status}
+                      disabled={updatingId === order.orderId}
+                      onChange={(e) =>
+                        handleStatusChange(order.orderId, e.target.value as OrderStatus)
+                      }
+                      className="w-full bg-obsidian border border-champagne-brass/30 text-porcelain text-xs px-2.5 py-1.5 focus:outline-none focus:border-champagne-brass"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="dispatched">Dispatched</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] uppercase tracking-wider text-porcelain/50 mb-1">
+                      Tracking
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        placeholder="Tracking code"
+                        value={currentTracking}
+                        onChange={(e) =>
+                          setTrackingInputs((prev) => ({
+                            ...prev,
+                            [order.orderId]: e.target.value,
+                          }))
+                        }
+                        className="flex-1 px-2.5 py-1.5 bg-obsidian border border-white/10 text-porcelain text-xs font-mono"
+                      />
+                      {trackingInputs[order.orderId] !== undefined &&
+                        trackingInputs[order.orderId] !== (order.courierTrackingNumber || "") && (
+                          <button
+                            onClick={() => handleSaveTracking(order.orderId)}
+                            disabled={savingTrackingId === order.orderId}
+                            className="px-2.5 py-1.5 bg-champagne-brass text-obsidian text-xs uppercase font-medium"
+                          >
+                            Save
+                          </button>
+                        )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Actions Toolbar */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/5 text-xs">
+                  <a
+                    href={createWhatsAppLink(order)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-2.5 py-1.5 bg-emerald-950/40 text-emerald-300 border border-emerald-800/40 hover:bg-emerald-900/60 transition-colors text-[11px] uppercase tracking-wider font-medium"
+                  >
+                    WhatsApp ↗
+                  </a>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="px-2.5 py-1.5 bg-white/5 border border-champagne-brass/20 text-champagne-brass hover:bg-champagne-brass/10 text-[11px] uppercase tracking-wider font-medium"
+                    >
+                      Details
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(order)}
+                      className="px-2.5 py-1.5 bg-deep-wine/20 border border-deep-wine/40 text-red-300 hover:bg-deep-wine/40 text-[11px] uppercase tracking-wider font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* DESKTOP/TABLET TABLE VIEW (>= 768px) */}
+      <div className="hidden md:block bg-white/5 border border-champagne-brass/20 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs min-w-[760px]">
             <thead>
               <tr className="border-b border-champagne-brass/20 bg-black/40 text-champagne-brass uppercase tracking-widest font-sans">
                 <th className="py-3.5 px-4 font-medium">Order Ref</th>
@@ -335,6 +522,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                                   fill
                                   sizes="32px"
                                   className="object-cover"
+                                  unoptimized={it.image.startsWith("http") || it.image.startsWith("data:")}
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-[9px] text-porcelain/30">
@@ -450,30 +638,31 @@ If you have any questions or require custom assistance, our atelier team is at y
         </div>
       </div>
 
-      {/* Order Details Drawer / Modal */}
+      {/* Order Details Drawer / Modal (Fully Responsive) */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-[#121318] border border-champagne-brass/30 p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6">
-            <div className="flex items-center justify-between border-b border-champagne-brass/20 pb-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="bg-[#121318] border border-champagne-brass/30 p-4 sm:p-6 lg:p-8 max-w-2xl w-full max-h-[92vh] overflow-y-auto space-y-5 sm:space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-champagne-brass/20 pb-3 sm:pb-4">
               <div>
-                <h3 className="text-xl font-display text-porcelain flex items-center gap-2">
+                <h3 className="text-lg sm:text-xl font-display text-porcelain flex items-center gap-2">
                   <span>Order Reference</span>
                   <span className="text-champagne-brass font-mono">#{selectedOrder.orderId}</span>
                 </h3>
-                <p className="text-xs text-porcelain/50 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-porcelain/50 mt-0.5">
                   Placed on {new Date(selectedOrder.createdAt).toLocaleString("en-PK")}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-porcelain/60 hover:text-porcelain text-xl"
+                className="text-porcelain/60 hover:text-porcelain text-xl p-1"
+                aria-label="Close modal"
               >
                 ✕
               </button>
             </div>
 
             {/* Status and Summary Header */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 bg-white/5 border border-white/5">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 sm:p-4 bg-white/5 border border-white/5 text-xs">
               <div>
                 <span className="text-[10px] uppercase text-champagne-brass block">Status</span>
                 <span className="text-xs font-medium text-porcelain capitalize mt-1 block">
@@ -488,7 +677,7 @@ If you have any questions or require custom assistance, our atelier team is at y
               </div>
               <div>
                 <span className="text-[10px] uppercase text-champagne-brass block">Destination</span>
-                <span className="text-xs text-porcelain mt-1 block font-medium">
+                <span className="text-xs text-porcelain mt-1 block font-medium truncate">
                   {selectedOrder.city}
                 </span>
               </div>
@@ -505,27 +694,27 @@ If you have any questions or require custom assistance, our atelier team is at y
               <h4 className="text-xs uppercase tracking-widest text-champagne-brass font-sans">
                 Customer Delivery Information
               </h4>
-              <div className="p-4 bg-black/40 border border-white/10 space-y-2 text-xs text-porcelain/80">
-                <div className="flex justify-between">
+              <div className="p-3.5 sm:p-4 bg-black/40 border border-white/10 space-y-2 text-xs text-porcelain/80">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
                   <span className="text-porcelain/40">Full Name:</span>
                   <span className="font-medium text-porcelain">{selectedOrder.customerName}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
                   <span className="text-porcelain/40">Phone / WhatsApp:</span>
                   <span className="font-mono text-champagne-brass">{selectedOrder.phone}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
                   <span className="text-porcelain/40">City:</span>
                   <span className="text-porcelain">{selectedOrder.city}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-porcelain/40">Full Shipping Address:</span>
-                  <span className="text-right max-w-sm text-porcelain">{selectedOrder.address}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
+                  <span className="text-porcelain/40 shrink-0">Shipping Address:</span>
+                  <span className="sm:text-right max-w-sm text-porcelain break-words">{selectedOrder.address}</span>
                 </div>
                 {selectedOrder.notes && (
-                  <div className="flex justify-between pt-2 border-t border-white/5">
-                    <span className="text-porcelain/40">Client Special Notes:</span>
-                    <span className="text-right text-amber-200/90 italic max-w-sm">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2 pt-2 border-t border-white/5">
+                    <span className="text-porcelain/40 shrink-0">Client Special Notes:</span>
+                    <span className="sm:text-right text-amber-200/90 italic max-w-sm break-words">
                       &quot;{selectedOrder.notes}&quot;
                     </span>
                   </div>
@@ -548,9 +737,9 @@ If you have any questions or require custom assistance, our atelier team is at y
               </h4>
               <div className="divide-y divide-white/5 border border-white/10 bg-black/40">
                 {selectedOrder.items?.map((it: any, index: number) => (
-                  <div key={index} className="p-3 flex items-center justify-between gap-4 text-xs">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative w-12 h-12 bg-black/60 border border-white/10 shrink-0">
+                  <div key={index} className="p-3 flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-black/60 border border-white/10 shrink-0">
                         {it.image && (
                           <Image
                             src={it.image}
@@ -558,17 +747,18 @@ If you have any questions or require custom assistance, our atelier team is at y
                             fill
                             sizes="48px"
                             className="object-cover"
+                            unoptimized={it.image.startsWith("http") || it.image.startsWith("data:")}
                           />
                         )}
                       </div>
-                      <div>
-                        <p className="font-medium text-porcelain">{it.name}</p>
+                      <div className="min-w-0">
+                        <p className="font-medium text-porcelain truncate">{it.name}</p>
                         <p className="text-[10px] text-porcelain/50">
                           Qty: {it.quantity} • Unit: Rs. {it.price?.toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    <span className="font-mono text-porcelain font-medium">
+                    <span className="font-mono text-porcelain font-medium shrink-0">
                       Rs. {(it.price * it.quantity).toLocaleString()}
                     </span>
                   </div>
@@ -593,19 +783,19 @@ If you have any questions or require custom assistance, our atelier team is at y
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between pt-4 border-t border-champagne-brass/20">
+            {/* Actions (Responsive Stack/Row) */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-4 border-t border-champagne-brass/20">
               <a
                 href={createWhatsAppLink(selectedOrder)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 bg-emerald-700 text-white text-xs uppercase tracking-widest font-medium hover:bg-emerald-600 transition-colors shadow"
+                className="px-4 py-2.5 bg-emerald-700 text-white text-xs uppercase tracking-widest font-medium hover:bg-emerald-600 transition-colors shadow text-center"
               >
-                Send WhatsApp Dispatch Notice ↗
+                Send WhatsApp Notice ↗
               </a>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 bg-white/10 text-porcelain text-xs uppercase tracking-wider hover:bg-white/20 transition-colors"
+                className="px-4 py-2 bg-white/10 text-porcelain text-xs uppercase tracking-wider hover:bg-white/20 transition-colors text-center"
               >
                 Close Drawer
               </button>
@@ -614,22 +804,22 @@ If you have any questions or require custom assistance, our atelier team is at y
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Confirmation Modal (Fully Responsive) */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-[#121318] border border-champagne-brass/30 p-6 max-w-md w-full space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#121318] border border-champagne-brass/30 p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl">
             <h3 className="text-lg font-display text-porcelain">Remove Order from Registry</h3>
             <p className="text-xs text-porcelain/70 leading-relaxed">
               Are you sure you wish to delete order{" "}
               <strong className="text-champagne-brass">#{deleteTarget.orderId}</strong> for{" "}
               <strong>{deleteTarget.customerName}</strong>? This action cannot be undone.
             </p>
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs uppercase tracking-wider text-porcelain/60 hover:text-porcelain"
+                className="px-4 py-2 text-xs uppercase tracking-wider text-porcelain/60 hover:text-porcelain text-center"
               >
                 Cancel
               </button>
@@ -637,7 +827,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                 type="button"
                 onClick={handleDeleteOrder}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-deep-wine text-white text-xs uppercase tracking-wider hover:bg-red-700 font-medium"
+                className="px-4 py-2 bg-deep-wine text-white text-xs uppercase tracking-wider hover:bg-red-700 font-medium transition-colors text-center"
               >
                 {isDeleting ? "Deleting..." : "Confirm Removal"}
               </button>

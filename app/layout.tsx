@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/frontend/components/layout/Navbar";
-import Footer from "@/frontend/components/layout/Footer";
-import ScrollProgress from "@/frontend/components/motion/ScrollProgress";
-import PageTransition from "@/frontend/components/motion/PageTransition";
+import Navbar from "@/components/storefront/layout/Navbar";
+import Footer from "@/components/storefront/layout/Footer";
+import ScrollProgress from "@/components/motion/ScrollProgress";
+import PageTransition from "@/components/motion/PageTransition";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],

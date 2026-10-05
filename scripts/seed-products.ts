@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
-import { connectToDatabase } from "../backend/lib/db";
-import ProductModel from "../backend/models/Product";
+import { connectToDatabase } from "../lib/server/db";
+import ProductModel from "../models/Product";
 
 const RAW_PRODUCTS = [
   // ==========================================

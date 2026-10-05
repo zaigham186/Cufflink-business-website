@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
-import { connectToDatabase } from "../backend/lib/db";
-import CollectionSettingsModel from "../backend/models/CollectionSettings";
-import SiteContentModel from "../backend/models/SiteContent";
+import { connectToDatabase } from "../lib/server/db";
+import CollectionSettingsModel from "../models/CollectionSettings";
+import SiteContentModel from "../models/SiteContent";
 
 const INITIAL_COLLECTIONS: Array<{
   tier: "Classical" | "Signature" | "Premium";

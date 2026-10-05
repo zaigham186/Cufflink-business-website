@@ -1,17 +1,17 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
-import { connectToDatabase } from "../backend/lib/db";
-import ProductModel from "../backend/models/Product";
-import CollectionSettingsModel from "../backend/models/CollectionSettings";
-import SiteContentModel from "../backend/models/SiteContent";
-import { signAdminToken, verifyAdminToken } from "../backend/lib/auth";
+import { connectToDatabase } from "../lib/server/db";
+import ProductModel from "../models/Product";
+import CollectionSettingsModel from "../models/CollectionSettings";
+import SiteContentModel from "../models/SiteContent";
+import { signAdminToken, verifyAdminToken } from "../lib/server/auth";
 import {
   getAllProducts,
   getFeaturedProducts,
   getProductBySlug,
   filterProducts,
-} from "../shared/lib/products";
+} from "../lib/server/services/product.service";
 import { POST as createProduct, GET as getProducts } from "../app/api/products/route";
 import {
   GET as getProductById,
@@ -62,7 +62,7 @@ async function runVerification() {
 
   const sampleSlug = allProds[0].slug;
   const singleProd = await getProductBySlug(sampleSlug);
-  assert(singleProd !== undefined && singleProd.slug === sampleSlug, `getProductBySlug('${sampleSlug}') retrieves product details`);
+  assert(Boolean(singleProd) && singleProd!.slug === sampleSlug, `getProductBySlug('${sampleSlug}') retrieves product details`);
 
   const filtered = await filterProducts({ category: "classical" });
   assert(filtered.length > 0 && filtered.every((p) => p.categorySlug === "classical"), `filterProducts({ category: 'classical' }) returns correct tier`);

@@ -1,0 +1,2 @@
+// components/admin/dashboard
+export {};

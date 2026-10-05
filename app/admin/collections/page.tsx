@@ -1,22 +1,10 @@
-import { connectToDatabase } from "@/backend/lib/db";
-import CollectionSettingsModel from "@/backend/models/CollectionSettings";
-import CollectionEditor from "@/backend/admin-components/CollectionEditor";
+import { collectionService } from "@/lib/server/services/collection.service";
+import CollectionEditor from "@/components/admin/CollectionEditor";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCollectionsPage() {
-  await connectToDatabase();
-  const docs = await CollectionSettingsModel.find({}).lean();
-
-  const tiersOrder = ["Classical", "Signature", "Premium"];
-  const formatted = tiersOrder.map((tier) => {
-    const existing = docs.find((d: any) => d.tier === tier);
-    return {
-      tier: tier as "Classical" | "Signature" | "Premium",
-      priceRangeLabel: existing?.priceRangeLabel || (tier === "Classical" ? "Rs. 700–800" : tier === "Signature" ? "Rs. 1,000–1,400" : "Rs. 1,500–2,500"),
-      description: existing?.description || "",
-    };
-  });
+  const collections = await collectionService.getCollections();
 
   return (
     <div className="space-y-8 max-w-7xl">
@@ -29,7 +17,7 @@ export default async function AdminCollectionsPage() {
         </p>
       </div>
 
-      <CollectionEditor initialCollections={formatted} />
+      <CollectionEditor initialCollections={collections as any} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyPassword, signAdminToken } from "@/backend/lib/auth";
+import { verifyPassword, signAdminToken, COOKIE_NAME } from "@/lib/server/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     const token = signAdminToken();
     const response = NextResponse.json({ success: true });
-    response.cookies.set("ck_admin_token", token, {
+    response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
@@ -30,6 +30,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const response = NextResponse.json({ success: true });
-  response.cookies.delete("ck_admin_token");
+  response.cookies.delete(COOKIE_NAME);
   return response;
 }

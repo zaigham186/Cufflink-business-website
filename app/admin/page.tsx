@@ -1,116 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { connectToDatabase } from "@/backend/lib/db";
-import ProductModel from "@/backend/models/Product";
-import OrderModel, { OrderStatus } from "@/backend/models/Order";
-import SiteContentModel from "@/backend/models/SiteContent";
+import { productService } from "@/lib/server/services/product.service";
+import { orderService } from "@/lib/server/services/order.service";
+import { contentService } from "@/lib/server/services/content.service";
 
 export const dynamic = "force-dynamic";
 
-const INITIAL_ATELIER_ORDERS = [
-  {
-    orderId: "CK-84192",
-    customerName: "Malik Shahryar",
-    phone: "03215549021",
-    address: "House 42-B, Street 9, Sector F-7/2",
-    city: "Islamabad",
-    paymentMethod: "Cash on Delivery (COD)",
-    notes: "Please pack in formal executive presentation box for gift.",
-    items: [
-      {
-        productId: "sample-1",
-        name: "Imperial Guilloché Emerald Studs",
-        slug: "imperial-guilloche-emerald-studs",
-        price: 1800,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1590548784585-643d2b9f2925?q=80&w=800&auto=format&fit=crop",
-        material: "Brass / Gold Electroplate",
-      },
-    ],
-    subtotal: 1800,
-    deliveryFee: 180,
-    total: 1980,
-    status: "dispatched" as OrderStatus,
-    courierTrackingNumber: "TCS-924185012PK",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 18),
-  },
-  {
-    orderId: "CK-84193",
-    customerName: "Barrister Daniyal Khan",
-    phone: "03008451129",
-    address: "Suite 404, Eden Heights, Jail Road, Gulberg",
-    city: "Lahore",
-    paymentMethod: "Cash on Delivery (COD)",
-    notes: "Deliver before 5 PM to law chambers.",
-    items: [
-      {
-        productId: "sample-2",
-        name: "Bespoke Onyx Octagonal Cufflinks",
-        slug: "bespoke-onyx-octagonal-cufflinks",
-        price: 1400,
-        quantity: 2,
-        image: "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?q=80&w=800&auto=format&fit=crop",
-        material: "Gunmetal & Onyx Stone",
-      },
-      {
-        productId: "sample-3",
-        name: "Classical Florentine Silver Knot",
-        slug: "classical-florentine-silver-knot",
-        price: 800,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=800&auto=format&fit=crop",
-        material: "Silver Plate",
-      },
-    ],
-    subtotal: 3600,
-    deliveryFee: 180,
-    total: 3780,
-    status: "confirmed" as OrderStatus,
-    courierTrackingNumber: "",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 6),
-  },
-  {
-    orderId: "CK-84194",
-    customerName: "Dr. Hamza Afridi",
-    phone: "03339182344",
-    address: "Bungalow 18, Phase 5, Hayatabad",
-    city: "Peshawar",
-    paymentMethod: "Cash on Delivery (COD)",
-    notes: "Local delivery in Peshawar.",
-    items: [
-      {
-        productId: "sample-4",
-        name: "Vintage Monogram Brass Cufflinks",
-        slug: "vintage-monogram-brass-cufflinks",
-        price: 1200,
-        quantity: 1,
-        image: "https://images.unsplash.com/photo-1590548784585-643d2b9f2925?q=80&w=800&auto=format&fit=crop",
-        material: "Champagne Brass",
-      },
-    ],
-    subtotal: 1200,
-    deliveryFee: 180,
-    total: 1380,
-    status: "pending" as OrderStatus,
-    courierTrackingNumber: "",
-    createdAt: new Date(Date.now() - 1000 * 60 * 45),
-  },
-];
-
 export default async function AdminDashboardPage() {
-  await connectToDatabase();
-
-  // Auto-seed initial orders if empty
-  const ordersCountCheck = await OrderModel.countDocuments({});
-  if (ordersCountCheck === 0) {
-    await OrderModel.insertMany(INITIAL_ATELIER_ORDERS);
-  }
-
-  // Fetch all products, orders, and content in parallel
+  // Fetch all products, orders, and content in parallel via server services
   const [products, rawOrders, siteContent] = await Promise.all([
-    ProductModel.find({}).lean(),
-    OrderModel.find({}).sort({ createdAt: -1 }).limit(10).lean(),
-    SiteContentModel.findOne().lean(),
+    productService.getAllProducts(),
+    orderService.getOrders(),
+    contentService.getSiteContent(),
   ]);
 
   const totalProducts = products.length;
@@ -168,7 +69,6 @@ export default async function AdminDashboardPage() {
     totalUnitsInStock > 0 ? Math.round(totalAssetValuation / totalUnitsInStock) : 0;
 
   // Orders metrics
-  const totalOrdersLogged = rawOrders.length;
   const pendingOrders = rawOrders.filter((o: any) => o.status === "pending").length;
   const dispatchedOrders = rawOrders.filter((o: any) => o.status === "dispatched").length;
   const deliveredOrders = rawOrders.filter((o: any) => o.status === "delivered").length;
@@ -179,8 +79,8 @@ export default async function AdminDashboardPage() {
       ? Math.round(((totalProducts - lowStockList.length) / totalProducts) * 100)
       : 100;
 
-  const hotline = (siteContent as any)?.whatsappNumber || "923719145871";
-  const deliveryFee = (siteContent as any)?.deliveryFeePkr ?? 180;
+  const hotline = siteContent?.whatsappNumber || "923719145871";
+  const deliveryFee = siteContent?.deliveryFeePkr ?? 180;
 
   return (
     <div className="space-y-10 max-w-7xl">
@@ -381,7 +281,7 @@ export default async function AdminDashboardPage() {
                     {lowStockList.slice(0, 6).map((p: any) => {
                       const stockVal = typeof p.stockCount === "number" ? p.stockCount : 10;
                       return (
-                        <tr key={p._id.toString()} className="hover:bg-white/5 transition-colors">
+                        <tr key={p._id || p.id} className="hover:bg-white/5 transition-colors">
                           <td className="py-3 font-medium text-porcelain">
                             <div className="flex items-center space-x-2.5">
                               <div className="relative w-7 h-7 bg-black/40 border border-white/10 shrink-0 overflow-hidden">
@@ -417,7 +317,7 @@ export default async function AdminDashboardPage() {
                           </td>
                           <td className="py-3 text-right">
                             <Link
-                              href={`/admin/products/${p._id.toString()}/edit`}
+                              href={`/admin/products/${p._id || p.id}/edit`}
                               className="text-champagne-brass hover:underline uppercase tracking-wider text-[11px] font-medium"
                             >
                               Adjust →
@@ -455,7 +355,7 @@ export default async function AdminDashboardPage() {
             <div className="divide-y divide-white/5">
               {rawOrders.slice(0, 4).map((order: any) => (
                 <div
-                  key={order._id.toString()}
+                  key={order._id || order.orderId}
                   className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
                 >
                   <div>

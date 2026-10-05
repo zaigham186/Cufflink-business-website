@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/backend/lib/db";
-import CollectionSettingsModel from "@/backend/models/CollectionSettings";
-import { getAdminSession } from "@/backend/lib/auth";
-import { collectionSettingsSchema } from "@/backend/lib/validators";
+import { collectionService } from "@/lib/server/services/collection.service";
+import { getAdminSession } from "@/lib/server/auth";
+import { collectionSettingsSchema } from "@/lib/validations/collection.schema";
 
 export async function GET() {
   try {
-    await connectToDatabase();
-    const collections = await CollectionSettingsModel.find({}).lean();
+    const collections = await collectionService.getCollections();
     return NextResponse.json({ collections });
   } catch (error) {
     console.error("API GET /api/collections error:", error);
@@ -17,22 +15,16 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   try {
-    const isAdmin = await getAdminSession();
+    const isAdmin = await getAdminSession(req);
     if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    await connectToDatabase();
     const body = await req.json();
     const parsed = collectionSettingsSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const updated = await CollectionSettingsModel.findOneAndUpdate(
-      { tier: parsed.data.tier },
-      { $set: parsed.data },
-      { returnDocument: "after", upsert: true }
-    );
-
+    const updated = await collectionService.updateCollection(parsed.data.tier, parsed.data);
     return NextResponse.json({ collection: updated });
   } catch (error) {
     console.error("API PUT /api/collections error:", error);

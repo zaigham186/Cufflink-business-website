@@ -1,324 +1,254 @@
-# CuffKings — Final Project Architecture
+# CuffKings — Full-Stack Next.js Architecture
 
-## The Three Zones
+## Overview
 
+**CuffKings** is an artisanal, luxury e-commerce platform engineered as a unified monolithic **Next.js 15 App Router** application deployed on **Vercel** with **MongoDB Atlas**.
+
+The platform is designed around strict separation of concerns, enterprise-grade client/server boundaries, and layered architecture:
 ```
-cuffkings-website/
-│
-├── app/              ← NEXT.JS CORE (cannot move — framework requirement)
-├── frontend/         ← EVERYTHING the customer sees
-├── backend/          ← EVERYTHING the server runs
-├── public/           ← Static images (cannot move — Next.js requirement)
-├── docs/             ← All .md documentation files
-└── [config files]    ← next.config.ts, tailwind.config.ts, tsconfig.json etc.
+Route Handlers / Server Components
+                ↓
+          Domain Services
+                ↓
+           Repositories
+                ↓
+          Mongoose Models
+                ↓
+          MongoDB Atlas
 ```
 
 ---
 
-## Complete File Tree
+## 1. Directory Structure
 
-```
-cuffkings-website/
-│
-│ ════════════════════════════════════════════
-│  ZONE 1 — NEXT.JS CORE (stays at root)
-│ ════════════════════════════════════════════
-│
+```text
+cuffkings/
 ├── app/
-│   │
-│   │  ── Customer Pages ──
-│   ├── layout.tsx                     Root layout (Navbar, Footer, fonts, CartDrawer)
-│   ├── page.tsx                       Homepage
-│   ├── globals.css                    Global styles + Tailwind directives
-│   ├── not-found.tsx                  404 page
-│   ├── shop/
-│   │   ├── page.tsx                   Main shop catalog
-│   │   └── [category]/
-│   │       └── page.tsx               Category filtered shop
-│   ├── product/
-│   │   └── [slug]/
-│   │       └── page.tsx               Product detail (ISR revalidate=60)
-│   ├── cart/
-│   │   └── page.tsx
-│   ├── checkout/
-│   │   └── page.tsx
-│   ├── about/
-│   │   └── page.tsx
-│   └── contact/
-│       └── page.tsx
-│   │
-│   │  ── Admin Pages ──
-│   ├── admin/
-│   │   ├── layout.tsx                 Auth gate (checks ck_admin_token cookie)
-│   │   ├── login/
-│   │   │   └── page.tsx               Login form
-│   │   ├── page.tsx                   Dashboard (metrics, low-stock alerts)
-│   │   ├── products/
-│   │   │   ├── page.tsx               Product list table
-│   │   │   ├── new/
-│   │   │   │   └── page.tsx           Add new product
-│   │   │   └── [id]/
-│   │   │       └── edit/
-│   │   │           └── page.tsx       Edit existing product
-│   │   ├── collections/
-│   │   │   └── page.tsx               Collection tier settings editor
-│   │   └── content/
-│   │       └── page.tsx               Site copy editor (hero, FAQs, delivery fee)
-│   │
-│   │  ── API Routes (backend endpoints) ──
-│   └── api/
-│       ├── admin-login/
-│       │   └── route.ts               POST (login) / DELETE (logout)
-│       ├── products/
-│       │   ├── route.ts               GET all products / POST create (admin only)
-│       │   └── [id]/
-│       │       └── route.ts           GET one / PUT update / DELETE (admin only)
-│       ├── collections/
-│       │   └── route.ts               GET / PUT collection tier settings
-│       └── content/
-│           └── route.ts               GET / PUT site content and FAQs
-│
-│ ════════════════════════════════════════════
-│  ZONE 2 — FRONTEND (customer-facing only)
-│ ════════════════════════════════════════════
-│
-├── frontend/
-│   │
-│   ├── components/
-│   │   │
-│   │   ├── layout/
-│   │   │   ├── Navbar.tsx
-│   │   │   └── Footer.tsx
-│   │   │
-│   │   ├── home/
-│   │   │   ├── HeroNoir.tsx           Full-viewport GSAP hero
-│   │   │   ├── CollectionIntro.tsx    "Designed for the details"
-│   │   │   ├── CategoryGrid.tsx       Classical / Signature / Premium tiles
-│   │   │   ├── BrandStory.tsx         Peshawar editorial section
-│   │   │   └── FinalCTA.tsx           Bottom conversion block
-│   │   │
+│   ├── (storefront)/                  # Route group for customer storefront (preserves public URLs)
+│   │   ├── page.tsx                   # Homepage (Hero, Brand Ticker, Featured Collections)
+│   │   ├── about/page.tsx             # Brand story, artisanal craftsmanship
 │   │   ├── shop/
-│   │   │   ├── ProductCard.tsx        Individual product card (used everywhere)
-│   │   │   ├── ProductGrid.tsx        Catalog grid with sorting
-│   │   │   └── FilterSidebar.tsx      Category, price, material filters
-│   │   │
-│   │   ├── product/
-│   │   │   ├── ImageGallery.tsx       Primary image + thumbnails
-│   │   │   └── AddToCartButton.tsx    Quantity stepper + cart dispatch
-│   │   │
-│   │   ├── cart/
-│   │   │   ├── CartDrawer.tsx         Slide-over cart panel
-│   │   │   ├── CartItem.tsx           Single cart line item
-│   │   │   └── CartSummary.tsx        Totals and checkout CTA
-│   │   │
-│   │   ├── checkout/
-│   │   │   └── CheckoutForm.tsx       Name/phone/address + WhatsApp redirect
-│   │   │
-│   │   ├── contact/
-│   │   │   ├── ContactInquiryForm.tsx Pre-filled WhatsApp inquiry form
-│   │   │   ├── ContactChannels.tsx    WhatsApp, Email, Instagram, Location
-│   │   │   └── ContactFAQ.tsx         FAQ (reads from SiteContent DB)
-│   │   │
-│   │   ├── motion/
-│   │   │   ├── Reveal.tsx             Scroll-triggered fade+rise
-│   │   │   ├── Magnetic.tsx           Cursor-follow CTA buttons
-│   │   │   └── PageTransition.tsx     Route-change wipe animation
-│   │   │
-│   │   └── ui/
-│   │       ├── Button.tsx             Primary / Secondary / Outline variants
-│   │       ├── Badge.tsx              Default / Sale / Limited variants
-│   │       ├── BrassLine.tsx          Champagne brass hairline divider
-│   │       └── ProductPlaceholder.tsx Fallback for missing photography
-│   │
-│   └── store/
-│       └── cartStore.ts               Zustand cart (persisted to localStorage)
+│   │   │   ├── page.tsx               # Catalog browser with live filters
+│   │   │   └── [category]/page.tsx    # Tier collections (Classical, Signature, Premium)
+│   │   ├── product/[slug]/page.tsx    # Product detail page (ISR revalidate = 60s)
+│   │   ├── cart/page.tsx              # Full bag review
+│   │   ├── checkout/page.tsx          # Dual-rail checkout (Direct Web Order & WhatsApp)
+│   │   └── contact/page.tsx           # Contact & concierge inquiry
+│   ├── admin/                         # Admin panel routes (protected by middleware & JWT)
+│   │   ├── layout.tsx                 # Protected admin shell (AdminSidebar & AdminHeader)
+│   │   ├── login/page.tsx             # Master security access gate
+│   │   ├── page.tsx                   # Atelier command dashboard & analytics
+│   │   ├── products/
+│   │   │   ├── page.tsx               # Inventory matrix & stock tracking
+│   │   │   ├── new/page.tsx           # Product creation form
+│   │   │   └── [id]/edit/page.tsx     # Product update form
+│   │   ├── collections/page.tsx       # Tier pricing & descriptive copy management
+│   │   ├── content/page.tsx           # Hero headlines, FAQs, delivery fees CMS
+│   │   └── orders/page.tsx            # Order fulfillment registry & courier dispatch
+│   ├── api/                           # Thin Next.js Route Handlers
+│   │   ├── auth/
+│   │   │   ├── login/route.ts         # Secure HttpOnly admin login
+│   │   │   └── logout/route.ts        # Admin session invalidation
+│   │   ├── products/
+│   │   │   ├── route.ts               # GET all/filtered, POST create product
+│   │   │   └── [id]/route.ts          # GET product, PUT update, DELETE product
+│   │   ├── orders/
+│   │   │   ├── route.ts               # GET order registry, POST create customer order
+│   │   │   └── [id]/route.ts          # GET order, PUT status update, DELETE order
+│   │   ├── collections/route.ts       # GET tiers, PUT update tier pricing/copy
+│   │   └── content/route.ts           # GET site copy, PUT update site CMS
+│   ├── layout.tsx                     # Global root layout (Navbar, Footer, CartDrawer)
+│   ├── globals.css                    # Tailwind CSS directives & luxury styling tokens
+│   ├── not-found.tsx                  # Sartorial 404 handler
+│   ├── icon.tsx                       # Dynamic favicon
+│   ├── opengraph-image.tsx            # Social sharing preview
+│   ├── sitemap.ts                     # Dynamic XML sitemap generator
+│   └── robots.ts                      # Search engine crawler directives
 │
-│ ════════════════════════════════════════════
-│  ZONE 3 — BACKEND (server-side only)
-│ ════════════════════════════════════════════
+├── components/
+│   ├── storefront/                    # Customer UI components
+│   │   ├── home/                      # HeroNoir, FeaturedProducts, CollectionsShowcase, BrandStory
+│   │   ├── shop/                      # ProductGrid, ProductCard, FilterBar
+│   │   ├── product/                   # ImageGallery, AddToCartButton, ProductSpecs
+│   │   ├── cart/                      # CartDrawer, CartItem, CartSummary
+│   │   ├── checkout/                  # CheckoutForm, Dual-rail WhatsApp integration
+│   │   ├── contact/                   # ContactInquiryForm, ContactFAQ
+│   │   ├── about/                     # CollectionExplainer, BrandHeritage
+│   │   └── layout/                    # Navbar, Footer
+│   ├── admin/                         # Admin portal UI components
+│   │   ├── AdminSidebar.tsx           # Navigation links & active tab indicator
+│   │   ├── AdminHeader.tsx            # Session status & logout trigger
+│   │   ├── ProductTable.tsx           # Data table with quick actions
+│   │   ├── ProductForm.tsx            # Reactive creation & editing form
+│   │   ├── OrderTable.tsx             # Status updates, courier tracking, customer drawer
+│   │   ├── CollectionEditor.tsx       # Tier settings editor
+│   │   ├── SiteContentForm.tsx        # CMS copy editor
+│   │   ├── ImageUploader.tsx          # Media manager
+│   │   └── dashboard/                 # Metrics, revenue summary, low-stock alerts
+│   ├── ui/                            # Reusable atomic UI elements (Button, Badge, BrassLine)
+│   └── motion/                        # GSAP micro-animations & smooth transitions
 │
-├── backend/
-│   │
-│   ├── models/                        Mongoose schemas (MongoDB documents)
-│   │   ├── Product.ts                 Products collection schema
-│   │   ├── CollectionSettings.ts      Classical / Signature / Premium tier settings
-│   │   └── SiteContent.ts             Hero text, WhatsApp number, delivery fee, FAQs
-│   │
-│   ├── lib/                           Server-only utilities
-│   │   ├── db.ts                      Mongoose connection (cached singleton)
-│   │   ├── auth.ts                    JWT sign/verify + bcrypt password check
-│   │   └── validators.ts              Zod schemas for API request validation
-│   │
-│   └── admin-components/              React components only used in admin panel
-│       ├── AdminSidebar.tsx           Nav: Dashboard/Products/Collections/Content
-│       ├── ProductForm.tsx            Create + edit product form (all fields)
-│       ├── ImageUploader.tsx          Image path manager with reorder
-│       ├── ProductList.tsx            Admin product table with search/filter
-│       ├── CollectionSettingsForm.tsx Edit tier price labels and descriptions
-│       └── SiteContentForm.tsx        Edit hero, FAQs, delivery fee, WhatsApp number
+├── lib/
+│   ├── server/                        # SERVER-ONLY: Never imported by client code
+│   │   ├── db.ts                      # Cached Mongoose singleton connection
+│   │   ├── auth.ts                    # JWT signing/verification, password validation, cookie gate
+│   │   ├── services/                  # Business logic layer
+│   │   │   ├── product.service.ts
+│   │   │   ├── order.service.ts
+│   │   │   ├── collection.service.ts
+│   │   │   └── content.service.ts
+│   │   └── repositories/              # Database access layer
+│   │       ├── product.repository.ts
+│   │       ├── order.repository.ts
+│   │       ├── collection.repository.ts
+│   │       └── content.repository.ts
+│   ├── client/                        # CLIENT-ONLY: Browser utilities
+│   │   └── whatsapp.ts                # Direct WhatsApp checkout payload builder
+│   ├── validations/                   # Zod schemas for request validation & forms
+│   │   ├── product.schema.ts
+│   │   ├── order.schema.ts
+│   │   ├── collection.schema.ts
+│   │   ├── content.schema.ts
+│   │   └── auth.schema.ts
+│   ├── constants/
+│   │   ├── routes.ts                  # Canonical application route definitions
+│   │   └── config.ts                  # Static constants, brand details
+│   └── utils.ts                       # Classnames merger (clsx + tailwind-merge)
 │
-│ ════════════════════════════════════════════
-│  ZONE 4 — SHARED (used by both sides)
-│ ════════════════════════════════════════════
+├── models/                            # Mongoose Schemas & Models (Server-only)
+│   ├── Product.ts
+│   ├── Order.ts
+│   ├── CollectionSettings.ts
+│   └── SiteContent.ts
 │
-├── shared/
-│   │
-│   ├── types/                         TypeScript interfaces — single source of truth
-│   │   ├── product.ts                 Product, Collection, StockStatus types
-│   │   ├── collection.ts              CollectionSettings interface
-│   │   └── siteContent.ts             SiteContent interface
-│   │
-│   └── lib/                           Helpers used by both frontend and backend
-│       ├── products.ts                getAllProducts(), getProductBySlug(), etc.
-│       └── whatsapp.ts                generateWhatsAppURL() for checkout + contact
+├── store/
+│   └── cartStore.ts                   # Zustand client state with LocalStorage persistence
 │
-│ ════════════════════════════════════════════
-│  ZONE 5 — SCRIPTS (one-time utilities)
-│ ════════════════════════════════════════════
+├── types/                             # Universal TypeScript interfaces & types
+│   ├── product.ts
+│   ├── order.ts
+│   ├── collection.ts
+│   ├── siteContent.ts
+│   └── auth.ts
+│
+├── hooks/
+│   └── useReducedMotion.ts            # Accessibility motion preference detection
+│
+├── public/                            # Static media (80+ product photographs & editorial assets)
+│   ├── editorial/
+│   └── products/
 │
 ├── scripts/
-│   ├── seed-products.ts               Populates MongoDB with product catalog
-│   ├── seed-site-data.ts              Populates collection tiers and site content
-│   └── verify-backend.ts              Tests all API routes and auth barriers
+│   ├── seed-products.ts               # Seeds 67 catalog products into Atlas
+│   ├── seed-site-data.ts              # Seeds collection tiers & CMS site content
+│   └── verify-backend.ts              # Comprehensive 19-point automated test suite
 │
-│ ════════════════════════════════════════════
-│  STATIC ASSETS (stays at root)
-│ ════════════════════════════════════════════
-│
-├── public/
-│   ├── products/                      Product photography (80+ images)
-│   └── editorial/                     Hero and craftsmanship editorial photos
-│
-│ ════════════════════════════════════════════
-│  DOCUMENTATION
-│ ════════════════════════════════════════════
-│
-├── docs/
-│   ├── ARCHITECTURE.md                This file (final source of truth)
-│   ├── MASTER_BLUEPRINT.md            Full feature and page specs
-│   ├── COMPONENTS_REFERENCE.md        Component props and usage
-│   ├── DESIGN.md                      Noir Atelier design system (v2.1)
-│   └── archive/                       Old/superseded docs
-│
-│ ════════════════════════════════════════════
-│  CONFIG (all at root — tooling requires this)
-│ ════════════════════════════════════════════
-│
-├── .env.local                         Secrets (never committed to git)
-├── .env.example                       Key names with blank values (committed)
-├── next.config.ts                     Next.js config (image domains, ISR)
-├── tailwind.config.ts                 Color tokens, typography, content paths
-├── tsconfig.json                      Path aliases and TypeScript settings
-├── postcss.config.mjs
-├── package.json
-├── package-lock.json
-└── README.md
+├── middleware.ts                      # Edge middleware for /admin route guarding
+├── next.config.ts                     # Security headers & remote image configuration
+├── tailwind.config.ts                 # Noir Atelier color tokens & typography
+├── tsconfig.json                      # Clean single @/* root alias
+└── .env.example                       # Documented required environment variables
 ```
 
 ---
 
-## Import rules — what can import from where
+## 2. Request Flow Architecture
+
+All write operations and complex reads strictly follow the clean architecture pipeline:
 
 ```
-frontend/   → can import from: shared/
-             cannot import from: backend/
-
-backend/    → can import from: shared/
-             cannot import from: frontend/
-
-shared/     → cannot import from: frontend/ or backend/
-             (shared is the foundation — it has no dependencies on either side)
-
-app/        → can import from: frontend/, backend/, shared/
-             (app/ is the bridge — pages connect the two sides)
-```
-
-Visualized:
-
-```
-shared/          ← foundation, no dependencies
-   ↑       ↑
-frontend/  backend/    ← each imports from shared only
-   ↑       ↑
-      app/             ← imports from both, connects everything
-```
-
----
-
-## Path aliases — `tsconfig.json`
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "@/frontend/*":  ["./frontend/*"],
-      "@/backend/*":   ["./backend/*"],
-      "@/shared/*":    ["./shared/*"],
-      "@/*":           ["./*"]
-    }
-  }
-}
-```
-
-How imports look in practice:
-
-```typescript
-// In app/shop/page.tsx (a customer page)
-import ProductGrid from "@/frontend/components/shop/ProductGrid";
-import { getAllProducts } from "@/shared/lib/products";
-
-// In app/api/products/route.ts (an API route)
-import ProductModel from "@/backend/models/Product";
-import { getAdminSession } from "@/backend/lib/auth";
-import { productSchema } from "@/backend/lib/validators";
-import type { Product } from "@/shared/types/product";
-
-// In app/admin/products/page.tsx (admin page)
-import ProductList from "@/backend/admin-components/ProductList";
-
-// In frontend/components/cart/CartDrawer.tsx (customer component)
-import { useCartStore } from "@/frontend/store/cartStore";
-import type { Product } from "@/shared/types/product";
+[ HTTP Request (e.g. POST /api/products) ]
+                    ↓
+[ App Route Handler (app/api/products/route.ts) ]
+  • Parses request body
+  • Validates payload against Zod schema (lib/validations/product.schema.ts)
+  • Authorizes admin session via HttpOnly cookie (lib/server/auth.ts)
+  • Delegates work to the Domain Service
+                    ↓
+[ Domain Service (lib/server/services/product.service.ts) ]
+  • Applies business logic (e.g., calculates stockStatus based on stockCount)
+  • Enforces uniqueness of SKU & slug
+  • Delegates database operation to the Repository
+                    ↓
+[ Repository (lib/server/repositories/product.repository.ts) ]
+  • Establishes cached connection via lib/server/db.ts
+  • Executes Mongoose queries (ProductModel.create, find, update)
+  • Maps database documents to plain TypeScript interfaces
+                    ↓
+[ Mongoose Model (models/Product.ts) ]
+                    ↓
+[ MongoDB Atlas Database ]
 ```
 
 ---
 
-## Tailwind config — required update after restructure
+## 3. Client / Server Boundaries
 
-```typescript
-// tailwind.config.ts
-const config: Config = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./frontend/**/*.{js,ts,jsx,tsx,mdx}",
-    "./backend/admin-components/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  // rest unchanged
-};
-```
+To prevent security vulnerabilities, bundle bloat, and runtime crashes:
 
----
+### Server-Only Modules:
+- `lib/server/**` (Database connections, JWT signing, password hashing, services, repositories)
+- `models/**` (Mongoose schema definitions and models)
+- Environment secrets (`JWT_SECRET`, `ADMIN_PASSWORD_HASH`, `MONGODB_URI`)
 
-## Environment variables — `.env.local`
+> **Enforcement:** Client components (`"use client"`) **must never** import from `models/`, `lib/server/`, or `mongoose`.
 
-```
-MONGODB_URI=
-JWT_SECRET=
-ADMIN_PASSWORD_HASH=
-NEXT_PUBLIC_WHATSAPP_NUMBER=
-NEXT_PUBLIC_SITE_URL=
-```
+### Client-Side Modules:
+- `store/cartStore.ts` (Zustand client store using `localStorage`)
+- `lib/client/whatsapp.ts` (Builds `https://wa.me/...` URL with encoded order details)
+- `components/storefront/**` and `components/motion/**` (Interactive UI & GSAP animations)
+- `hooks/**` (React hooks, e.g. `useReducedMotion`)
+
+### Universal Modules:
+- `types/**` (Pure TypeScript definitions with no runtime overhead)
+- `lib/validations/**` (Zod schemas usable both on the server for route verification and on the client for form validation)
+- `lib/constants/**` (Route paths, brand configurations)
+- `lib/utils.ts` (String manipulation, tailwind-merge)
 
 ---
 
-## The one question that tells you where any file belongs
+## 4. Authentication & Security Architecture
 
-> "Does the customer ever see or trigger this directly?"
+1. **No Hardcoded Fallbacks:**
+   - Production mode requires explicit `JWT_SECRET` and `ADMIN_PASSWORD_HASH` environment variables. If missing in production, authentication fails safely.
+2. **Password Verification:**
+   - Evaluated via `bcrypt.compare` using salted hashes (e.g. `$2b$10$...`).
+3. **Session Cookie:**
+   - Upon successful login, the server issues a signed JWT stored inside an `HttpOnly`, `SameSite=Lax`, `Secure` (in production) cookie named `ck_admin_token`.
+4. **Edge Guard:**
+   - `middleware.ts` runs on the edge to immediately intercept unauthorized requests to `/admin/*` and redirects them to `/admin/login`.
+5. **Route-Level Guard:**
+   - Every mutating route handler (`POST`, `PUT`, `DELETE` under `/api/*`) performs cryptographic verification of `ck_admin_token` via `getAdminSession(req)` before processing requests.
 
-| Answer | Zone |
-|---|---|
-| Yes — it's a page, UI component, or cart logic | `frontend/` |
-| No — it's database, auth, or admin UI | `backend/` |
-| Both sides need it — it's a type or query function | `shared/` |
-| Next.js needs to route to it | `app/` |
-| I run it once in the terminal | `scripts/` |
+---
+
+## 5. Dual-Rail Checkout Architecture
+
+Customers have two checkout rails:
+1. **Direct Web Order:**
+   - Customer submits shipping address and phone number to `/api/orders`.
+   - Generates an official tracking order number (e.g., `CK-84192`).
+   - Recorded immediately in MongoDB for fulfillment by the atelier admin.
+2. **WhatsApp Direct Checkout:**
+   - Formulates a formatted, itemized order invoice.
+   - Launches WhatsApp with the store's concierge number (`NEXT_PUBLIC_WHATSAPP_NUMBER`), allowing immediate customer confirmation.
+
+---
+
+## 6. Deployment Architecture
+
+The application is deployed as **ONE full-stack Next.js project on Vercel**:
+
+```
+GitHub Repository (main branch)
+              ↓
+  Vercel Unified Monolith
+  ├── Serverless Functions (/api/*)
+  ├── Edge Middleware (route guard)
+  ├── Static HTML / Incremental Static Regeneration (storefront)
+  └── Client React Bundles
+              ↓
+      MongoDB Atlas (Database)
+```
+
+No external Express servers, Railway backends, or separate frontend hosts are required.

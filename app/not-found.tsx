@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Reveal from "@/frontend/components/motion/Reveal";
-import Magnetic from "@/frontend/components/motion/Magnetic";
+import Reveal from "@/components/motion/Reveal";
+import Magnetic from "@/components/motion/Magnetic";
 
 export default function NotFound() {
   return (

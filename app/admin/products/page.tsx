@@ -1,22 +1,11 @@
 import Link from "next/link";
-import { connectToDatabase } from "@/backend/lib/db";
-import ProductModel from "@/backend/models/Product";
-import ProductTable from "@/backend/admin-components/ProductTable";
+import { productService } from "@/lib/server/services/product.service";
+import ProductTable from "@/components/admin/ProductTable";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  await connectToDatabase();
-  const docs = await ProductModel.find({}).sort({ createdAt: -1 }).lean();
-
-  const formattedProducts = docs.map((doc: any) => ({
-    ...doc,
-    _id: doc._id.toString(),
-    id: doc._id.toString(),
-    stockCount: typeof doc.stockCount === "number" ? doc.stockCount : 10,
-    stockStatus: doc.stock || "in-stock",
-    stock: typeof doc.stockCount === "number" ? doc.stockCount : 10,
-  }));
+  const formattedProducts = await productService.getAllProducts();
 
   return (
     <div className="space-y-8 max-w-7xl">

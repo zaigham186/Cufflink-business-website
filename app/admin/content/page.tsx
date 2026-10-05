@@ -1,35 +1,10 @@
-import { connectToDatabase } from "@/backend/lib/db";
-import SiteContentModel from "@/backend/models/SiteContent";
-import SiteContentForm from "@/backend/admin-components/SiteContentForm";
+import { contentService } from "@/lib/server/services/content.service";
+import SiteContentForm from "@/components/admin/SiteContentForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminContentPage() {
-  await connectToDatabase();
-  const defaultContent = {
-    heroHeadline: "Cufflinks, finished the way formalwear demands.",
-    heroSubtext:
-      "Cufflinks built around polished metal, considered patterns and the details of formal dressing.",
-    whatsappNumber: "923719145871",
-    deliveryFeePkr: 180,
-    faqDeliveryTime: "2–4 working days nationwide via tracked express courier.",
-    faqDeliveryCoverage: "We deliver across all cities and regions of Pakistan.",
-    faqReturnPolicy:
-      "7-day replacement guarantee for any transit damages or quality concerns in original packaging.",
-  };
-
-  const rawContent = (await SiteContentModel.findOne().lean()) as any;
-  const content = rawContent || defaultContent;
-
-  const plainContent = {
-    heroHeadline: content.heroHeadline || defaultContent.heroHeadline,
-    heroSubtext: content.heroSubtext || defaultContent.heroSubtext,
-    whatsappNumber: content.whatsappNumber || defaultContent.whatsappNumber,
-    deliveryFeePkr: content.deliveryFeePkr ?? defaultContent.deliveryFeePkr,
-    faqDeliveryTime: content.faqDeliveryTime || defaultContent.faqDeliveryTime,
-    faqDeliveryCoverage: content.faqDeliveryCoverage || defaultContent.faqDeliveryCoverage,
-    faqReturnPolicy: content.faqReturnPolicy || defaultContent.faqReturnPolicy,
-  };
+  const content = await contentService.getSiteContent();
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -42,7 +17,7 @@ export default async function AdminContentPage() {
         </p>
       </div>
 
-      <SiteContentForm initialContent={plainContent} />
+      <SiteContentForm initialContent={content as any} />
     </div>
   );
 }

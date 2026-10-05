@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Magnetic from "@/components/motion/Magnetic";
+import Magnetic from "@/frontend/components/motion/Magnetic";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -13,6 +13,8 @@ if (typeof window !== "undefined") {
 
 interface HeroNoirProps {
   heroVideo?: string;
+  headline?: string;
+  subtext?: string;
 }
 
 const KEN_BURNS_SLIDES = [
@@ -42,7 +44,7 @@ const KEN_BURNS_SLIDES = [
   },
 ];
 
-export default function HeroNoir({ heroVideo }: HeroNoirProps) {
+export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps) {
   const heroRef = useRef<HTMLElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
   const wordmarkRef = useRef<HTMLDivElement>(null);
@@ -283,12 +285,20 @@ export default function HeroNoir({ heroVideo }: HeroNoirProps) {
 
           {/* Headline: "Cufflinks, finished the way formalwear demands." - Decent, refined size */}
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-display leading-[1.15] tracking-tight mb-6 max-w-2xl">
-            <span ref={headlineLine1Ref} className="block">
-              Cufflinks, finished the way
-            </span>
-            <span ref={headlineLine2Ref} className="block text-porcelain/95">
-              formalwear demands.
-            </span>
+            {headline ? (
+              <span ref={headlineLine1Ref} className="block">
+                {headline}
+              </span>
+            ) : (
+              <>
+                <span ref={headlineLine1Ref} className="block">
+                  Cufflinks, finished the way
+                </span>
+                <span ref={headlineLine2Ref} className="block text-porcelain/95">
+                  formalwear demands.
+                </span>
+              </>
+            )}
           </h1>
 
           {/* Subline */}
@@ -296,8 +306,8 @@ export default function HeroNoir({ heroVideo }: HeroNoirProps) {
             ref={sublineRef}
             className="text-body max-w-xl text-porcelain/85 mb-10 leading-relaxed"
           >
-            Cufflinks built around polished metal, considered patterns and the
-            details of formal dressing.
+            {subtext ||
+              "Cufflinks built around polished metal, considered patterns and the details of formal dressing."}
           </p>
 
           {/* CTAs */}

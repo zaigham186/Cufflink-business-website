@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CartItem as CartItemType } from "@/store/cartStore";
-import { useCartStore } from "@/store/cartStore";
+import { CartItem as CartItemType } from "@/frontend/store/cartStore";
+import { useCartStore } from "@/frontend/store/cartStore";
 
 interface CartItemProps {
   item: CartItemType;
@@ -45,6 +45,7 @@ export default function CartItem({ item }: CartItemProps) {
           <div className="flex items-center border border-champagne-brass/30 bg-obsidian">
             <button
               onClick={() => updateQuantity(item.id, item.quantity - 1)}
+              suppressHydrationWarning
               className="px-3 py-1 text-porcelain hover:bg-champagne-brass hover:text-obsidian transition-all duration-200 text-sm"
               aria-label="Decrease quantity"
             >
@@ -55,6 +56,7 @@ export default function CartItem({ item }: CartItemProps) {
             </span>
             <button
               onClick={() => updateQuantity(item.id, item.quantity + 1)}
+              suppressHydrationWarning
               className="px-3 py-1 text-porcelain hover:bg-champagne-brass hover:text-obsidian transition-all duration-200 text-sm"
               aria-label="Increase quantity"
             >
@@ -79,6 +81,7 @@ export default function CartItem({ item }: CartItemProps) {
       {/* Remove button */}
       <button
         onClick={() => removeItem(item.id)}
+        suppressHydrationWarning
         className="flex-shrink-0 p-2 text-porcelain/60 hover:text-deep-wine transition-colors duration-200 self-start"
         aria-label="Remove item"
       >

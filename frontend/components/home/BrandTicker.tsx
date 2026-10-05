@@ -1,6 +1,6 @@
 "use client";
 
-import Marquee from "@/components/motion/Marquee";
+import Marquee from "@/frontend/components/motion/Marquee";
 
 const tickerItems = [
   "Classical Collection",

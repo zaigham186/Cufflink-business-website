@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCartStore } from "@/store/cartStore";
-import type { Product } from "@/types/product";
-import Magnetic from "@/components/motion/Magnetic";
+import { useCartStore } from "@/frontend/store/cartStore";
+import type { Product } from "@/shared/types/product";
+import Magnetic from "@/frontend/components/motion/Magnetic";
 
 interface AddToCartButtonProps {
   product: Product;
@@ -72,6 +72,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
             type="button"
             onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
             disabled={isOutOfStock || quantity <= 1}
+            suppressHydrationWarning
             className="w-9 h-9 flex items-center justify-center text-warm-charcoal hover:bg-obsidian hover:text-porcelain transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
             aria-label="Decrease quantity"
           >
@@ -86,6 +87,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
               setQuantity((prev) => Math.min(product.stock, prev + 1))
             }
             disabled={isOutOfStock || quantity >= product.stock}
+            suppressHydrationWarning
             className="w-9 h-9 flex items-center justify-center text-warm-charcoal hover:bg-obsidian hover:text-porcelain transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-sm"
             aria-label="Increase quantity"
           >
@@ -101,6 +103,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
             type="button"
             onClick={handleAddToCart}
             disabled={isOutOfStock}
+            suppressHydrationWarning
             className="w-full py-4 px-8 bg-obsidian text-porcelain text-sm font-medium border border-obsidian hover:bg-obsidian/90 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isOutOfStock
@@ -116,6 +119,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
             <button
               type="button"
               onClick={handleBuyNow}
+              suppressHydrationWarning
               className="w-full py-3.5 px-8 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
             >
               Buy now with WhatsApp →

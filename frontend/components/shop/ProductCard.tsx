@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { Product } from "@/types/product";
-import Badge from "@/components/ui/Badge";
+import type { Product } from "@/shared/types/product";
+import Badge from "@/frontend/components/ui/Badge";
 
 interface ProductCardProps {
   product: Product;

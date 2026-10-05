@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import ProductMedia from "@/components/product/ProductMedia";
+import ProductMedia from "@/frontend/components/product/ProductMedia";
 
 interface ImageGalleryProps {
   images: string[];
@@ -44,6 +44,7 @@ export default function ImageGallery({
                   prev === 0 ? displayImages.length - 1 : prev - 1
                 )
               }
+              suppressHydrationWarning
               className="w-8 h-8 bg-obsidian text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
               aria-label="Previous image"
             >
@@ -56,6 +57,7 @@ export default function ImageGallery({
                   prev === displayImages.length - 1 ? 0 : prev + 1
                 )
               }
+              suppressHydrationWarning
               className="w-8 h-8 bg-obsidian text-porcelain border border-champagne-brass/30 flex items-center justify-center text-xs"
               aria-label="Next image"
             >
@@ -73,6 +75,7 @@ export default function ImageGallery({
               key={idx}
               type="button"
               onClick={() => setSelectedIndex(idx)}
+              suppressHydrationWarning
               className={`relative w-20 h-20 bg-obsidian overflow-hidden border transition-all ${
                 selectedIndex === idx
                   ? "border-champagne-brass ring-1 ring-champagne-brass"

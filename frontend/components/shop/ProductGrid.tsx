@@ -2,10 +2,10 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import type { Product } from "@/types/product";
+import type { Product } from "@/shared/types/product";
 import ProductCard from "./ProductCard";
 import FilterSidebar from "./FilterSidebar";
-import Reveal from "@/components/motion/Reveal";
+import Reveal from "@/frontend/components/motion/Reveal";
 
 interface ProductGridProps {
   products: Product[];
@@ -207,6 +207,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
           {/* Mobile filter toggle */}
           <button
             onClick={() => setMobileFiltersOpen(true)}
+            suppressHydrationWarning
             className="lg:hidden px-4 py-2 border border-warm-charcoal/30 text-xs font-medium text-warm-charcoal hover:bg-obsidian hover:text-porcelain transition-colors"
           >
             Filters &amp; Sort
@@ -333,6 +334,7 @@ export default function ProductGrid({ products }: ProductGridProps) {
                 </span>
                 <button
                   onClick={() => setMobileFiltersOpen(false)}
+                  suppressHydrationWarning
                   className="p-1 text-warm-charcoal/70 hover:text-warm-charcoal"
                   aria-label="Close filters"
                 >

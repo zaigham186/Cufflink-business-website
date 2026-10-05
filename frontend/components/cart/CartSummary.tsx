@@ -1,7 +1,7 @@
 "use client";
 
-import { useCartStore } from "@/store/cartStore";
-import Button from "@/components/ui/Button";
+import { useCartStore } from "@/frontend/store/cartStore";
+import Button from "@/frontend/components/ui/Button";
 
 export default function CartSummary() {
   const subtotal = useCartStore((state) => state.getSubtotal());

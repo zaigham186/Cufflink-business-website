@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Button from "@/components/ui/Button";
-import ProductMedia from "@/components/product/ProductMedia";
-import Magnetic from "@/components/motion/Magnetic";
+import Button from "@/frontend/components/ui/Button";
+import ProductMedia from "@/frontend/components/product/ProductMedia";
+import Magnetic from "@/frontend/components/motion/Magnetic";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);

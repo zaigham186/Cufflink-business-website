@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Product, CollectionCategory } from "@/lib/products";
-import ProductCard from "@/components/shop/ProductCard";
-import Reveal from "@/components/motion/Reveal";
+import type { Product, CollectionCategory } from "@/shared/types/product";
+import ProductCard from "@/frontend/components/shop/ProductCard";
+import Reveal from "@/frontend/components/motion/Reveal";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -193,6 +193,7 @@ export default function FeaturedCollectionsShowcase({
                   role="tab"
                   aria-selected={isActive}
                   onClick={() => setActiveTab(tab)}
+                  suppressHydrationWarning
                   className={`px-3.5 py-2 text-xs font-medium tracking-wider uppercase transition-all duration-200 border flex items-center gap-1.5 ${
                     isActive
                       ? "bg-champagne-brass text-obsidian border-champagne-brass font-semibold shadow-sm"

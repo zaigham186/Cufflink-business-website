@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import { useCartStore } from "@/store/cartStore";
-import Magnetic from "@/components/motion/Magnetic";
+import { useCartStore } from "@/frontend/store/cartStore";
+import Magnetic from "@/frontend/components/motion/Magnetic";
 
 export default function CartDrawer() {
   const [mounted, setMounted] = useState(false);

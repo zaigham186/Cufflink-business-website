@@ -99,6 +99,7 @@ export default function FilterSidebar({
             <button
               key={opt.value}
               onClick={() => onSortChange(opt.value)}
+              suppressHydrationWarning
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 sortBy === opt.value
                   ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -121,6 +122,7 @@ export default function FilterSidebar({
             <button
               key={col.value}
               onClick={() => onCategoryChange(col.value)}
+              suppressHydrationWarning
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 selectedCategory.toLowerCase() === col.value.toLowerCase()
                   ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -144,6 +146,7 @@ export default function FilterSidebar({
               <button
                 key={m.value}
                 onClick={() => onMaterialChange(m.value)}
+                suppressHydrationWarning
                 className={`block w-full text-left py-1 text-sm transition-colors ${
                   selectedMaterial.toLowerCase() === m.value.toLowerCase()
                     ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -167,6 +170,7 @@ export default function FilterSidebar({
             <button
               key={f.value}
               onClick={() => onFinishChange(f.value)}
+              suppressHydrationWarning
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 selectedFinish.toLowerCase() === f.value.toLowerCase()
                   ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -189,6 +193,7 @@ export default function FilterSidebar({
             <button
               key={c.value}
               onClick={() => onColorChange(c.value)}
+              suppressHydrationWarning
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 selectedColor.toLowerCase() === c.value.toLowerCase()
                   ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -211,6 +216,7 @@ export default function FilterSidebar({
             <button
               key={range.value}
               onClick={() => onPriceChange(range.value)}
+              suppressHydrationWarning
               className={`block w-full text-left py-1 text-sm transition-colors ${
                 selectedPrice === range.value
                   ? "font-medium text-warm-charcoal text-champagne-brass font-semibold"
@@ -228,6 +234,7 @@ export default function FilterSidebar({
         <div>
           <button
             onClick={onResetAll}
+            suppressHydrationWarning
             className="text-xs text-warm-charcoal/60 hover:text-warm-charcoal underline underline-offset-4"
           >
             Reset all filters

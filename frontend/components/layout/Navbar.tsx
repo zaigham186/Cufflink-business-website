@@ -4,9 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useCartStore } from "@/store/cartStore";
-import { searchProducts, Product } from "@/lib/products";
-import CartDrawer from "@/components/cart/CartDrawer";
+import { useCartStore } from "@/frontend/store/cartStore";
+import type { Product } from "@/shared/types/product";
+import CartDrawer from "@/frontend/components/cart/CartDrawer";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,24 +53,48 @@ export default function Navbar() {
 
   // Desktop search filter
   useEffect(() => {
+    let active = true;
     if (searchQuery.trim().length > 0) {
-      const results = searchProducts(searchQuery);
-      setSearchResults(results);
-      setSearchOpen(true);
+      fetch(`/api/products?search=${encodeURIComponent(searchQuery.trim())}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (active && data.products) {
+            setSearchResults(data.products.slice(0, 5));
+            setSearchOpen(true);
+          }
+        })
+        .catch(() => {
+          if (active) setSearchResults([]);
+        });
     } else {
       setSearchResults([]);
       setSearchOpen(false);
     }
+    return () => {
+      active = false;
+    };
   }, [searchQuery]);
 
   // Mobile search filter
   useEffect(() => {
+    let active = true;
     if (mobileSearchQuery.trim().length > 0) {
-      const results = searchProducts(mobileSearchQuery);
-      setMobileSearchResults(results);
+      fetch(`/api/products?search=${encodeURIComponent(mobileSearchQuery.trim())}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (active && data.products) {
+            setMobileSearchResults(data.products.slice(0, 5));
+          }
+        })
+        .catch(() => {
+          if (active) setMobileSearchResults([]);
+        });
     } else {
       setMobileSearchResults([]);
     }
+    return () => {
+      active = false;
+    };
   }, [mobileSearchQuery]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -149,6 +173,7 @@ export default function Navbar() {
                       }}
                       placeholder="Search cufflinks..."
                       aria-label="Search cufflinks"
+                      suppressHydrationWarning
                       className="w-full bg-white/5 text-porcelain placeholder:text-porcelain/40 text-xs px-3.5 py-2 pl-8 border border-champagne-brass/25 focus:border-champagne-brass focus:outline-none transition-colors duration-200"
                     />
                     <svg
@@ -172,6 +197,7 @@ export default function Navbar() {
                           setSearchQuery("");
                           setSearchOpen(false);
                         }}
+                        suppressHydrationWarning
                         className="absolute right-2.5 text-porcelain/40 hover:text-porcelain text-xs"
                         aria-label="Clear search"
                       >
@@ -263,10 +289,34 @@ export default function Navbar() {
                 )}
               </Link>
 
+              {/* 5. Atelier Admin Portal Login Link */}
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-widest font-medium text-champagne-brass border border-champagne-brass/35 hover:border-champagne-brass hover:bg-champagne-brass/10 transition-all duration-200 rounded-[2px]"
+                title="Atelier Admin Portal"
+                aria-label="Atelier Admin Portal"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Admin</span>
+              </Link>
+
               {/* Mobile menu toggle */}
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                suppressHydrationWarning
                 className="md:hidden text-porcelain hover:text-champagne-brass transition-colors duration-200 p-2 min-h-[44px] min-w-[44px] flex items-center justify-center flex-shrink-0"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileMenuOpen}
@@ -341,6 +391,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
+                suppressHydrationWarning
                 className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-porcelain hover:text-champagne-brass"
                 aria-label="Close menu"
               >
@@ -369,6 +420,7 @@ export default function Navbar() {
                 value={mobileSearchQuery}
                 onChange={(e) => setMobileSearchQuery(e.target.value)}
                 placeholder="Search cufflinks..."
+                suppressHydrationWarning
                 className="w-full bg-white/5 text-porcelain placeholder:text-porcelain/40 text-sm px-4 py-3 pl-10 border border-champagne-brass/30 focus:border-champagne-brass focus:outline-none"
               />
               <svg
@@ -436,6 +488,27 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+
+            <Link
+              href="/admin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="min-h-[44px] flex items-center gap-3 text-xl font-display text-champagne-brass hover:text-porcelain transition-colors pt-4 border-t border-champagne-brass/20"
+            >
+              <svg
+                className="w-5 h-5 text-champagne-brass"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
+                />
+              </svg>
+              <span>Atelier Admin</span>
+            </Link>
           </div>
 
           {/* Mobile Footer note */}

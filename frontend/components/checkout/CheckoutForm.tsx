@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore } from "@/frontend/store/cartStore";
 import {
   generateWhatsAppURL,
   generateWhatsAppOrderMessage,
   formatWhatsAppBusinessNumber,
-} from "@/lib/whatsapp";
-import { checkoutSchema, type CheckoutFormData } from "@/lib/validators";
-import Button from "@/components/ui/Button";
-import Reveal from "@/components/motion/Reveal";
-import Magnetic from "@/components/motion/Magnetic";
+} from "@/shared/lib/whatsapp";
+import { checkoutSchema, type CheckoutFormData } from "@/shared/lib/validators";
+import Button from "@/frontend/components/ui/Button";
+import Reveal from "@/frontend/components/motion/Reveal";
+import Magnetic from "@/frontend/components/motion/Magnetic";
 
 export default function CheckoutForm() {
   const router = useRouter();
@@ -124,6 +124,33 @@ export default function CheckoutForm() {
         console.warn("Direct window.open blocked by browser; user can click the manual link", e);
       }
 
+      // Persist order asynchronously to Atelier database
+      fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          customerName: result.data.name,
+          phone: result.data.phone,
+          address: result.data.address,
+          city: result.data.city,
+          paymentMethod: result.data.paymentMethod || "Cash on Delivery (COD)",
+          notes: result.data.notes || "",
+          items: items.map((it) => ({
+            productId: it.id,
+            name: it.name,
+            slug: it.slug,
+            price: it.price,
+            quantity: it.quantity,
+            image: it.image,
+            material: it.material,
+          })),
+          subtotal,
+          deliveryFee: 180,
+          total: subtotal + 180,
+        }),
+      }).catch((err) => console.error("Background order save notification:", err));
+
       setPreparedOrder({
         orderId,
         whatsappURL,
@@ -203,6 +230,7 @@ export default function CheckoutForm() {
             <button
               type="button"
               onClick={handleCopyMessage}
+              suppressHydrationWarning
               className="w-full py-2.5 px-4 text-xs font-medium border border-champagne-brass/30 bg-obsidian/40 text-porcelain hover:border-champagne-brass hover:text-champagne-brass transition-colors flex items-center justify-center gap-2"
             >
               {copied ? (
@@ -260,6 +288,7 @@ export default function CheckoutForm() {
             <button
               type="button"
               onClick={() => setPreparedOrder(null)}
+              suppressHydrationWarning
               className="text-xs text-porcelain/70 hover:text-champagne-brass transition-colors underline"
             >
               ← Edit delivery details
@@ -267,6 +296,7 @@ export default function CheckoutForm() {
             <button
               type="button"
               onClick={handleFinishOrder}
+              suppressHydrationWarning
               className="text-xs font-medium px-5 py-2.5 bg-obsidian border border-champagne-brass/40 text-champagne-brass hover:border-champagne-brass transition-colors"
             >
               I have sent the message — Done
@@ -279,7 +309,7 @@ export default function CheckoutForm() {
 
   // Active Checkout Form View
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-8">
       <div className="bg-porcelain border border-champagne-brass/30 p-6 lg:p-8 space-y-6">
         <div>
           <h2 className="text-2xl font-display text-warm-charcoal">Delivery details</h2>
@@ -299,6 +329,7 @@ export default function CheckoutForm() {
             name="name"
             value={formData.name}
             onChange={handleChange}
+            suppressHydrationWarning
             className={`w-full px-4 py-3 bg-white border text-warm-charcoal placeholder:text-warm-charcoal/40 focus:outline-none focus:ring-2 focus:ring-champagne-brass ${
               errors.name ? "border-deep-wine ring-1 ring-deep-wine" : "border-champagne-brass/30"
             }`}
@@ -322,6 +353,7 @@ export default function CheckoutForm() {
             value={formData.phone}
             onChange={handleChange}
             placeholder="0371 9145871 or +92 371 9145871"
+            suppressHydrationWarning
             className={`w-full px-4 py-3 bg-white border text-warm-charcoal placeholder:text-warm-charcoal/40 focus:outline-none focus:ring-2 focus:ring-champagne-brass ${
               errors.phone ? "border-deep-wine ring-1 ring-deep-wine" : "border-champagne-brass/30"
             }`}
@@ -346,6 +378,7 @@ export default function CheckoutForm() {
             value={formData.address}
             onChange={handleChange}
             rows={3}
+            suppressHydrationWarning
             className={`w-full px-4 py-3 bg-white border text-warm-charcoal placeholder:text-warm-charcoal/40 focus:outline-none focus:ring-2 focus:ring-champagne-brass resize-none ${
               errors.address ? "border-deep-wine ring-1 ring-deep-wine" : "border-champagne-brass/30"
             }`}
@@ -370,6 +403,7 @@ export default function CheckoutForm() {
               name="city"
               value={formData.city}
               onChange={handleChange}
+              suppressHydrationWarning
               className={`w-full px-4 py-3 bg-white border text-warm-charcoal placeholder:text-warm-charcoal/40 focus:outline-none focus:ring-2 focus:ring-champagne-brass ${
                 errors.city ? "border-deep-wine ring-1 ring-deep-wine" : "border-champagne-brass/30"
               }`}
@@ -391,6 +425,7 @@ export default function CheckoutForm() {
               name="paymentMethod"
               value={formData.paymentMethod}
               onChange={handleChange}
+              suppressHydrationWarning
               className="w-full px-4 py-3 bg-white border border-champagne-brass/30 text-warm-charcoal focus:outline-none focus:ring-2 focus:ring-champagne-brass text-sm"
             >
               <option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option>
@@ -412,6 +447,7 @@ export default function CheckoutForm() {
             value={formData.notes || ""}
             onChange={handleChange}
             placeholder="e.g. Gift packaging requested, call before delivery"
+            suppressHydrationWarning
             className="w-full px-4 py-3 bg-white border border-champagne-brass/30 text-warm-charcoal placeholder:text-warm-charcoal/40 focus:outline-none focus:ring-2 focus:ring-champagne-brass text-sm"
           />
         </div>

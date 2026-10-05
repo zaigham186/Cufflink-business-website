@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Reveal from "@/components/motion/Reveal";
+import Reveal from "@/frontend/components/motion/Reveal";
 
 export default function CollectionExplainer() {
   return (

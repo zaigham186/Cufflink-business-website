@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Magnetic from "@/components/motion/Magnetic";
-import { generateInquiryWhatsAppURL } from "@/lib/whatsapp";
+import Magnetic from "@/frontend/components/motion/Magnetic";
+import { generateInquiryWhatsAppURL } from "@/shared/lib/whatsapp";
 
 const INQUIRY_TYPES = [
   "General inquiry",
@@ -56,7 +56,7 @@ export default function ContactInquiryForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-6">
         {error && (
           <div className="text-xs text-rose-400 bg-rose-950/40 border border-rose-800/40 p-3">
             {error}
@@ -77,6 +77,7 @@ export default function ContactInquiryForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Zaid Khan"
+            suppressHydrationWarning
             className="w-full bg-obsidian border border-champagne-brass/25 px-4 py-3 text-sm text-porcelain placeholder-porcelain/35 focus:outline-none focus:border-champagne-brass transition-colors"
             required
           />
@@ -95,6 +96,7 @@ export default function ContactInquiryForm() {
               id="inquiry-type"
               value={inquiryType}
               onChange={(e) => setInquiryType(e.target.value)}
+              suppressHydrationWarning
               className="w-full bg-obsidian border border-champagne-brass/25 px-4 py-3 text-sm text-porcelain focus:outline-none focus:border-champagne-brass transition-colors appearance-none cursor-pointer pr-10"
             >
               {INQUIRY_TYPES.map((type) => (
@@ -125,6 +127,7 @@ export default function ContactInquiryForm() {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Tell us about the pieces you are interested in, special requests, or questions..."
+            suppressHydrationWarning
             className="w-full bg-obsidian border border-champagne-brass/25 px-4 py-3 text-sm text-porcelain placeholder-porcelain/35 focus:outline-none focus:border-champagne-brass transition-colors resize-y min-h-[100px]"
             required
           />
@@ -135,6 +138,7 @@ export default function ContactInquiryForm() {
           <Magnetic>
             <button
               type="submit"
+              suppressHydrationWarning
               className="w-full py-3.5 px-8 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200 flex items-center justify-center space-x-2"
             >
               <span>Send Inquiry via WhatsApp</span>

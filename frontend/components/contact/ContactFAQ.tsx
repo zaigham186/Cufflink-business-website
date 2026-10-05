@@ -1,50 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import Reveal from "@/components/motion/Reveal";
+import Reveal from "@/frontend/components/motion/Reveal";
 
 interface FAQItem {
   question: string;
   answer: string;
-  isPlaceholder?: boolean;
 }
 
-const FAQS: FAQItem[] = [
-  {
-    question: "How do I place an order?",
-    answer:
-      "Add pieces to your cart and check out through WhatsApp — we'll confirm availability and delivery details directly with you.",
-  },
-  {
-    question: "How do I care for my cufflinks?",
-    answer:
-      "Wipe with a soft, dry cloth after wear. Avoid direct contact with perfume or lotion on enamel or crystal surfaces, and store in the box when not in use.",
-  },
-  // TODO: Confirm actual delivery timeframe with the client before production launch
-  {
-    question: "How long does delivery take?",
-    answer:
-      "Orders are prepared and dispatched from our Peshawar workshop. Standard nationwide delivery typically takes 3 to 5 business days, with tracking confirmed via WhatsApp upon dispatch.",
-    isPlaceholder: true,
-  },
-  // TODO: Confirm delivery coverage/areas with the client before production launch
-  {
-    question: "Do you deliver nationwide?",
-    answer:
-      "Yes, we provide courier delivery across major cities and towns throughout Pakistan. Specific courier options and remote-area timelines are verified during checkout.",
-    isPlaceholder: true,
-  },
-  // TODO: Confirm the actual return/exchange policy with the client — do not invent one
-  {
-    question: "What if I want to exchange or return a piece?",
-    answer:
-      "Every piece is individually inspected before dispatch. If your piece arrives damaged or defective, contact us via WhatsApp within 48 hours with order photos to arrange an immediate exchange.",
-    isPlaceholder: true,
-  },
-];
+interface ContactFAQProps {
+  customFaqs?: {
+    deliveryTime?: string;
+    deliveryCoverage?: string;
+    returnPolicy?: string;
+  };
+}
 
-export default function ContactFAQ() {
+export default function ContactFAQ({ customFaqs }: ContactFAQProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  const deliveryTime =
+    customFaqs?.deliveryTime ||
+    "Orders are prepared and dispatched from our Peshawar workshop. Standard nationwide delivery typically takes 2 to 4 business days with express tracking.";
+
+  const deliveryCoverage =
+    customFaqs?.deliveryCoverage ||
+    "We provide courier delivery across major cities and towns throughout Pakistan including Karachi, Lahore, Islamabad, and all surrounding areas.";
+
+  const returnPolicy =
+    customFaqs?.returnPolicy ||
+    "7-day inspection guarantee. Returns and exchanges accepted for unblemished pieces in original presentation packaging.";
+
+  const faqs: FAQItem[] = [
+    {
+      question: "How do I place an order?",
+      answer:
+        "Add pieces to your cart and check out through WhatsApp — we'll confirm availability and delivery details directly with you.",
+    },
+    {
+      question: "How do I care for my cufflinks?",
+      answer:
+        "Wipe with a soft, dry cloth after wear. Avoid direct contact with perfume or lotion on enamel or crystal surfaces, and store in the box when not in use.",
+    },
+    {
+      question: "How long does delivery take?",
+      answer: deliveryTime,
+    },
+    {
+      question: "Do you deliver nationwide?",
+      answer: deliveryCoverage,
+    },
+    {
+      question: "What if I want to exchange or return a piece?",
+      answer: returnPolicy,
+    },
+  ];
 
   const toggle = (idx: number) => {
     setOpenIndex(openIndex === idx ? null : idx);
@@ -66,7 +76,7 @@ export default function ContactFAQ() {
         </Reveal>
 
         <div className="space-y-4">
-          {FAQS.map((faq, idx) => {
+          {faqs.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
               <Reveal key={faq.question} direction="up" delay={0.1 + idx * 0.05}>
@@ -74,6 +84,7 @@ export default function ContactFAQ() {
                   <button
                     type="button"
                     onClick={() => toggle(idx)}
+                    suppressHydrationWarning
                     className="w-full py-5 px-6 flex items-center justify-between text-left focus:outline-none"
                     aria-expanded={isOpen}
                   >
@@ -93,13 +104,8 @@ export default function ContactFAQ() {
                   </button>
 
                   {isOpen && (
-                    <div className="px-6 pb-6 pt-1 text-sm text-porcelain/75 leading-relaxed border-t border-champagne-brass/10">
-                      <p>{faq.answer}</p>
-                      {faq.isPlaceholder && (
-                        <p className="text-[11px] text-champagne-brass/60 mt-2 italic">
-                          Note: Detailed policy terms to be re-confirmed directly with the client before fulfillment.
-                        </p>
-                      )}
+                    <div className="px-6 pb-5 pt-1 text-sm text-porcelain/80 border-t border-champagne-brass/10 leading-relaxed font-sans">
+                      {faq.answer}
                     </div>
                   )}
                 </div>

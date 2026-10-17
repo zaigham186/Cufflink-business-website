@@ -4,7 +4,12 @@ import CollectionEditor from "@/components/admin/CollectionEditor";
 export const dynamic = "force-dynamic";
 
 export default async function AdminCollectionsPage() {
-  const collections = await collectionService.getCollections();
+  let collections: any[] = [];
+  try {
+    collections = await collectionService.getCollections();
+  } catch (e) {
+    console.error("Failed to fetch collections:", e);
+  }
 
   return (
     <div className="space-y-8 max-w-7xl">

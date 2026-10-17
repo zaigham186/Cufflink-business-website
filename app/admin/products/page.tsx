@@ -5,7 +5,12 @@ import ProductTable from "@/components/admin/ProductTable";
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const formattedProducts = await productService.getAllProducts();
+  let formattedProducts: any[] = [];
+  try {
+    formattedProducts = await productService.getAdminProducts();
+  } catch (e) {
+    console.error("Failed to fetch admin products:", e);
+  }
 
   return (
     <div className="space-y-8 max-w-7xl">

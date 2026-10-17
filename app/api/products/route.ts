@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { productService } from "@/lib/server/services/product.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { productSchema } from "@/lib/validations/product.schema";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -10,12 +13,14 @@ export async function GET(req: NextRequest) {
     const featured = searchParams.get("featured");
     const search = searchParams.get("search");
     const sort = searchParams.get("sort");
+    const isAdmin = await getAdminSession(req);
 
     const products = await productService.queryProducts({
       category,
       featured,
       search,
       sort,
+      includeUnpublished: isAdmin,
     });
 
     return NextResponse.json({ products });
@@ -39,6 +44,19 @@ export async function POST(req: NextRequest) {
     const result = await productService.createProduct(parsed.data);
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: result.status || 400 });
+    }
+
+    // Trigger Next.js on-demand route revalidation
+    try {
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/admin/products");
+      revalidatePath("/admin");
+      if (result.product?.slug) {
+        revalidatePath(`/product/${result.product.slug}`);
+      }
+    } catch (revalError) {
+      console.warn("revalidatePath notice:", revalError);
     }
 
     return NextResponse.json({ product: result.product }, { status: 201 });

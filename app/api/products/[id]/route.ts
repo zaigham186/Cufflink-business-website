@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { productService } from "@/lib/server/services/product.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { productUpdateSchema } from "@/lib/validations/product.schema";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   _req: NextRequest,
@@ -27,6 +30,7 @@ export async function PUT(
     if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
+    const existing = await productService.getProductById(id);
     const body = await req.json();
     const parsed = productUpdateSchema.safeParse(body);
     if (!parsed.success) {
@@ -36,6 +40,22 @@ export async function PUT(
     const result = await productService.updateProduct(id, parsed.data);
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: result.status || 400 });
+    }
+
+    // Trigger on-demand cache revalidation across public website and admin
+    try {
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/admin/products");
+      revalidatePath("/admin");
+      if (result.product?.slug) {
+        revalidatePath(`/product/${result.product.slug}`);
+      }
+      if (existing?.slug && existing.slug !== result.product?.slug) {
+        revalidatePath(`/product/${existing.slug}`);
+      }
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
     }
 
     return NextResponse.json({ product: result.product });
@@ -54,8 +74,23 @@ export async function DELETE(
     if (!isAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;
+    const existing = await productService.getProductById(id);
     const deleted = await productService.deleteProduct(id);
     if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    // Invalidate cached storefront pages so deleted product is immediately removed
+    try {
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/admin/products");
+      revalidatePath("/admin");
+      if (existing?.slug) {
+        revalidatePath(`/product/${existing.slug}`);
+      }
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("API DELETE /api/products/[id] error:", error);

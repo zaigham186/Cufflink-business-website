@@ -27,6 +27,9 @@ export interface IOrder extends Document {
   total: number;
   status: OrderStatus;
   courierTrackingNumber?: string;
+  courierProvider?: string;
+  dispatchedAt?: Date;
+  deliveredAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -67,6 +70,9 @@ const OrderSchema = new Schema<IOrder>(
       index: true,
     },
     courierTrackingNumber: { type: String, default: "" },
+    courierProvider: { type: String, default: "" },
+    dispatchedAt: { type: Date },
+    deliveredAt: { type: Date },
   },
   {
     timestamps: true,

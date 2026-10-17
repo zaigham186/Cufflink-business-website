@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
 
     const valid = await verifyPassword(password);
     if (!valid) {
+      console.warn(`[Admin Login] Invalid password attempt. Received length: ${(password || "").length}`);
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
@@ -23,7 +24,8 @@ export async function POST(req: NextRequest) {
       path: "/",
     });
     return response;
-  } catch {
+  } catch (error) {
+    console.error("admin-login POST error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

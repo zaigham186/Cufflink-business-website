@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/storefront/layout/Navbar";
-import Footer from "@/components/storefront/layout/Footer";
-import ScrollProgress from "@/components/motion/ScrollProgress";
-import PageTransition from "@/components/motion/PageTransition";
+import StorefrontChrome from "@/components/storefront/layout/StorefrontChrome";
 
 const playfairDisplay = Playfair_Display({
   subsets: ["latin"],
@@ -119,13 +116,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <ScrollProgress />
-        <PageTransition />
-        <Navbar />
-        <main id="main-content" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
+        <StorefrontChrome>{children}</StorefrontChrome>
       </body>
     </html>
   );

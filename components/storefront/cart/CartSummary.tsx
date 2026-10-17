@@ -12,21 +12,21 @@ export default function CartSummary() {
 
       <div className="space-y-3 text-sm text-porcelain">
         <div className="flex justify-between">
-          <span className="opacity-70">Subtotal</span>
-          <span className="font-medium">Rs. {subtotal.toLocaleString()}</span>
+          <span className="opacity-70">Items Subtotal</span>
+          <span className="font-medium font-mono">Rs. {subtotal.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
-          <span className="opacity-70">Shipping</span>
-          <span className="text-sm opacity-60">Calculated at checkout</span>
+          <span className="opacity-70">Nationwide Shipping</span>
+          <span className="font-medium text-champagne-brass font-mono">Rs. 180 (COD)</span>
         </div>
       </div>
 
       <div className="border-t border-champagne-brass/20 pt-4">
         <div className="flex justify-between text-lg font-medium text-porcelain">
           <span>Total</span>
-          <span className="text-champagne-brass">Rs. {subtotal.toLocaleString()}</span>
+          <span className="text-champagne-brass font-mono">Rs. {(subtotal + 180).toLocaleString()}</span>
         </div>
-        <p className="text-xs text-porcelain/50 mt-2">Final total calculated at checkout</p>
+        <p className="text-xs text-porcelain/50 mt-1">Flat rate express delivery across Pakistan</p>
       </div>
 
       <Button href="/checkout" variant="primary" className="w-full">

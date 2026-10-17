@@ -32,12 +32,13 @@ export default function ProductForm({ product }: ProductFormProps) {
     pattern: product?.pattern || "",
     isSet: Boolean(product?.isSet),
     pairsCount: product?.pairsCount || 1,
-    stock: (product?.stockStatus as any) || "in-stock",
-    stockCount: typeof product?.stockCount === "number" ? product.stockCount : 10,
+    stock: (product?.stockStatus as any) || (typeof product?.stockCount === "number" && product.stockCount === 0 ? "out-of-stock" : "in-stock"),
+    stockCount: typeof product?.stockCount === "number" ? product.stockCount : 0,
     sku: product?.sku || "",
     featured: Boolean(product?.featured),
     isNew: Boolean(product?.isNew),
     isLimited: Boolean(product?.isLimited),
+    isPublished: product?.isPublished !== false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -89,10 +90,12 @@ export default function ProductForm({ product }: ProductFormProps) {
       const payload = {
         ...formData,
         price: Number(formData.price),
-        salePrice: formData.salePrice ? Number(formData.salePrice) : undefined,
-        compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : undefined,
+        salePrice: formData.salePrice ? Number(formData.salePrice) : null,
+        compareAtPrice: formData.compareAtPrice ? Number(formData.compareAtPrice) : null,
         stockCount: Number(formData.stockCount),
         pairsCount: Number(formData.pairsCount),
+        shape: formData.shape?.trim() || null,
+        isPublished: Boolean(formData.isPublished),
       };
 
       const res = await fetch(url, {
@@ -118,13 +121,13 @@ export default function ProductForm({ product }: ProductFormProps) {
       }
 
       setSuccessMessage(
-        isEditing ? "Product successfully updated!" : "New product created successfully!"
+        isEditing ? "Product updated successfully." : "Product created successfully."
       );
 
       setTimeout(() => {
         router.push("/admin/products");
         router.refresh();
-      }, 1200);
+      }, 1000);
     } catch {
       setErrors({ general: "A network error occurred. Please try again." });
       setLoading(false);
@@ -509,6 +512,41 @@ export default function ProductForm({ product }: ProductFormProps) {
               <span className="text-[10px] text-porcelain/50">Displays rarity badge</span>
             </div>
           </label>
+        </div>
+      </div>
+
+      {/* 06. Publication & Storefront Visibility */}
+      <div className="bg-white/5 border border-champagne-brass/20 p-6 space-y-4">
+        <h2 className="text-sm font-display text-champagne-brass uppercase tracking-widest border-b border-white/10 pb-3">
+          Catalog Publication Status
+        </h2>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-black/30 border border-white/5">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${formData.isPublished ? "bg-emerald-400" : "bg-amber-400"}`} />
+              <span className="text-sm font-medium text-porcelain">
+                {formData.isPublished ? "Active on Public Storefront" : "Saved as Draft (Hidden)"}
+              </span>
+            </div>
+            <p className="text-xs text-porcelain/60 mt-1">
+              {formData.isPublished
+                ? "This product is publicly visible and available for clients to browse and order."
+                : "This product is hidden from customer browsing and can only be seen in the admin panel."}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setFormData((prev) => ({ ...prev, isPublished: !prev.isPublished }))}
+            className={`px-4 py-2 text-xs uppercase tracking-wider font-medium border transition-colors shrink-0 ${
+              formData.isPublished
+                ? "bg-emerald-950/40 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900/60"
+                : "bg-amber-950/40 text-amber-300 border-amber-500/40 hover:bg-amber-900/60"
+            }`}
+          >
+            {formData.isPublished ? "Deactivate / Unpublish" : "Publish to Storefront"}
+          </button>
         </div>
       </div>
 

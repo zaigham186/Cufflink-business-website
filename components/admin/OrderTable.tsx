@@ -3,11 +3,22 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { IOrder, OrderStatus } from "@/types/order";
+import type { OrderStatus } from "@/types/order";
 
 interface OrderTableProps {
   initialOrders: any[];
 }
+
+const COURIER_OPTIONS = [
+  "TCS Express",
+  "Leopards Courier",
+  "Trax Logistics",
+  "Call Courier",
+  "PostEx",
+  "M&P Express",
+  "Rider Delivery",
+  "Workshop Direct Delivery",
+];
 
 export default function OrderTable({ initialOrders }: OrderTableProps) {
   const [orders, setOrders] = useState<any[]>(initialOrders);
@@ -16,11 +27,19 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [trackingInputs, setTrackingInputs] = useState<Record<string, string>>({});
+  const [providerInputs, setProviderInputs] = useState<Record<string, string>>({});
   const [savingTrackingId, setSavingTrackingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  // Status counters
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Status counts
   const counts = {
     all: orders.length,
     pending: orders.filter((o) => o.status === "pending").length,
@@ -48,6 +67,7 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     try {
       setUpdatingId(orderId);
+      setActionError(null);
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -55,58 +75,69 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const updated = data.order;
         setOrders((prev) =>
           prev.map((o) =>
             o.orderId === orderId || o._id === orderId
-              ? { ...o, status: newStatus }
+              ? { ...o, ...updated, status: newStatus }
               : o
           )
         );
         if (selectedOrder && (selectedOrder.orderId === orderId || selectedOrder._id === orderId)) {
-          setSelectedOrder((prev: any) => ({ ...prev, status: newStatus }));
+          setSelectedOrder((prev: any) => ({ ...prev, ...updated, status: newStatus }));
         }
+        showToast("Order status updated successfully.");
       } else {
-        alert("Failed to update status on server.");
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || "Unable to save status change. Please try again.");
       }
-    } catch (err) {
-      console.error("Status update error:", err);
-      alert("Network error updating status.");
+    } catch {
+      setActionError("Network error updating order status.");
     } finally {
       setUpdatingId(null);
     }
   };
 
-  // Handle tracking number update
-  const handleSaveTracking = async (orderId: string) => {
+  // Handle tracking & provider update
+  const handleSaveDispatchInfo = async (orderId: string) => {
     const tracking = trackingInputs[orderId];
-    if (tracking === undefined) return;
+    const provider = providerInputs[orderId];
 
     try {
       setSavingTrackingId(orderId);
+      setActionError(null);
+
+      const body: Record<string, any> = {};
+      if (tracking !== undefined) body.courierTrackingNumber = tracking;
+      if (provider !== undefined) body.courierProvider = provider;
+
       const res = await fetch(`/api/orders/${orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courierTrackingNumber: tracking }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const updated = data.order;
         setOrders((prev) =>
           prev.map((o) =>
             o.orderId === orderId || o._id === orderId
-              ? { ...o, courierTrackingNumber: tracking }
+              ? { ...o, ...updated }
               : o
           )
         );
         if (selectedOrder && (selectedOrder.orderId === orderId || selectedOrder._id === orderId)) {
-          setSelectedOrder((prev: any) => ({ ...prev, courierTrackingNumber: tracking }));
+          setSelectedOrder((prev: any) => ({ ...prev, ...updated }));
         }
-        alert("Courier tracking code updated.");
+        showToast("Dispatch information saved successfully.");
       } else {
-        alert("Failed to save tracking.");
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || "Unable to save dispatch details.");
       }
-    } catch (err) {
-      console.error("Save tracking error:", err);
-      alert("Network error updating tracking.");
+    } catch {
+      setActionError("Network error updating dispatch information.");
     } finally {
       setSavingTrackingId(null);
     }
@@ -118,6 +149,7 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
 
     try {
       setIsDeleting(true);
+      setActionError(null);
       const res = await fetch(`/api/orders/${deleteTarget.orderId || deleteTarget._id}`, {
         method: "DELETE",
       });
@@ -133,12 +165,13 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
           setSelectedOrder(null);
         }
         setDeleteTarget(null);
+        showToast("Order removed from registry.");
       } else {
-        alert("Failed to delete order from registry.");
+        const data = await res.json().catch(() => ({}));
+        setActionError(data.error || "Unable to delete order.");
       }
-    } catch (err) {
-      console.error("Delete order error:", err);
-      alert("Network error deleting order.");
+    } catch {
+      setActionError("Network error deleting order.");
     } finally {
       setIsDeleting(false);
     }
@@ -157,60 +190,58 @@ export default function OrderTable({ initialOrders }: OrderTableProps) {
       ?.map((it: any) => `• ${it.name} (x${it.quantity}) - Rs. ${(it.price * it.quantity).toLocaleString()}`)
       .join("\n");
 
-    const message = `*CUFFKINGS ATELIER — ORDER UPDATE*
+    const message = `*CUFFKINGS ATELIER — ORDER STATUS*
 Order ID: #${order.orderId}
 Dear ${order.customerName},
 
-Thank you for your order with Cuffkings.
-*Order Status:* ${(order.status || "PENDING").toUpperCase()}
-${order.courierTrackingNumber ? `*Courier Tracking:* ${order.courierTrackingNumber}\n` : ""}
+*Status:* ${(order.status || "PENDING").toUpperCase()}
+${order.courierProvider ? `*Courier:* ${order.courierProvider}\n` : ""}${order.courierTrackingNumber ? `*Tracking Number:* ${order.courierTrackingNumber}\n` : ""}
 *Items Ordered:*
 ${itemsSummary}
 
-*Total Payable:* Rs. ${order.total?.toLocaleString()} (${order.paymentMethod || "Cash on Delivery"})
-*Delivery Destination:* ${order.city}
+*Payable Total:* Rs. ${order.total?.toLocaleString()} (${order.paymentMethod || "Cash on Delivery"})
+*Delivery Destination:* ${order.address}, ${order.city}
 
-If you have any questions or require custom assistance, our atelier team is at your disposal.`;
+Thank you for choosing CuffKings. Our Peshawar workshop is at your service.`;
 
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
 
-  // Status Badge Helper
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "pending":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-amber-950/40 text-amber-300 border border-amber-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-amber-950/60 text-amber-300 border border-amber-800/60">
             Pending
           </span>
         );
       case "confirmed":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-blue-950/40 text-blue-300 border border-blue-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-blue-950/60 text-blue-300 border border-blue-800/60">
             Confirmed
           </span>
         );
       case "dispatched":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-purple-950/40 text-purple-300 border border-purple-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-purple-950/60 text-purple-300 border border-purple-800/60">
             Dispatched
           </span>
         );
       case "delivered":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-950/40 text-emerald-300 border border-emerald-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
             Delivered
           </span>
         );
       case "cancelled":
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-red-950/40 text-red-300 border border-red-800/40">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-rose-950/60 text-rose-300 border border-rose-800/60">
             Cancelled
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center px-2 py-0.5 text-[9px] sm:text-[10px] font-medium uppercase tracking-wider bg-white/10 text-porcelain/60">
+          <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider bg-white/10 text-porcelain/60">
             {status}
           </span>
         );
@@ -219,12 +250,37 @@ If you have any questions or require custom assistance, our atelier team is at y
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      {/* Top Filter Bar (Responsive Flex / Horizontal Scroll) */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 bg-white/5 border border-champagne-brass/20 p-3 sm:p-4">
-        {/* Status Tabs (Horizontally scrollable on mobile) */}
+      {/* Toast Feedback */}
+      {toastMessage && (
+        <div className="p-3 bg-emerald-950/70 border border-emerald-500/50 text-emerald-200 text-xs flex items-center justify-between shadow-lg">
+          <span className="font-medium">✓ {toastMessage}</span>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-emerald-400 hover:text-emerald-200 text-sm ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {actionError && (
+        <div className="p-3 bg-rose-950/70 border border-rose-600/60 text-rose-200 text-xs flex items-center justify-between shadow-lg">
+          <span>✕ {actionError}</span>
+          <button
+            onClick={() => setActionError(null)}
+            className="text-rose-400 hover:text-rose-200 text-sm ml-4"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Filter and Search Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 bg-[#101217] border border-white/10 p-3 sm:p-4">
+        {/* Status Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
           {[
-            { id: "all", label: "All", count: counts.all },
+            { id: "all", label: "All Orders", count: counts.all },
             { id: "pending", label: "Pending", count: counts.pending },
             { id: "confirmed", label: "Confirmed", count: counts.confirmed },
             { id: "dispatched", label: "Dispatched", count: counts.dispatched },
@@ -234,18 +290,18 @@ If you have any questions or require custom assistance, our atelier team is at y
             <button
               key={tab.id}
               onClick={() => setSelectedStatus(tab.id)}
-              className={`px-2.5 sm:px-3 py-1.5 text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 shrink-0 whitespace-nowrap ${
+              className={`px-3 py-1.5 text-xs uppercase tracking-wider transition-all duration-150 flex items-center gap-1.5 shrink-0 whitespace-nowrap border ${
                 selectedStatus === tab.id
-                  ? "bg-champagne-brass text-obsidian font-medium shadow"
-                  : "text-porcelain/70 hover:text-porcelain hover:bg-white/5"
+                  ? "bg-champagne-brass text-obsidian border-champagne-brass font-medium shadow"
+                  : "border-white/10 text-porcelain/70 hover:text-porcelain hover:bg-white/5"
               }`}
             >
               <span>{tab.label}</span>
               <span
-                className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                   selectedStatus === tab.id
                     ? "bg-obsidian/20 text-obsidian"
-                    : "bg-white/10 text-porcelain/50"
+                    : "bg-white/10 text-porcelain/60"
                 }`}
               >
                 {tab.count}
@@ -260,8 +316,8 @@ If you have any questions or require custom assistance, our atelier team is at y
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search Order #, customer, city..."
-            className="w-full px-3.5 py-2 bg-obsidian border border-champagne-brass/20 text-porcelain text-xs focus:outline-none focus:border-champagne-brass placeholder-porcelain/40"
+            placeholder="Search Order #, customer, phone..."
+            className="w-full px-3.5 py-2 bg-black/40 border border-white/10 text-porcelain text-xs focus:outline-none focus:border-champagne-brass placeholder-porcelain/40"
           />
         </div>
       </div>
@@ -269,8 +325,9 @@ If you have any questions or require custom assistance, our atelier team is at y
       {/* MOBILE ORDER CARDS (< 768px) */}
       <div className="block md:hidden space-y-3">
         {filteredOrders.length === 0 ? (
-          <div className="p-8 text-center text-porcelain/40 bg-white/5 border border-white/10 text-xs">
-            No orders match the selected criteria.
+          <div className="p-8 text-center text-porcelain/50 bg-[#101217] border border-white/10 text-xs space-y-1">
+            <p className="font-medium text-porcelain">No orders match the selected criteria.</p>
+            <p className="text-[11px] text-porcelain/40">Genuine customer orders from WhatsApp checkout will appear here.</p>
           </div>
         ) : (
           filteredOrders.map((order) => {
@@ -279,12 +336,17 @@ If you have any questions or require custom assistance, our atelier team is at y
                 ? trackingInputs[order.orderId]
                 : order.courierTrackingNumber || "";
 
+            const currentProvider =
+              providerInputs[order.orderId] !== undefined
+                ? providerInputs[order.orderId]
+                : order.courierProvider || "";
+
             return (
               <div
                 key={order._id || order.orderId}
-                className="bg-white/5 border border-white/10 p-3.5 space-y-3"
+                className="bg-[#101217] border border-white/10 p-3.5 space-y-3"
               >
-                {/* Order Top Line: Ref & Date & Price */}
+                {/* Header */}
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
@@ -301,12 +363,12 @@ If you have any questions or require custom assistance, our atelier team is at y
                             hour: "2-digit",
                             minute: "2-digit",
                           })
-                        : "Atelier Desk"}
+                        : "Registered Order"}
                     </p>
                   </div>
 
                   <div className="text-right">
-                    <span className="font-mono font-semibold text-champagne-brass text-xs">
+                    <span className="font-mono font-semibold text-porcelain text-xs">
                       Rs. {order.total?.toLocaleString()}
                     </span>
                     <span className="block text-[10px] text-porcelain/40">
@@ -324,9 +386,12 @@ If you have any questions or require custom assistance, our atelier team is at y
                   <div className="text-[11px] font-mono text-champagne-brass">
                     {order.phone}
                   </div>
+                  <div className="text-[10px] text-porcelain/50 truncate">
+                    {order.address}
+                  </div>
                 </div>
 
-                {/* Items preview */}
+                {/* Items */}
                 <div className="flex items-center space-x-2">
                   {order.items?.slice(0, 3).map((it: any, i: number) => (
                     <div
@@ -354,7 +419,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                   </p>
                 </div>
 
-                {/* Status selector & tracking */}
+                {/* Status & Courier */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-white/5">
                   <div>
                     <label className="block text-[9px] uppercase tracking-wider text-porcelain/50 mb-1">
@@ -366,7 +431,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                       onChange={(e) =>
                         handleStatusChange(order.orderId, e.target.value as OrderStatus)
                       }
-                      className="w-full bg-obsidian border border-champagne-brass/30 text-porcelain text-xs px-2.5 py-1.5 focus:outline-none focus:border-champagne-brass"
+                      className="w-full bg-obsidian border border-white/15 text-porcelain text-xs px-2.5 py-1.5 focus:outline-none focus:border-champagne-brass"
                     >
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>
@@ -378,7 +443,7 @@ If you have any questions or require custom assistance, our atelier team is at y
 
                   <div>
                     <label className="block text-[9px] uppercase tracking-wider text-porcelain/50 mb-1">
-                      Tracking
+                      Courier & Tracking
                     </label>
                     <div className="flex items-center gap-1.5">
                       <input
@@ -391,18 +456,17 @@ If you have any questions or require custom assistance, our atelier team is at y
                             [order.orderId]: e.target.value,
                           }))
                         }
-                        className="flex-1 px-2.5 py-1.5 bg-obsidian border border-white/10 text-porcelain text-xs font-mono"
+                        className="flex-1 px-2.5 py-1.5 bg-obsidian border border-white/15 text-porcelain text-xs font-mono"
                       />
-                      {trackingInputs[order.orderId] !== undefined &&
-                        trackingInputs[order.orderId] !== (order.courierTrackingNumber || "") && (
-                          <button
-                            onClick={() => handleSaveTracking(order.orderId)}
-                            disabled={savingTrackingId === order.orderId}
-                            className="px-2.5 py-1.5 bg-champagne-brass text-obsidian text-xs uppercase font-medium"
-                          >
-                            Save
-                          </button>
-                        )}
+                      {(trackingInputs[order.orderId] !== undefined || providerInputs[order.orderId] !== undefined) && (
+                        <button
+                          onClick={() => handleSaveDispatchInfo(order.orderId)}
+                          disabled={savingTrackingId === order.orderId}
+                          className="px-2.5 py-1.5 bg-champagne-brass text-obsidian text-xs uppercase font-medium"
+                        >
+                          Save
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -421,13 +485,13 @@ If you have any questions or require custom assistance, our atelier team is at y
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      className="px-2.5 py-1.5 bg-white/5 border border-champagne-brass/20 text-champagne-brass hover:bg-champagne-brass/10 text-[11px] uppercase tracking-wider font-medium"
+                      className="px-2.5 py-1.5 bg-white/5 border border-white/15 text-porcelain hover:bg-white/10 text-[11px] uppercase tracking-wider font-medium"
                     >
                       Details
                     </button>
                     <button
                       onClick={() => setDeleteTarget(order)}
-                      className="px-2.5 py-1.5 bg-deep-wine/20 border border-deep-wine/40 text-red-300 hover:bg-deep-wine/40 text-[11px] uppercase tracking-wider font-medium"
+                      className="px-2.5 py-1.5 bg-rose-950/40 border border-rose-800/40 text-rose-300 hover:bg-rose-900/60 text-[11px] uppercase tracking-wider font-medium"
                     >
                       Delete
                     </button>
@@ -440,16 +504,16 @@ If you have any questions or require custom assistance, our atelier team is at y
       </div>
 
       {/* DESKTOP/TABLET TABLE VIEW (>= 768px) */}
-      <div className="hidden md:block bg-white/5 border border-champagne-brass/20 overflow-hidden">
+      <div className="hidden md:block bg-[#101217] border border-white/10 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs min-w-[760px]">
             <thead>
-              <tr className="border-b border-champagne-brass/20 bg-black/40 text-champagne-brass uppercase tracking-widest font-sans">
+              <tr className="border-b border-white/10 bg-black/40 text-champagne-brass uppercase tracking-widest font-sans">
                 <th className="py-3.5 px-4 font-medium">Order Ref</th>
-                <th className="py-3.5 px-4 font-medium">Customer & City</th>
-                <th className="py-3.5 px-4 font-medium">Pieces Ordered</th>
-                <th className="py-3.5 px-4 font-medium">Total (PKR)</th>
-                <th className="py-3.5 px-4 font-medium">Status</th>
+                <th className="py-3.5 px-4 font-medium">Customer & Destination</th>
+                <th className="py-3.5 px-4 font-medium">Items</th>
+                <th className="py-3.5 px-4 font-medium">Amount</th>
+                <th className="py-3.5 px-4 font-medium">Order Status</th>
                 <th className="py-3.5 px-4 font-medium">Courier Tracking</th>
                 <th className="py-3.5 px-4 font-medium text-right">Actions</th>
               </tr>
@@ -458,9 +522,11 @@ If you have any questions or require custom assistance, our atelier team is at y
               {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center text-porcelain/40">
-                    <p className="text-sm font-display mb-1">No orders found</p>
+                    <p className="text-sm font-display mb-1 text-porcelain/70">No orders recorded</p>
                     <p className="text-xs">
-                      {search ? "No orders match your search query." : "No orders in this status category."}
+                      {search
+                        ? "No orders match your search query."
+                        : "No orders in this status category. Live customer orders from WhatsApp checkout will appear here."}
                     </p>
                   </td>
                 </tr>
@@ -470,6 +536,15 @@ If you have any questions or require custom assistance, our atelier team is at y
                     trackingInputs[order.orderId] !== undefined
                       ? trackingInputs[order.orderId]
                       : order.courierTrackingNumber || "";
+
+                  const currentProvider =
+                    providerInputs[order.orderId] !== undefined
+                      ? providerInputs[order.orderId]
+                      : order.courierProvider || "";
+
+                  const hasDispatchPendingSave =
+                    (trackingInputs[order.orderId] !== undefined && trackingInputs[order.orderId] !== (order.courierTrackingNumber || "")) ||
+                    (providerInputs[order.orderId] !== undefined && providerInputs[order.orderId] !== (order.courierProvider || ""));
 
                   return (
                     <tr
@@ -482,7 +557,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                           <span className="text-champagne-brass">#</span>
                           {order.orderId}
                         </div>
-                        <div className="text-[10px] text-porcelain/40 mt-0.5">
+                        <div className="text-[10px] text-porcelain/40 mt-0.5 font-mono">
                           {order.createdAt
                             ? new Date(order.createdAt).toLocaleDateString("en-PK", {
                                 day: "numeric",
@@ -490,7 +565,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })
-                            : "Atelier Desk"}
+                            : "Registered"}
                         </div>
                       </td>
 
@@ -502,7 +577,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                         <div className="text-[11px] text-porcelain/60 flex items-center gap-1 font-mono">
                           <span>{order.city}</span>
                           <span>•</span>
-                          <span>{order.phone}</span>
+                          <span className="text-champagne-brass">{order.phone}</span>
                         </div>
                       </td>
 
@@ -533,7 +608,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                           ))}
                           {order.items?.length > 3 && (
                             <span className="text-[10px] text-porcelain/50 font-mono">
-                              +{order.items.length - 3} more
+                              +{order.items.length - 3}
                             </span>
                           )}
                         </div>
@@ -561,7 +636,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                             onChange={(e) =>
                               handleStatusChange(order.orderId, e.target.value as OrderStatus)
                             }
-                            className="bg-obsidian border border-champagne-brass/30 text-porcelain text-[11px] px-2 py-1 focus:outline-none focus:border-champagne-brass cursor-pointer"
+                            className="bg-obsidian border border-white/15 text-porcelain text-[11px] px-2 py-1 focus:outline-none focus:border-champagne-brass cursor-pointer"
                           >
                             <option value="pending">Pending Confirmation</option>
                             <option value="confirmed">Confirmed / Packing</option>
@@ -572,31 +647,37 @@ If you have any questions or require custom assistance, our atelier team is at y
                         </div>
                       </td>
 
-                      {/* Courier Tracking Input */}
+                      {/* Courier Tracking */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="text"
-                            placeholder="e.g. TCS-94812"
-                            value={currentTracking}
-                            onChange={(e) =>
-                              setTrackingInputs((prev) => ({
-                                ...prev,
-                                [order.orderId]: e.target.value,
-                              }))
-                            }
-                            className="w-28 px-2 py-1 bg-obsidian border border-white/10 text-porcelain text-[11px] font-mono focus:outline-none focus:border-champagne-brass"
-                          />
-                          {trackingInputs[order.orderId] !== undefined &&
-                            trackingInputs[order.orderId] !== (order.courierTrackingNumber || "") && (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              placeholder="Tracking #"
+                              value={currentTracking}
+                              onChange={(e) =>
+                                setTrackingInputs((prev) => ({
+                                  ...prev,
+                                  [order.orderId]: e.target.value,
+                                }))
+                              }
+                              className="w-28 px-2 py-1 bg-obsidian border border-white/10 text-porcelain text-[11px] font-mono focus:outline-none focus:border-champagne-brass"
+                            />
+                            {hasDispatchPendingSave && (
                               <button
-                                onClick={() => handleSaveTracking(order.orderId)}
+                                onClick={() => handleSaveDispatchInfo(order.orderId)}
                                 disabled={savingTrackingId === order.orderId}
                                 className="px-2 py-1 bg-champagne-brass text-obsidian text-[10px] uppercase font-medium hover:bg-champagne-brass/80 transition-colors"
                               >
                                 {savingTrackingId === order.orderId ? "..." : "Save"}
                               </button>
                             )}
+                          </div>
+                          {order.courierProvider && (
+                            <span className="text-[10px] text-porcelain/40 block font-mono">
+                              via {order.courierProvider}
+                            </span>
+                          )}
                         </div>
                       </td>
 
@@ -616,7 +697,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                         {/* View Details */}
                         <button
                           onClick={() => setSelectedOrder(order)}
-                          className="px-2 py-1 bg-white/5 border border-champagne-brass/20 text-champagne-brass hover:bg-champagne-brass/10 transition-colors text-[10px] uppercase tracking-wider"
+                          className="px-2 py-1 bg-white/5 border border-white/15 text-porcelain hover:bg-white/10 transition-colors text-[10px] uppercase tracking-wider"
                         >
                           Details
                         </button>
@@ -624,7 +705,7 @@ If you have any questions or require custom assistance, our atelier team is at y
                         {/* Delete */}
                         <button
                           onClick={() => setDeleteTarget(order)}
-                          className="px-2 py-1 bg-deep-wine/20 border border-deep-wine/40 text-red-300 hover:bg-deep-wine/40 transition-colors text-[10px] uppercase tracking-wider"
+                          className="px-2 py-1 bg-rose-950/40 border border-rose-800/40 text-rose-300 hover:bg-rose-900/60 transition-colors text-[10px] uppercase tracking-wider"
                         >
                           Delete
                         </button>
@@ -638,188 +719,214 @@ If you have any questions or require custom assistance, our atelier team is at y
         </div>
       </div>
 
-      {/* Order Details Drawer / Modal (Fully Responsive) */}
+      {/* Order Details Drawer / Modal */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-          <div className="bg-[#121318] border border-champagne-brass/30 p-4 sm:p-6 lg:p-8 max-w-2xl w-full max-h-[92vh] overflow-y-auto space-y-5 sm:space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-champagne-brass/20 pb-3 sm:pb-4">
+          <div className="bg-[#121318] border border-white/15 p-4 sm:p-6 lg:p-8 max-w-2xl w-full max-h-[92vh] overflow-y-auto space-y-5 sm:space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
               <div>
                 <h3 className="text-lg sm:text-xl font-display text-porcelain flex items-center gap-2">
                   <span>Order Reference</span>
                   <span className="text-champagne-brass font-mono">#{selectedOrder.orderId}</span>
                 </h3>
-                <p className="text-[11px] sm:text-xs text-porcelain/50 mt-0.5">
-                  Placed on {new Date(selectedOrder.createdAt).toLocaleString("en-PK")}
+                <p className="text-xs text-porcelain/50 mt-0.5">
+                  Placed on {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleString("en-PK") : "N/A"}
                 </p>
               </div>
+
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-porcelain/60 hover:text-porcelain text-xl p-1"
-                aria-label="Close modal"
+                className="text-porcelain/60 hover:text-porcelain p-1 text-lg"
               >
                 ✕
               </button>
             </div>
 
-            {/* Status and Summary Header */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 sm:p-4 bg-white/5 border border-white/5 text-xs">
-              <div>
-                <span className="text-[10px] uppercase text-champagne-brass block">Status</span>
-                <span className="text-xs font-medium text-porcelain capitalize mt-1 block">
-                  {selectedOrder.status}
+            {/* Customer & Address Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-black/30 border border-white/5 text-xs">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-champagne-brass font-sans block">
+                  Customer Information
                 </span>
+                <p className="font-medium text-porcelain text-sm">{selectedOrder.customerName}</p>
+                <p className="font-mono text-champagne-brass">{selectedOrder.phone}</p>
+                <p className="text-porcelain/60">Payment: {selectedOrder.paymentMethod || "Cash on Delivery (COD)"}</p>
               </div>
-              <div>
-                <span className="text-[10px] uppercase text-champagne-brass block">Payment</span>
-                <span className="text-xs text-porcelain mt-1 block">
-                  {selectedOrder.paymentMethod || "COD"}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase text-champagne-brass block">Destination</span>
-                <span className="text-xs text-porcelain mt-1 block font-medium truncate">
-                  {selectedOrder.city}
-                </span>
-              </div>
-              <div>
-                <span className="text-[10px] uppercase text-champagne-brass block">Total</span>
-                <span className="text-xs font-mono font-medium text-champagne-brass mt-1 block">
-                  Rs. {selectedOrder.total?.toLocaleString()}
-                </span>
-              </div>
-            </div>
 
-            {/* Customer Details */}
-            <div className="space-y-3">
-              <h4 className="text-xs uppercase tracking-widest text-champagne-brass font-sans">
-                Customer Delivery Information
-              </h4>
-              <div className="p-3.5 sm:p-4 bg-black/40 border border-white/10 space-y-2 text-xs text-porcelain/80">
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
-                  <span className="text-porcelain/40">Full Name:</span>
-                  <span className="font-medium text-porcelain">{selectedOrder.customerName}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
-                  <span className="text-porcelain/40">Phone / WhatsApp:</span>
-                  <span className="font-mono text-champagne-brass">{selectedOrder.phone}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
-                  <span className="text-porcelain/40">City:</span>
-                  <span className="text-porcelain">{selectedOrder.city}</span>
-                </div>
-                <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2">
-                  <span className="text-porcelain/40 shrink-0">Shipping Address:</span>
-                  <span className="sm:text-right max-w-sm text-porcelain break-words">{selectedOrder.address}</span>
-                </div>
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase tracking-wider text-champagne-brass font-sans block">
+                  Delivery Destination
+                </span>
+                <p className="text-porcelain">{selectedOrder.address}</p>
+                <p className="font-medium text-porcelain font-mono">{selectedOrder.city}</p>
                 {selectedOrder.notes && (
-                  <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5 sm:gap-2 pt-2 border-t border-white/5">
-                    <span className="text-porcelain/40 shrink-0">Client Special Notes:</span>
-                    <span className="sm:text-right text-amber-200/90 italic max-w-sm break-words">
-                      &quot;{selectedOrder.notes}&quot;
-                    </span>
-                  </div>
-                )}
-                {selectedOrder.courierTrackingNumber && (
-                  <div className="flex justify-between pt-2 border-t border-white/5">
-                    <span className="text-porcelain/40">Courier Tracking Code:</span>
-                    <span className="font-mono text-purple-300">
-                      {selectedOrder.courierTrackingNumber}
-                    </span>
-                  </div>
+                  <p className="text-amber-200/80 italic pt-1 border-t border-white/5">
+                    &ldquo;{selectedOrder.notes}&rdquo;
+                  </p>
                 )}
               </div>
             </div>
 
-            {/* Items Ordered List */}
+            {/* Dispatch & Courier Configuration in Modal */}
+            <div className="p-4 bg-black/40 border border-white/5 space-y-3">
+              <span className="text-[10px] uppercase tracking-wider text-champagne-brass font-sans block">
+                Fulfillment & Dispatch Details
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="block text-[10px] text-porcelain/60 mb-1">Courier Service</label>
+                  <select
+                    value={
+                      providerInputs[selectedOrder.orderId] !== undefined
+                        ? providerInputs[selectedOrder.orderId]
+                        : selectedOrder.courierProvider || ""
+                    }
+                    onChange={(e) =>
+                      setProviderInputs((prev) => ({
+                        ...prev,
+                        [selectedOrder.orderId]: e.target.value,
+                      }))
+                    }
+                    className="w-full bg-obsidian border border-white/10 text-porcelain px-2.5 py-1.5 focus:border-champagne-brass"
+                  >
+                    <option value="">Select Courier...</option>
+                    {COURIER_OPTIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-porcelain/60 mb-1">Tracking Code</label>
+                  <input
+                    type="text"
+                    value={
+                      trackingInputs[selectedOrder.orderId] !== undefined
+                        ? trackingInputs[selectedOrder.orderId]
+                        : selectedOrder.courierTrackingNumber || ""
+                    }
+                    onChange={(e) =>
+                      setTrackingInputs((prev) => ({
+                        ...prev,
+                        [selectedOrder.orderId]: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. TCS-924185012PK"
+                    className="w-full bg-obsidian border border-white/10 text-porcelain px-2.5 py-1.5 font-mono focus:border-champagne-brass"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleSaveDispatchInfo(selectedOrder.orderId)}
+                  disabled={savingTrackingId === selectedOrder.orderId}
+                  className="px-4 py-1.5 bg-champagne-brass text-obsidian text-xs uppercase font-medium hover:bg-champagne-brass/90"
+                >
+                  {savingTrackingId === selectedOrder.orderId ? "Saving..." : "Update Dispatch Details"}
+                </button>
+              </div>
+            </div>
+
+            {/* Ordered Pieces */}
             <div className="space-y-3">
-              <h4 className="text-xs uppercase tracking-widest text-champagne-brass font-sans">
-                Bespoke Items ({selectedOrder.items?.length || 0})
-              </h4>
-              <div className="divide-y divide-white/5 border border-white/10 bg-black/40">
-                {selectedOrder.items?.map((it: any, index: number) => (
-                  <div key={index} className="p-3 flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center space-x-3 min-w-0">
-                      <div className="relative w-10 h-10 sm:w-12 sm:h-12 bg-black/60 border border-white/10 shrink-0">
-                        {it.image && (
+              <span className="text-[10px] uppercase tracking-wider text-champagne-brass font-sans block">
+                Ordered Pieces ({selectedOrder.items?.length || 0})
+              </span>
+              <div className="divide-y divide-white/5 border border-white/5">
+                {selectedOrder.items?.map((item: any, idx: number) => (
+                  <div key={idx} className="p-3 flex items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 relative bg-black border border-white/10 shrink-0 overflow-hidden">
+                        {item.image ? (
                           <Image
-                            src={it.image}
-                            alt={it.name}
+                            src={item.image}
+                            alt={item.name}
                             fill
-                            sizes="48px"
                             className="object-cover"
-                            unoptimized={it.image.startsWith("http") || it.image.startsWith("data:")}
+                            unoptimized={item.image.startsWith("http") || item.image.startsWith("data:")}
                           />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-porcelain/30">
+                            CK
+                          </div>
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-medium text-porcelain truncate">{it.name}</p>
-                        <p className="text-[10px] text-porcelain/50">
-                          Qty: {it.quantity} • Unit: Rs. {it.price?.toLocaleString()}
+                      <div>
+                        <p className="font-medium text-porcelain">{item.name}</p>
+                        {item.material && (
+                          <p className="text-[10px] text-porcelain/50">{item.material}</p>
+                        )}
+                        <p className="text-[11px] text-porcelain/60 font-mono mt-0.5">
+                          Qty: {item.quantity} × Rs. {item.price?.toLocaleString()}
                         </p>
                       </div>
                     </div>
-                    <span className="font-mono text-porcelain font-medium shrink-0">
-                      Rs. {(it.price * it.quantity).toLocaleString()}
+                    <span className="font-mono font-medium text-champagne-brass text-sm">
+                      Rs. {((item.price || 0) * (item.quantity || 1)).toLocaleString()}
                     </span>
                   </div>
                 ))}
-
-                <div className="p-3 bg-white/5 space-y-1 text-xs">
-                  <div className="flex justify-between text-porcelain/60">
-                    <span>Subtotal</span>
-                    <span className="font-mono">Rs. {selectedOrder.subtotal?.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-porcelain/60">
-                    <span>Express Nationwide Delivery</span>
-                    <span className="font-mono">Rs. {selectedOrder.deliveryFee?.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-porcelain font-medium pt-2 border-t border-white/10">
-                    <span className="text-champagne-brass">Grand Total (COD)</span>
-                    <span className="font-mono text-champagne-brass text-sm">
-                      Rs. {selectedOrder.total?.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
 
-            {/* Actions (Responsive Stack/Row) */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-4 border-t border-champagne-brass/20">
+            {/* Financial Summary */}
+            <div className="p-4 bg-black/40 border border-white/5 space-y-2 text-xs">
+              <div className="flex justify-between text-porcelain/60">
+                <span>Subtotal</span>
+                <span className="font-mono">Rs. {selectedOrder.subtotal?.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-porcelain/60">
+                <span>Courier Nationwide Delivery Fee</span>
+                <span className="font-mono">Rs. {selectedOrder.deliveryFee?.toLocaleString() ?? 180}</span>
+              </div>
+              <div className="flex justify-between text-porcelain font-medium pt-2 border-t border-white/10 text-sm">
+                <span>Total Payable</span>
+                <span className="font-mono text-champagne-brass">Rs. {selectedOrder.total?.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-white/10">
               <a
                 href={createWhatsAppLink(selectedOrder)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2.5 bg-emerald-700 text-white text-xs uppercase tracking-widest font-medium hover:bg-emerald-600 transition-colors shadow text-center"
+                className="px-4 py-2.5 bg-emerald-950/60 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900/60 text-center text-xs uppercase tracking-wider font-medium"
               >
-                Send WhatsApp Notice ↗
+                Send WhatsApp Status Update ↗
               </a>
+
               <button
+                type="button"
                 onClick={() => setSelectedOrder(null)}
-                className="px-4 py-2 bg-white/10 text-porcelain text-xs uppercase tracking-wider hover:bg-white/20 transition-colors text-center"
+                className="px-6 py-2.5 bg-white/10 text-porcelain hover:bg-white/15 text-xs uppercase tracking-wider"
               >
-                Close Drawer
+                Close
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal (Fully Responsive) */}
+      {/* Delete Confirmation Modal */}
       {deleteTarget && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#121318] border border-champagne-brass/30 p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl">
-            <h3 className="text-lg font-display text-porcelain">Remove Order from Registry</h3>
+          <div className="bg-[#121318] border border-rose-800/60 p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <h3 className="text-lg font-display text-porcelain">Confirm Order Deletion</h3>
             <p className="text-xs text-porcelain/70 leading-relaxed">
-              Are you sure you wish to delete order{" "}
-              <strong className="text-champagne-brass">#{deleteTarget.orderId}</strong> for{" "}
-              <strong>{deleteTarget.customerName}</strong>? This action cannot be undone.
+              Are you sure you want to permanently delete order{" "}
+              <strong className="text-champagne-brass font-mono">#{deleteTarget.orderId}</strong> for{" "}
+              <strong className="text-porcelain">{deleteTarget.customerName}</strong>?
             </p>
-            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 pt-2">
+
+            <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 pt-3 border-t border-white/10">
               <button
                 type="button"
                 onClick={() => setDeleteTarget(null)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-xs uppercase tracking-wider text-porcelain/60 hover:text-porcelain text-center"
+                className="px-4 py-2 border border-white/20 text-porcelain text-xs uppercase tracking-wider hover:bg-white/5 transition-colors text-center"
               >
                 Cancel
               </button>
@@ -827,9 +934,9 @@ If you have any questions or require custom assistance, our atelier team is at y
                 type="button"
                 onClick={handleDeleteOrder}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-deep-wine text-white text-xs uppercase tracking-wider hover:bg-red-700 font-medium transition-colors text-center"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs uppercase tracking-wider font-medium transition-colors disabled:opacity-50 text-center"
               >
-                {isDeleting ? "Deleting..." : "Confirm Removal"}
+                {isDeleting ? "Deleting..." : "Permanently Delete"}
               </button>
             </div>
           </div>

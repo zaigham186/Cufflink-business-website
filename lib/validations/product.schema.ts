@@ -12,13 +12,13 @@ export const productSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters").max(1000),
   longDescription: z.string().optional(),
   price: z.number().positive("Price must be a positive number"),
-  salePrice: z.number().positive().optional(),
-  compareAtPrice: z.number().positive().optional(),
+  salePrice: z.number().positive().optional().nullable(),
+  compareAtPrice: z.number().positive().optional().nullable(),
   images: z.array(z.string()).min(1, "At least one image is required"),
   material: z.string().min(2),
   finish: z.string().min(2),
   color: z.string().min(2),
-  shape: z.string().optional(),
+  shape: z.string().optional().nullable(),
   pattern: z.string().optional().default(""),
   isSet: z.boolean().default(false),
   pairsCount: z.number().int().positive().default(1),
@@ -27,6 +27,8 @@ export const productSchema = z.object({
   sku: z.string().min(2).max(50),
   featured: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
+  isPublished: z.boolean().default(true),
+  archived: z.boolean().default(false),
   isNew: z.boolean().default(false),
   isLimited: z.boolean().default(false),
   details: z
@@ -38,8 +40,8 @@ export const productSchema = z.object({
     })
     .optional(),
   hasPhotography: z.boolean().default(false),
-  video: z.string().optional(),
-  heroVideo: z.string().optional(),
+  video: z.string().optional().nullable(),
+  heroVideo: z.string().optional().nullable(),
 });
 
 export const productUpdateSchema = productSchema.partial();

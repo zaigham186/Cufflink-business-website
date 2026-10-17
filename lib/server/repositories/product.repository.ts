@@ -6,7 +6,7 @@ import type { Product, StockStatus } from "@/types/product";
 function toPlainProduct(doc: any): Product {
   if (!doc) return doc;
   const obj = doc.toObject ? doc.toObject() : doc;
-  const count = typeof obj.stockCount === "number" ? obj.stockCount : 10;
+  const count = typeof obj.stockCount === "number" ? obj.stockCount : 0;
   const status: StockStatus =
     obj.stock || (count === 0 ? "out-of-stock" : count <= 5 ? "low-stock" : "in-stock");
   return {
@@ -16,6 +16,8 @@ function toPlainProduct(doc: any): Product {
     stock: count,
     stockStatus: status,
     stockCount: count,
+    isPublished: obj.isPublished !== false,
+    archived: Boolean(obj.archived),
   };
 }
 
@@ -53,6 +55,8 @@ export class ProductRepository {
     await connectToDatabase();
     const lowerSlug = categorySlug.toLowerCase().trim();
     const docs = await ProductModel.find({
+      isPublished: { $ne: false },
+      archived: { $ne: true },
       $or: [
         { categorySlug: lowerSlug },
         { category: { $regex: new RegExp(`^${lowerSlug}$`, "i") } },
@@ -103,11 +107,24 @@ export class ProductRepository {
     return docs.map(toPlainProduct);
   }
 
-  async checkExisting(slug: string, sku: string): Promise<boolean> {
+  async checkExisting(slug?: string, sku?: string, excludeId?: string): Promise<boolean> {
+    if (!slug && !sku) return false;
     await connectToDatabase();
-    const existing = await ProductModel.findOne({
-      $or: [{ slug }, { sku }],
-    });
+    const conditions: any[] = [];
+    if (slug) conditions.push({ slug });
+    if (sku) conditions.push({ sku });
+    const query: Record<string, any> = { $or: conditions };
+
+    if (excludeId) {
+      const isObjectId = mongoose.Types.ObjectId.isValid(excludeId);
+      if (isObjectId) {
+        query._id = { $ne: new mongoose.Types.ObjectId(excludeId) };
+      } else {
+        query.slug = { $ne: excludeId };
+      }
+    }
+
+    const existing = await ProductModel.findOne(query);
     return !!existing;
   }
 

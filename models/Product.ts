@@ -24,6 +24,8 @@ export interface IProductDocument extends Document {
   sku: string;
   featured: boolean;
   isFeatured?: boolean;
+  isPublished?: boolean;
+  archived?: boolean;
   isLimited?: boolean;
   details?: {
     dimensions?: string;
@@ -70,6 +72,8 @@ const ProductSchema = new Schema<IProductDocument>(
     sku: { type: String, required: true, unique: true, uppercase: true },
     featured: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
+    isPublished: { type: Boolean, default: true, index: true },
+    archived: { type: Boolean, default: false, index: true },
     isLimited: { type: Boolean, default: false },
     details: {
       dimensions: { type: String },

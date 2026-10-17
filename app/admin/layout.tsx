@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { getAdminSession } from "@/lib/server/auth";
 import AdminLayoutClient from "@/components/admin/AdminLayoutClient";
 
@@ -8,17 +6,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const headerList = await headers();
-  const pathname = headerList.get("x-pathname") || headerList.get("next-url") || "";
-
-  if (pathname.includes("/login")) {
-    return <>{children}</>;
-  }
-
   const isAdmin = await getAdminSession();
 
+  // If unauthenticated (e.g. on /admin/login), render children directly without sidebar/topbar.
+  // middleware.ts handles edge redirects to /admin/login for all protected /admin routes.
   if (!isAdmin) {
-    redirect("/admin/login");
+    return <>{children}</>;
   }
 
   return <AdminLayoutClient>{children}</AdminLayoutClient>;

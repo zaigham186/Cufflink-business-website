@@ -7,77 +7,67 @@ import { contentService } from "@/lib/server/services/content.service";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  // Fetch all products, orders, and content in parallel via server services
-  const [products, rawOrders, siteContent] = await Promise.all([
-    productService.getAllProducts(),
-    orderService.getOrders(),
-    contentService.getSiteContent(),
-  ]);
+  // Defensively fetch products, orders, and content in parallel via server services
+  let products: any[] = [];
+  let rawOrders: any[] = [];
+  let siteContent: any = null;
+  let dbError: string | null = null;
+
+  try {
+    const results = await Promise.all([
+      productService.getAllProducts().catch((e) => {
+        console.error("Failed to load products in admin dashboard:", e);
+        return [];
+      }),
+      orderService.getOrders().catch((e) => {
+        console.error("Failed to load orders in admin dashboard:", e);
+        return [];
+      }),
+      contentService.getSiteContent().catch((e) => {
+        console.error("Failed to load content in admin dashboard:", e);
+        return null;
+      }),
+    ]);
+    products = results[0] || [];
+    rawOrders = results[1] || [];
+    siteContent = results[2] || null;
+  } catch (err: any) {
+    console.error("Admin dashboard data fetch error:", err);
+    dbError = "Database connectivity notice: Unable to query MongoDB. Please verify Atlas connection string and Network Access in Vercel.";
+  }
 
   const totalProducts = products.length;
+  const publishedProducts = products.filter((p: any) => p.isPublished !== false && !p.archived).length;
+  const draftProducts = products.filter((p: any) => p.isPublished === false || p.archived).length;
 
-  // Real calculations
-  let totalAssetValuation = 0;
-  let totalUnitsInStock = 0;
   let classicalCount = 0;
-  let classicalValuation = 0;
-  let classicalUnits = 0;
   let signatureCount = 0;
-  let signatureValuation = 0;
-  let signatureUnits = 0;
   let premiumCount = 0;
-  let premiumValuation = 0;
-  let premiumUnits = 0;
-
-  const lowStockList: any[] = [];
 
   products.forEach((p: any) => {
-    const stock = typeof p.stockCount === "number" ? p.stockCount : 10;
-    const price = typeof p.price === "number" ? p.price : 0;
-    const itemValuation = price * stock;
-
-    totalAssetValuation += itemValuation;
-    totalUnitsInStock += stock;
-
-    if (p.category === "Classical") {
-      classicalCount += 1;
-      classicalValuation += itemValuation;
-      classicalUnits += stock;
-    } else if (p.category === "Signature") {
-      signatureCount += 1;
-      signatureValuation += itemValuation;
-      signatureUnits += stock;
-    } else if (p.category === "Premium") {
-      premiumCount += 1;
-      premiumValuation += itemValuation;
-      premiumUnits += stock;
-    }
-
-    if (stock < 5) {
-      lowStockList.push(p);
-    }
+    if (p.category === "Classical") classicalCount++;
+    else if (p.category === "Signature") signatureCount++;
+    else if (p.category === "Premium") premiumCount++;
   });
 
-  // Sort low stock by smallest first
-  lowStockList.sort(
-    (a, b) =>
-      (typeof a.stockCount === "number" ? a.stockCount : 10) -
-      (typeof b.stockCount === "number" ? b.stockCount : 10)
-  );
-
-  const averagePiecePrice =
-    totalUnitsInStock > 0 ? Math.round(totalAssetValuation / totalUnitsInStock) : 0;
-
-  // Orders metrics
+  // Genuine Orders metrics (zero fake/demo data)
+  const totalOrders = rawOrders.length;
   const pendingOrders = rawOrders.filter((o: any) => o.status === "pending").length;
+  const confirmedOrders = rawOrders.filter((o: any) => o.status === "confirmed").length;
   const dispatchedOrders = rawOrders.filter((o: any) => o.status === "dispatched").length;
   const deliveredOrders = rawOrders.filter((o: any) => o.status === "delivered").length;
-  const totalRevenue = rawOrders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
 
-  const stockHealthRate =
-    totalProducts > 0
-      ? Math.round(((totalProducts - lowStockList.length) / totalProducts) * 100)
-      : 100;
+  // Delivered revenue is strictly confirmed completed sales
+  const deliveredRevenue = rawOrders
+    .filter((o: any) => o.status === "delivered")
+    .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+
+  // Active pipeline value (confirmed + dispatched)
+  const pipelineValue = rawOrders
+    .filter((o: any) => o.status === "confirmed" || o.status === "dispatched")
+    .reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+
+  const awaitingDispatchCount = pendingOrders + confirmedOrders;
 
   const hotline = siteContent?.whatsappNumber || "923719145871";
   const deliveryFee = siteContent?.deliveryFeePkr ?? 180;
@@ -89,26 +79,26 @@ export default async function AdminDashboardPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight">
-              Atelier Executive Desk
+              Operations Overview
             </h1>
             <span className="px-2 py-0.5 text-[9px] sm:text-[10px] uppercase font-mono tracking-widest bg-champagne-brass/10 border border-champagne-brass/30 text-champagne-brass">
-              Live Operations
+              Production Registry
             </span>
           </div>
           <p className="text-[11px] sm:text-xs text-porcelain/60 uppercase tracking-widest font-sans mt-1">
-            Genuine catalog asset analytics, inventory replenishment &amp; order fulfillment
+            Real-time catalog metrics, genuine orders &amp; dispatch fulfillment
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 shrink-0">
           <Link
-            href="/admin/orders"
+            href="/admin/dispatch"
             className="inline-flex items-center justify-center px-4 py-2.5 bg-white/5 border border-champagne-brass/30 text-champagne-brass text-xs uppercase tracking-wider hover:bg-champagne-brass/10 transition-colors"
           >
-            <span>Orders Desk</span>
-            {pendingOrders > 0 && (
+            <span>Dispatch Desk</span>
+            {awaitingDispatchCount > 0 && (
               <span className="ml-2 px-1.5 py-0.2 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono">
-                {pendingOrders} action
+                {awaitingDispatchCount} ready
               </span>
             )}
           </Link>
@@ -121,106 +111,123 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 4 High-Impact KPI Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* KPI 1: Inventory Valuation */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
-              Inventory Asset Value
-            </span>
-            <span className="text-[11px] font-mono text-porcelain/40">PKR</span>
-          </div>
-          <div className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight truncate" title={`Rs. ${totalAssetValuation.toLocaleString()}`}>
-            Rs. {totalAssetValuation.toLocaleString()}
-          </div>
-          <p className="text-[11px] text-porcelain/50 mt-2 font-mono">
-            {totalUnitsInStock} total units in stock across {totalProducts} active designs
-          </p>
-          <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
-            <span>Avg Piece Value:</span>
-            <span className="font-mono text-champagne-brass">Rs. {averagePiecePrice.toLocaleString()}</span>
+      {/* Database Diagnostic Notice */}
+      {dbError && (
+        <div className="p-4 bg-red-950/60 border border-red-800 text-red-200 text-xs flex items-start space-x-3">
+          <span className="text-red-400 text-base leading-none">⚠</span>
+          <div>
+            <p className="font-semibold">{dbError}</p>
+            <p className="text-[11px] text-red-300/80 mt-1">
+              Ensure <code className="bg-black/40 px-1 py-0.5 rounded font-mono">MONGODB_URI</code> is added in Vercel Project Settings &gt; Environment Variables, and that MongoDB Atlas Network Access has <code className="bg-black/40 px-1 py-0.5 rounded font-mono">0.0.0.0/0</code> whitelisted.
+            </p>
           </div>
         </div>
+      )}
 
-        {/* KPI 2: Catalog Volume */}
+      {/* 4 Key Performance Indicators (Zero demo stock / Zero synthetic asset value) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* KPI 1: Catalog Products & Designs */}
         <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
-              Catalog Volume
+              Catalog Products
             </span>
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl sm:text-3xl font-display text-porcelain">{totalProducts}</span>
-            <span className="text-xs text-porcelain/40">bespoke designs</span>
+            <span className="text-2xl sm:text-3xl font-display text-porcelain font-mono">{totalProducts}</span>
+            <span className="text-xs text-porcelain/40">active designs</span>
           </div>
           <p className="text-[11px] text-porcelain/50 mt-2 truncate">
-            Classical ({classicalCount}) • Signature ({signatureCount}) • Premium ({premiumCount})
+            {publishedProducts} Published • {draftProducts} Draft / Inactive
           </p>
           <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
-            <span>Registry Status:</span>
-            <span className="text-emerald-300 font-medium">100% Verified</span>
+            <span>Tiers:</span>
+            <span className="text-porcelain/70 font-mono">
+              C:{classicalCount} • S:{signatureCount} • P:{premiumCount}
+            </span>
           </div>
         </div>
 
-        {/* KPI 3: Orders & Dispatches */}
+        {/* KPI 2: Genuine Orders Registry */}
         <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
-              Fulfillment Desk
+              Orders Registry
             </span>
-            <span className="text-[11px] font-mono text-amber-300">
-              {pendingOrders > 0 ? "● Action Needed" : "All Clear"}
-            </span>
+            <span className={`w-2 h-2 rounded-full ${pendingOrders > 0 ? "bg-amber-400" : "bg-champagne-brass/40"}`} />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl sm:text-3xl font-display text-porcelain">{pendingOrders}</span>
-            <span className="text-xs text-amber-200/60">pending dispatch</span>
-          </div>
-          <p className="text-[11px] text-porcelain/50 mt-2 font-mono">
-            {dispatchedOrders} in transit • {deliveredOrders} delivered
-          </p>
-          <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
-            <span>Gross Order Value:</span>
-            <span className="font-mono text-champagne-brass">Rs. {totalRevenue.toLocaleString()}</span>
-          </div>
-        </div>
-
-        {/* KPI 4: Stock Health Ratio */}
-        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
-              Inventory Health
-            </span>
-            <span className="text-[11px] font-mono text-porcelain/40">{stockHealthRate}%</span>
-          </div>
-          <div className="flex items-baseline space-x-2">
-            <span className="text-2xl sm:text-3xl font-display text-porcelain">
-              {totalProducts - lowStockList.length}
-            </span>
-            <span className="text-xs text-porcelain/40">healthy / {totalProducts}</span>
+            <span className="text-2xl sm:text-3xl font-display text-porcelain font-mono">{totalOrders}</span>
+            <span className="text-xs text-porcelain/40">orders recorded</span>
           </div>
           <p className="text-[11px] text-porcelain/50 mt-2">
-            {lowStockList.length === 0
-              ? "All stock levels adequate (≥ 5 units)"
-              : `${lowStockList.length} items flagged for replenishment`}
+            {pendingOrders > 0
+              ? `${pendingOrders} awaiting customer confirmation`
+              : "All customer inquiries handled"}
           </p>
           <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
-            <span>Restock Urgency:</span>
-            <span className={lowStockList.length > 0 ? "text-amber-300 font-medium" : "text-emerald-300"}>
-              {lowStockList.length > 0 ? `${lowStockList.length} Units Low` : "Optimal"}
+            <span>Completed Deliveries:</span>
+            <span className="font-mono text-emerald-300">{deliveredOrders} delivered</span>
+          </div>
+        </div>
+
+        {/* KPI 3: Dispatch & Fulfillment */}
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
+              Dispatch Desk
             </span>
+            <span className="text-[11px] font-mono text-purple-300">
+              {dispatchedOrders} in transit
+            </span>
+          </div>
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl sm:text-3xl font-display text-porcelain font-mono">
+              {awaitingDispatchCount}
+            </span>
+            <span className="text-xs text-porcelain/40">ready for dispatch</span>
+          </div>
+          <p className="text-[11px] text-porcelain/50 mt-2">
+            {dispatchedOrders > 0
+              ? `${dispatchedOrders} consignments with couriers`
+              : "Fulfillment queue clear"}
+          </p>
+          <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
+            <span>Express Courier SLA:</span>
+            <span className="font-mono text-champagne-brass">2–4 Working Days</span>
+          </div>
+        </div>
+
+        {/* KPI 4: Delivered Sales Revenue */}
+        <div className="bg-[#101217] border border-champagne-brass/20 p-5 sm:p-6 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] uppercase tracking-widest text-champagne-brass font-sans">
+              Delivered Revenue
+            </span>
+            <span className="text-[11px] font-mono text-emerald-400">
+              PKR
+            </span>
+          </div>
+          <div className="text-2xl sm:text-3xl font-display text-porcelain tracking-tight font-mono">
+            Rs. {deliveredRevenue.toLocaleString()}
+          </div>
+          <p className="text-[11px] text-porcelain/50 mt-2 font-mono truncate">
+            Pipeline: Rs. {pipelineValue.toLocaleString()} ({pendingOrders + confirmedOrders + dispatchedOrders} active)
+          </p>
+          <div className="mt-3 pt-3 border-t border-white/5 text-[10px] text-porcelain/40 flex justify-between">
+            <span>Accounting Verification:</span>
+            <span className="text-emerald-300/80">Completed Orders Only</span>
           </div>
         </div>
       </div>
 
-      {/* Atelier Operational Status Bar */}
+      {/* Operational Information Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-4 sm:p-5 bg-[#0f1015] border border-champagne-brass/20 text-xs">
         <div>
           <span className="text-[10px] uppercase text-champagne-brass font-sans block">Client Hotline</span>
           <span className="font-mono text-porcelain mt-1 block">+{hotline}</span>
-          <span className="text-[10px] text-emerald-400 mt-0.5 block">● WhatsApp Active</span>
+          <span className="text-[10px] text-emerald-400 mt-0.5 block">● WhatsApp Concierge Live</span>
         </div>
         <div>
           <span className="text-[10px] uppercase text-champagne-brass font-sans block">Nationwide Shipping</span>
@@ -230,117 +237,28 @@ export default async function AdminDashboardPage() {
         <div>
           <span className="text-[10px] uppercase text-champagne-brass font-sans block">Fulfillment SLA</span>
           <span className="text-porcelain mt-1 block">2–4 Working Days</span>
-          <span className="text-[10px] text-porcelain/40 mt-0.5 block">TCS / Leopards Express</span>
+          <span className="text-[10px] text-porcelain/40 mt-0.5 block">TCS / Leopards / Trax</span>
         </div>
         <div>
-          <span className="text-[10px] uppercase text-champagne-brass font-sans block">Atelier Location</span>
-          <span className="text-porcelain mt-1 block">Peshawar Atelier</span>
-          <span className="text-[10px] text-porcelain/40 mt-0.5 block">Direct Workshop Dispatch</span>
+          <span className="text-[10px] uppercase text-champagne-brass font-sans block">Fulfillment Center</span>
+          <span className="text-porcelain mt-1 block">Peshawar Workshop</span>
+          <span className="text-[10px] text-porcelain/40 mt-0.5 block">Direct Atelier Consignment</span>
         </div>
       </div>
 
       {/* Two-Column Operations Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Priority Restock & Recent Orders (7 cols) */}
+        {/* Left Column: Recent Customer Orders & Fulfillment (7 cols) */}
         <div className="lg:col-span-7 space-y-8">
-          {/* Priority Restock Queue */}
-          <div className="bg-[#101217] border border-champagne-brass/20 p-6">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
-              <div>
-                <h2 className="text-lg font-display text-porcelain tracking-wide flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-deep-wine" />
-                  Priority Inventory Restock Queue
-                </h2>
-                <p className="text-xs text-porcelain/50 mt-0.5">
-                  Cufflinks with under 5 units remaining in current stock
-                </p>
-              </div>
-
-              <span className="text-xs px-2.5 py-1 bg-deep-wine/20 text-red-300 border border-deep-wine/40 font-mono">
-                {lowStockList.length} Flagged
-              </span>
-            </div>
-
-            {lowStockList.length === 0 ? (
-              <div className="text-center py-10 border border-dashed border-white/10 text-porcelain/50 text-xs">
-                All inventory levels are healthy (no cufflinks under 5 units).
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-white/10 text-champagne-brass/70 uppercase tracking-widest font-sans">
-                      <th className="pb-3 font-medium">Piece</th>
-                      <th className="pb-3 font-medium">Tier</th>
-                      <th className="pb-3 font-medium">Price</th>
-                      <th className="pb-3 font-medium">Stock Left</th>
-                      <th className="pb-3 font-medium text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 text-porcelain/80">
-                    {lowStockList.slice(0, 6).map((p: any) => {
-                      const stockVal = typeof p.stockCount === "number" ? p.stockCount : 10;
-                      return (
-                        <tr key={p._id || p.id} className="hover:bg-white/5 transition-colors">
-                          <td className="py-3 font-medium text-porcelain">
-                            <div className="flex items-center space-x-2.5">
-                              <div className="relative w-7 h-7 bg-black/40 border border-white/10 shrink-0 overflow-hidden">
-                                {p.images && p.images[0] ? (
-                                  <Image
-                                    src={p.images[0]}
-                                    alt={p.name}
-                                    fill
-                                    sizes="28px"
-                                    className="object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-[9px] text-porcelain/30">
-                                    CK
-                                  </div>
-                                )}
-                              </div>
-                              <span className="truncate max-w-[180px]">{p.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 text-porcelain/60">{p.category}</td>
-                          <td className="py-3 font-mono">Rs. {p.price.toLocaleString()}</td>
-                          <td className="py-3">
-                            <span
-                              className={`inline-block px-2 py-0.5 border font-mono text-[10px] ${
-                                stockVal === 0
-                                  ? "bg-red-950/60 text-red-200 border-red-800"
-                                  : "bg-amber-950/40 text-amber-200 border-amber-800/40"
-                              }`}
-                            >
-                              {stockVal} units
-                            </span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <Link
-                              href={`/admin/products/${p._id || p.id}/edit`}
-                              className="text-champagne-brass hover:underline uppercase tracking-wider text-[11px] font-medium"
-                            >
-                              Adjust →
-                            </Link>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
           {/* Recent Orders Queue */}
           <div className="bg-[#101217] border border-champagne-brass/20 p-6">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
               <div>
                 <h2 className="text-lg font-display text-porcelain tracking-wide">
-                  Recent Orders &amp; Dispatches
+                  Recent Orders
                 </h2>
                 <p className="text-xs text-porcelain/50 mt-0.5">
-                  Latest clients receiving handcrafted pieces
+                  Latest customer orders placed via the website
                 </p>
               </div>
 
@@ -352,58 +270,153 @@ export default async function AdminDashboardPage() {
               </Link>
             </div>
 
-            <div className="divide-y divide-white/5">
-              {rawOrders.slice(0, 4).map((order: any) => (
-                <div
-                  key={order._id || order.orderId}
-                  className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-champagne-brass font-medium">
-                        #{order.orderId}
-                      </span>
-                      <span className="text-porcelain font-medium">{order.customerName}</span>
-                      <span className="text-porcelain/40">•</span>
-                      <span className="text-porcelain/60">{order.city}</span>
-                    </div>
-                    <p className="text-[11px] text-porcelain/50 mt-0.5 truncate max-w-md">
-                      {order.items?.map((it: any) => `${it.quantity}x ${it.name}`).join(", ")}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center space-x-3 shrink-0">
-                    <span className="font-mono text-porcelain font-medium">
-                      Rs. {order.total?.toLocaleString()}
-                    </span>
-                    <span
-                      className={`text-[10px] uppercase px-2 py-0.5 border ${
-                        order.status === "dispatched"
-                          ? "bg-purple-950/40 text-purple-300 border-purple-800/40"
-                          : order.status === "confirmed"
-                          ? "bg-blue-950/40 text-blue-300 border-blue-800/40"
-                          : order.status === "delivered"
-                          ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
-                          : "bg-amber-950/40 text-amber-300 border-amber-800/40"
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </div>
+            {rawOrders.length === 0 ? (
+              <div className="text-center py-12 border border-dashed border-white/10 text-porcelain/50 text-xs space-y-2">
+                <div className="w-10 h-10 mx-auto rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-champagne-brass text-sm">
+                  ✓
                 </div>
-              ))}
+                <p className="font-medium text-porcelain/80 text-sm">No customer orders recorded yet.</p>
+                <p className="text-[11px] text-porcelain/40 max-w-sm mx-auto">
+                  When clients place orders via the storefront checkout, genuine records are saved to the database and will immediately appear here.
+                </p>
+                <div className="pt-2">
+                  <Link
+                    href="/"
+                    target="_blank"
+                    className="inline-block px-3 py-1.5 bg-champagne-brass/10 border border-champagne-brass/30 text-champagne-brass text-[11px] uppercase tracking-wider hover:bg-champagne-brass/20 transition-colors"
+                  >
+                    Open Storefront to Test Order ↗
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {rawOrders.slice(0, 6).map((order: any) => (
+                  <div
+                    key={order._id || order.orderId}
+                    className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-champagne-brass font-medium">
+                          #{order.orderId}
+                        </span>
+                        <span className="text-porcelain font-medium">{order.customerName}</span>
+                        <span className="text-porcelain/40">•</span>
+                        <span className="text-porcelain/60">{order.city}</span>
+                      </div>
+                      <p className="text-[11px] text-porcelain/50 mt-1 truncate max-w-md">
+                        {order.items?.map((it: any) => `${it.quantity}x ${it.name}`).join(", ")}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center space-x-3 shrink-0">
+                      <span className="font-mono text-porcelain font-medium">
+                        Rs. {order.total?.toLocaleString()}
+                      </span>
+                      <span
+                        className={`text-[10px] uppercase px-2 py-0.5 border font-mono ${
+                          order.status === "dispatched"
+                            ? "bg-purple-950/40 text-purple-300 border-purple-800/40"
+                            : order.status === "confirmed"
+                            ? "bg-blue-950/40 text-blue-300 border-blue-800/40"
+                            : order.status === "delivered"
+                            ? "bg-emerald-950/40 text-emerald-300 border-emerald-800/40"
+                            : "bg-amber-950/40 text-amber-300 border-amber-800/40"
+                        }`}
+                      >
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Live Dispatch & Courier Desk Snapshot */}
+          <div className="bg-[#101217] border border-champagne-brass/20 p-6">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-white/5">
+              <div>
+                <h2 className="text-lg font-display text-porcelain tracking-wide">
+                  Dispatch &amp; Fulfillment Queue
+                </h2>
+                <p className="text-xs text-porcelain/50 mt-0.5">
+                  Consignments ready for courier pickup &amp; active in transit
+                </p>
+              </div>
+
+              <Link
+                href="/admin/dispatch"
+                className="text-xs text-champagne-brass hover:underline uppercase tracking-wider font-medium"
+              >
+                Go to Dispatch Desk →
+              </Link>
             </div>
+
+            {awaitingDispatchCount + dispatchedOrders === 0 ? (
+              <div className="text-center py-8 border border-dashed border-white/10 text-porcelain/40 text-xs">
+                All consignments fulfilled. Zero active packages in packing or transit queue.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {rawOrders
+                  .filter((o: any) => o.status === "pending" || o.status === "confirmed" || o.status === "dispatched")
+                  .slice(0, 4)
+                  .map((order: any) => (
+                    <div
+                      key={order._id || order.orderId}
+                      className="p-3 bg-white/5 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                    >
+                      <div>
+                        <span className="font-mono text-champagne-brass mr-2 font-medium">#{order.orderId}</span>
+                        <span className="text-porcelain font-medium">{order.customerName}</span>
+                        <span className="text-porcelain/40 mx-1.5">•</span>
+                        <span className="text-porcelain/60">{order.city}</span>
+                        {order.courierTrackingNumber && (
+                          <span className="block text-[10px] text-purple-300 font-mono mt-0.5">
+                            {order.courierProvider || "Courier"}: {order.courierTrackingNumber}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-[9px] uppercase px-2 py-0.5 border font-mono ${
+                            order.status === "dispatched"
+                              ? "bg-purple-950/40 text-purple-300 border-purple-800/40"
+                              : "bg-amber-950/40 text-amber-300 border-amber-800/40"
+                          }`}
+                        >
+                          {order.status === "dispatched" ? "In Transit" : "Ready to Pack"}
+                        </span>
+                        <Link
+                          href="/admin/dispatch"
+                          className="text-[11px] text-champagne-brass hover:underline uppercase tracking-wider"
+                        >
+                          Manage →
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Collection Tiers & Quick Action Cards (5 cols) */}
+        {/* Right Column: Collection Tiers & Quick Management (5 cols) */}
         <div className="lg:col-span-5 space-y-8">
-          {/* Collection Tiers Breakdown Card */}
+          {/* Collection Tiers Breakdown Card (Pure design counts, zero demo stock values) */}
           <div className="bg-[#101217] border border-champagne-brass/20 p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
-              <h2 className="text-lg font-display text-porcelain tracking-wide">
-                Collection Tiers
-              </h2>
+              <div>
+                <h2 className="text-lg font-display text-porcelain tracking-wide">
+                  Collection Tiers
+                </h2>
+                <p className="text-[11px] text-porcelain/50">
+                  Active cufflinks by tier
+                </p>
+              </div>
               <Link
                 href="/admin/collections"
                 className="text-[11px] text-champagne-brass hover:underline uppercase tracking-wider"
@@ -413,53 +426,59 @@ export default async function AdminDashboardPage() {
             </div>
 
             {/* Classical */}
-            <div className="p-4 bg-white/5 border border-white/5 space-y-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium">
-                    Classical Tier
-                  </span>
-                  <span className="block text-[11px] text-porcelain/40">Rs. 700 – 800 Band</span>
-                </div>
-                <span className="text-lg font-display text-porcelain">{classicalCount} Designs</span>
+            <div className="p-4 bg-white/5 border border-white/5 flex items-center justify-between">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium block">
+                  Classical Tier
+                </span>
+                <span className="text-[11px] text-porcelain/50">Rs. 700 – 800 Band</span>
               </div>
-              <div className="flex justify-between text-[11px] text-porcelain/50 pt-2 border-t border-white/5 font-mono">
-                <span>{classicalUnits} total units</span>
-                <span className="text-champagne-brass">Rs. {classicalValuation.toLocaleString()}</span>
+              <div className="text-right">
+                <span className="text-lg font-display text-porcelain block">{classicalCount} Designs</span>
+                <Link
+                  href="/admin/products"
+                  className="text-[10px] text-champagne-brass/70 hover:text-champagne-brass uppercase tracking-wider"
+                >
+                  View Pieces →
+                </Link>
               </div>
             </div>
 
             {/* Signature */}
-            <div className="p-4 bg-white/5 border border-white/5 space-y-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium">
-                    Signature Tier
-                  </span>
-                  <span className="block text-[11px] text-porcelain/40">Rs. 1,000 – 1,400 Band</span>
-                </div>
-                <span className="text-lg font-display text-porcelain">{signatureCount} Designs</span>
+            <div className="p-4 bg-white/5 border border-white/5 flex items-center justify-between">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium block">
+                  Signature Tier
+                </span>
+                <span className="text-[11px] text-porcelain/50">Rs. 1,000 – 1,400 Band</span>
               </div>
-              <div className="flex justify-between text-[11px] text-porcelain/50 pt-2 border-t border-white/5 font-mono">
-                <span>{signatureUnits} total units</span>
-                <span className="text-champagne-brass">Rs. {signatureValuation.toLocaleString()}</span>
+              <div className="text-right">
+                <span className="text-lg font-display text-porcelain block">{signatureCount} Designs</span>
+                <Link
+                  href="/admin/products"
+                  className="text-[10px] text-champagne-brass/70 hover:text-champagne-brass uppercase tracking-wider"
+                >
+                  View Pieces →
+                </Link>
               </div>
             </div>
 
             {/* Premium */}
-            <div className="p-4 bg-white/5 border border-white/5 space-y-2">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium">
-                    Premium Tier
-                  </span>
-                  <span className="block text-[11px] text-porcelain/40">Rs. 1,500 – 2,500 Band</span>
-                </div>
-                <span className="text-lg font-display text-porcelain">{premiumCount} Designs</span>
+            <div className="p-4 bg-white/5 border border-white/5 flex items-center justify-between">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-champagne-brass font-medium block">
+                  Premium Tier
+                </span>
+                <span className="text-[11px] text-porcelain/50">Rs. 1,500 – 2,500 Band</span>
               </div>
-              <div className="flex justify-between text-[11px] text-porcelain/50 pt-2 border-t border-white/5 font-mono">
-                <span>{premiumUnits} total units</span>
-                <span className="text-champagne-brass">Rs. {premiumValuation.toLocaleString()}</span>
+              <div className="text-right">
+                <span className="text-lg font-display text-porcelain block">{premiumCount} Designs</span>
+                <Link
+                  href="/admin/products"
+                  className="text-[10px] text-champagne-brass/70 hover:text-champagne-brass uppercase tracking-wider"
+                >
+                  View Pieces →
+                </Link>
               </div>
             </div>
           </div>
@@ -467,7 +486,7 @@ export default async function AdminDashboardPage() {
           {/* Quick Management Shortcuts */}
           <div className="bg-[#101217] border border-champagne-brass/20 p-6 space-y-3">
             <h3 className="text-xs uppercase tracking-widest text-champagne-brass font-sans pb-2 border-b border-white/5">
-              Atelier Management Shortcuts
+              Quick Management Shortcuts
             </h3>
 
             <Link
@@ -477,7 +496,7 @@ export default async function AdminDashboardPage() {
               <div>
                 <span className="font-medium text-porcelain block">Catalog Manager</span>
                 <span className="text-[10px] text-porcelain/40">
-                  Search, filter, edit prices and photos for {totalProducts} items
+                  Search, filter, edit prices, available stock, and publication status
                 </span>
               </div>
               <span className="text-champagne-brass">→</span>
@@ -488,9 +507,22 @@ export default async function AdminDashboardPage() {
               className="flex items-center justify-between p-3 bg-white/5 hover:bg-champagne-brass/10 border border-white/5 hover:border-champagne-brass/30 transition-all text-xs"
             >
               <div>
-                <span className="font-medium text-porcelain block">Orders &amp; Dispatch Desk</span>
+                <span className="font-medium text-porcelain block">Orders Registry</span>
                 <span className="text-[10px] text-porcelain/40">
-                  Track courier numbers and direct WhatsApp client bridge
+                  Review customer details, order statuses, and direct WhatsApp contact
+                </span>
+              </div>
+              <span className="text-champagne-brass">→</span>
+            </Link>
+
+            <Link
+              href="/admin/dispatch"
+              className="flex items-center justify-between p-3 bg-white/5 hover:bg-champagne-brass/10 border border-white/5 hover:border-champagne-brass/30 transition-all text-xs"
+            >
+              <div>
+                <span className="font-medium text-porcelain block">Dispatch &amp; Courier Desk</span>
+                <span className="text-[10px] text-porcelain/40">
+                  Assign courier slips, manage tracking codes, and verify deliveries
                 </span>
               </div>
               <span className="text-champagne-brass">→</span>
@@ -501,9 +533,9 @@ export default async function AdminDashboardPage() {
               className="flex items-center justify-between p-3 bg-white/5 hover:bg-champagne-brass/10 border border-white/5 hover:border-champagne-brass/30 transition-all text-xs"
             >
               <div>
-                <span className="font-medium text-porcelain block">Storefront Policies &amp; Fee</span>
+                <span className="font-medium text-porcelain block">Storefront Policies &amp; Delivery Fee</span>
                 <span className="text-[10px] text-porcelain/40">
-                  Courier charges, WhatsApp care hotline and FAQs
+                  Delivery charges, WhatsApp concierge number, and FAQ policies
                 </span>
               </div>
               <span className="text-champagne-brass">→</span>
@@ -515,9 +547,9 @@ export default async function AdminDashboardPage() {
               className="flex items-center justify-between p-3 bg-white/5 hover:bg-champagne-brass/10 border border-white/5 hover:border-champagne-brass/30 transition-all text-xs"
             >
               <div>
-                <span className="font-medium text-porcelain block">Open Customer Storefront</span>
+                <span className="font-medium text-porcelain block">Live Customer Storefront</span>
                 <span className="text-[10px] text-porcelain/40">
-                  Experience customer checkout and presentation
+                  Experience customer catalog and test checkout flow
                 </span>
               </div>
               <span className="text-champagne-brass">↗</span>

@@ -32,7 +32,8 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
       items: [
         { label: "Executive Dashboard", href: "/admin", exact: true, icon: "◈" },
         { label: "Cufflink Catalog", href: "/admin/products", exact: false, icon: "❖" },
-        { label: "Orders & Dispatches", href: "/admin/orders", exact: false, icon: "◩" },
+        { label: "Orders Registry", href: "/admin/orders", exact: true, icon: "◩" },
+        { label: "Dispatch Desk", href: "/admin/dispatch", exact: false, icon: "⛟" },
       ],
     },
     {

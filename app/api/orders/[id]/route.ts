@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { orderService } from "@/lib/server/services/order.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { updateOrderStatusSchema } from "@/lib/validations/order.schema";
@@ -52,6 +53,14 @@ export async function PUT(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    try {
+      revalidatePath("/admin/orders");
+      revalidatePath("/admin/dispatch");
+      revalidatePath("/admin");
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
+    }
+
     return NextResponse.json({
       message: "Order updated successfully",
       order: updated,
@@ -63,6 +72,8 @@ export async function PUT(
     );
   }
 }
+
+export const PATCH = PUT;
 
 export async function DELETE(
   _req: NextRequest,
@@ -78,6 +89,14 @@ export async function DELETE(
     const deleted = await orderService.deleteOrder(id);
     if (!deleted) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    try {
+      revalidatePath("/admin/orders");
+      revalidatePath("/admin/dispatch");
+      revalidatePath("/admin");
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
     }
 
     return NextResponse.json({

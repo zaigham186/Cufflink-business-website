@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { collectionService } from "@/lib/server/services/collection.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { collectionSettingsSchema } from "@/lib/validations/collection.schema";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -25,6 +28,16 @@ export async function PUT(req: NextRequest) {
     }
 
     const updated = await collectionService.updateCollection(parsed.data.tier, parsed.data);
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/admin/collections");
+      revalidatePath("/admin");
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
+    }
+
     return NextResponse.json({ collection: updated });
   } catch (error) {
     console.error("API PUT /api/collections error:", error);

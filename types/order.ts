@@ -30,6 +30,9 @@ export interface Order {
   total: number;
   status: OrderStatus;
   courierTrackingNumber?: string;
+  courierProvider?: string;
+  dispatchedAt?: Date | string;
+  deliveredAt?: Date | string;
   createdAt: Date | string;
   updatedAt?: Date | string;
 }

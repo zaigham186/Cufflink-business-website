@@ -33,8 +33,15 @@ export class ProductService {
     return CATEGORIES;
   }
 
-  async getAllProducts(sortOption?: any): Promise<Product[]> {
-    return productRepository.findAll({}, sortOption || { createdAt: -1 });
+  async getAllProducts(sortOption?: any, includeUnpublished = false): Promise<Product[]> {
+    const query: Record<string, any> = includeUnpublished
+      ? { archived: { $ne: true } }
+      : { isPublished: { $ne: false }, archived: { $ne: true } };
+    return productRepository.findAll(query, sortOption || { createdAt: -1 });
+  }
+
+  async getAdminProducts(query: Record<string, any> = {}, sortOption?: any): Promise<Product[]> {
+    return productRepository.findAll({ archived: { $ne: true }, ...query }, sortOption || { createdAt: -1 });
   }
 
   async queryProducts(params: {
@@ -42,8 +49,12 @@ export class ProductService {
     featured?: string | null;
     search?: string | null;
     sort?: string | null;
+    includeUnpublished?: boolean;
   }): Promise<Product[]> {
-    const query: Record<string, any> = {};
+    const query: Record<string, any> = params.includeUnpublished
+      ? { archived: { $ne: true } }
+      : { isPublished: { $ne: false }, archived: { $ne: true } };
+
     if (params.category && params.category !== "all") query.categorySlug = params.category.toLowerCase().trim();
     if (params.featured === "true") query.featured = true;
     if (params.search) {
@@ -68,7 +79,10 @@ export class ProductService {
   }
 
   async getFeaturedProducts(limit = 6): Promise<Product[]> {
-    return productRepository.findFeatured(limit);
+    return productRepository.findAll(
+      { featured: true, isPublished: { $ne: false }, archived: { $ne: true } },
+      { createdAt: -1 }
+    ).then((items) => items.slice(0, limit));
   }
 
   async getProductBySlug(slug: string): Promise<Product | null> {
@@ -112,12 +126,21 @@ export class ProductService {
       ...data,
       stock: stockStatus,
       stockCount,
+      isPublished: data.isPublished !== false,
+      archived: Boolean(data.archived),
     });
 
     return { product: created, status: 201 };
   }
 
   async updateProduct(id: string, data: any): Promise<{ product?: Product; error?: string; status?: number }> {
+    if (data.slug || data.sku) {
+      const exists = await productRepository.checkExisting(data.slug, data.sku, id);
+      if (exists) {
+        return { error: "A product with this Slug or SKU already exists", status: 409 };
+      }
+    }
+
     const updateData: any = { ...data };
     if (typeof updateData.stockCount === "number" && !updateData.stock) {
       updateData.stock =

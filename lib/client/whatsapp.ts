@@ -17,13 +17,15 @@ export function formatWhatsAppBusinessNumber(raw?: string): string {
 
 export function generateWhatsAppOrderMessage(
   items: CartItemLike[],
-  customer: CustomerDetails
+  customer: CustomerDetails & { deliveryFee?: number; total?: number }
 ): string {
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
 
+  const deliveryFee = typeof customer.deliveryFee === "number" ? customer.deliveryFee : 180;
+  const grandTotal = typeof customer.total === "number" ? customer.total : subtotal + deliveryFee;
   const orderId = customer.orderId || `CK-${Math.floor(10000 + Math.random() * 90000)}`;
 
   let message = `*NEW ORDER — CUFFKINGS ATELIER*\n`;
@@ -49,8 +51,9 @@ export function generateWhatsAppOrderMessage(
     message += `   • Subtotal: Rs. ${(item.price * item.quantity).toLocaleString()}\n`;
   });
 
-  message += `\n*Total Amount: Rs. ${subtotal.toLocaleString()}*\n`;
-  message += `*Delivery:* Standard Nationwide Delivery\n\n`;
+  message += `\n*Items Subtotal: Rs. ${subtotal.toLocaleString()}*\n`;
+  message += `*Delivery Fee: Rs. ${deliveryFee.toLocaleString()} (Nationwide Flat Rate COD)*\n`;
+  message += `*Grand Total: Rs. ${grandTotal.toLocaleString()}*\n\n`;
   message += `Please confirm this order and advise the estimated delivery schedule. Thank you!`;
 
   return message;
@@ -58,7 +61,7 @@ export function generateWhatsAppOrderMessage(
 
 export function generateWhatsAppURL(
   items: CartItemLike[],
-  customer: CustomerDetails
+  customer: CustomerDetails & { deliveryFee?: number; total?: number }
 ): string {
   const businessNumber = formatWhatsAppBusinessNumber();
   const message = generateWhatsAppOrderMessage(items, customer);

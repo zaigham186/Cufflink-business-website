@@ -42,9 +42,9 @@ export default function FilterSidebar({
   // Secondary attribute filters
   const priceRanges = [
     { label: "All prices", value: "" },
-    { label: "Under Rs. 3,000", value: "under-3000" },
-    { label: "Rs. 3,000 – Rs. 3,500", value: "3000-3500" },
-    { label: "Above Rs. 3,500", value: "above-3500" },
+    { label: "Under Rs. 1,000", value: "under-1000" },
+    { label: "Rs. 1,000 – Rs. 1,500", value: "1000-1500" },
+    { label: "Above Rs. 1,500", value: "above-1500" },
   ];
 
   const materials = [

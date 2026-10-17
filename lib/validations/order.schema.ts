@@ -33,8 +33,8 @@ export const orderItemSchema = z.object({
   slug: z.string().min(1),
   price: z.number().positive(),
   quantity: z.number().int().positive(),
-  image: z.string(),
-  material: z.string(),
+  image: z.string().optional().default(""),
+  material: z.string().optional().default(""),
 });
 
 export const createOrderSchema = z.object({
@@ -56,6 +56,9 @@ export const updateOrderStatusSchema = z.object({
     .enum(["pending", "confirmed", "dispatched", "delivered", "cancelled"])
     .optional(),
   courierTrackingNumber: z.string().optional(),
+  courierProvider: z.string().optional(),
+  dispatchedAt: z.union([z.string(), z.date()]).optional(),
+  deliveredAt: z.union([z.string(), z.date()]).optional(),
   notes: z.string().optional(),
 });
 

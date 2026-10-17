@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { contentService } from "@/lib/server/services/content.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { siteContentSchema } from "@/lib/validations/content.schema";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -25,6 +28,16 @@ export async function PUT(req: NextRequest) {
     }
 
     const updated = await contentService.updateSiteContent(parsed.data);
+
+    try {
+      revalidatePath("/");
+      revalidatePath("/shop");
+      revalidatePath("/admin/content");
+      revalidatePath("/admin");
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
+    }
+
     return NextResponse.json({ content: updated });
   } catch (error) {
     console.error("API PUT /api/content error:", error);

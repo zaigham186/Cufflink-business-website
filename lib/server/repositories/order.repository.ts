@@ -9,6 +9,9 @@ function toPlainOrder(doc: any): Order {
   return {
     ...obj,
     _id: obj._id ? obj._id.toString() : undefined,
+    courierProvider: obj.courierProvider || "",
+    dispatchedAt: obj.dispatchedAt ? new Date(obj.dispatchedAt).toISOString() : undefined,
+    deliveredAt: obj.deliveredAt ? new Date(obj.deliveredAt).toISOString() : undefined,
     createdAt: obj.createdAt ? new Date(obj.createdAt).toISOString() : new Date().toISOString(),
     updatedAt: obj.updatedAt ? new Date(obj.updatedAt).toISOString() : new Date().toISOString(),
   };

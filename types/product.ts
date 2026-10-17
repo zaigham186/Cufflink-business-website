@@ -36,6 +36,8 @@ export interface Product {
   sku: string;
   featured: boolean;
   isFeatured?: boolean;
+  isPublished?: boolean;
+  archived?: boolean;
   isNew?: boolean;
   isLimited?: boolean;
   details?: ProductDetails;

@@ -7,6 +7,7 @@ import Link from "next/link";
 export default function AdminLoginPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -59,22 +60,33 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} suppressHydrationWarning className="space-y-6">
           <div>
-            <label
-              htmlFor="password"
-              className="block text-xs uppercase tracking-wider text-porcelain/70 mb-2 font-sans"
-            >
-              Master Passcode
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••••••••••"
-              suppressHydrationWarning
-              className="w-full px-4 py-3 bg-white/5 border border-champagne-brass/20 text-porcelain placeholder-porcelain/30 text-sm focus:outline-none focus:border-champagne-brass focus:ring-1 focus:ring-champagne-brass transition-colors"
-            />
+            <div className="flex justify-between items-center mb-2">
+              <label
+                htmlFor="password"
+                className="block text-xs uppercase tracking-wider text-porcelain/70 font-sans"
+              >
+                Master Passcode
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-[11px] text-champagne-brass/80 hover:text-champagne-brass tracking-wider uppercase transition-colors"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••••••••••"
+                suppressHydrationWarning
+                className="w-full px-4 py-3 bg-white/5 border border-champagne-brass/20 text-porcelain placeholder-porcelain/30 text-sm focus:outline-none focus:border-champagne-brass focus:ring-1 focus:ring-champagne-brass transition-colors"
+              />
+            </div>
           </div>
 
           {error && (

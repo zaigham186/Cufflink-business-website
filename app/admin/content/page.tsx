@@ -4,7 +4,12 @@ import SiteContentForm from "@/components/admin/SiteContentForm";
 export const dynamic = "force-dynamic";
 
 export default async function AdminContentPage() {
-  const content = await contentService.getSiteContent();
+  let content: any = null;
+  try {
+    content = await contentService.getSiteContent();
+  } catch (e) {
+    console.error("Failed to fetch site content:", e);
+  }
 
   return (
     <div className="space-y-8 max-w-5xl">

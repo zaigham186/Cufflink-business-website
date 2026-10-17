@@ -80,8 +80,12 @@ export default function ProductGrid({ products }: ProductGridProps) {
 
     // 2. Price Filter
     if (selectedPrice) {
-      if (selectedPrice === "under-3000") {
-        result = result.filter((p) => p.price < 3000);
+      if (selectedPrice === "under-1000" || selectedPrice === "under-3000") {
+        result = result.filter((p) => p.price < (selectedPrice === "under-1000" ? 1000 : 3000));
+      } else if (selectedPrice === "1000-1500") {
+        result = result.filter((p) => p.price >= 1000 && p.price <= 1500);
+      } else if (selectedPrice === "above-1500") {
+        result = result.filter((p) => p.price > 1500);
       } else if (selectedPrice === "3000-3500") {
         result = result.filter((p) => p.price >= 3000 && p.price <= 3500);
       } else if (selectedPrice === "above-3500") {

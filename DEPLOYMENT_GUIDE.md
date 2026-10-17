@@ -40,7 +40,7 @@ You only need **4 environment variables** in Vercel.
 | :--- | :--- | :--- |
 | `MONGODB_URI` | Your live MongoDB Atlas connection URI | `mongodb+srv://<user>:<password>@cluster2.vpb0qnd.mongodb.net/cuffkings?retryWrites=true&w=majority` |
 | `JWT_SECRET` | 64-character random secret key for admin sessions | Use your current hex key from `.env.local` |
-| `ADMIN_PASSWORD_HASH` | Bcrypt hash of your admin password | Use your current `$2b$10$...` hash from `.env.local` |
+| `ADMIN_PASSWORD` | Master passcode for admin authentication | `@cuffkings0987` (or use bcrypt `ADMIN_PASSWORD_HASH`) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Your WhatsApp concierge phone number (no `+` sign) | `923719145871` |
 
 > ⚠️ **Note**: No `BLOB_READ_WRITE_TOKEN`, no Cloudinary credentials, and no AWS keys are required. The application handles manual file uploads directly.

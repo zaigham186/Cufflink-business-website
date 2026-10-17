@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { orderService } from "@/lib/server/services/order.service";
 import { getAdminSession } from "@/lib/server/auth";
 import { createOrderSchema } from "@/lib/validations/order.schema";
@@ -43,6 +44,14 @@ export async function POST(req: NextRequest) {
     }
 
     const order = await orderService.createOrder(parsed.data);
+
+    try {
+      revalidatePath("/admin/orders");
+      revalidatePath("/admin/dispatch");
+      revalidatePath("/admin");
+    } catch (revalErr) {
+      console.warn("revalidatePath notice:", revalErr);
+    }
 
     return NextResponse.json(
       {

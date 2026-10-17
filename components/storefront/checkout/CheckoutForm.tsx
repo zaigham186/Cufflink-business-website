@@ -71,7 +71,7 @@ export default function CheckoutForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (items.length === 0) {
@@ -105,14 +105,56 @@ export default function CheckoutForm() {
     try {
       // Generate clean unique order reference
       const orderId = `CK-${Math.floor(10000 + Math.random() * 90000)}`;
+      const deliveryFee = 180;
+      const orderTotal = subtotal + deliveryFee;
+
       const orderCustomerDetails = {
         ...result.data,
         orderId,
+        deliveryFee,
+        total: orderTotal,
       };
 
-      // Generate WhatsApp URL and message text
+      // Generate WhatsApp URL and message text with exact delivery fee and total
       const whatsappURL = generateWhatsAppURL(items, orderCustomerDetails);
       const messageText = generateWhatsAppOrderMessage(items, orderCustomerDetails);
+
+      // Persist order reliably to Atelier database
+      const orderPayload = {
+        orderId,
+        customerName: result.data.name,
+        phone: result.data.phone,
+        address: result.data.address,
+        city: result.data.city,
+        paymentMethod: result.data.paymentMethod || "Cash on Delivery (COD)",
+        notes: result.data.notes || "",
+        items: items.map((it) => ({
+          productId: it.id,
+          name: it.name,
+          slug: it.slug,
+          price: it.price,
+          quantity: it.quantity,
+          image: it.image || "",
+          material: it.material || "",
+        })),
+        subtotal,
+        deliveryFee,
+        total: orderTotal,
+      };
+
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Unable to save order record");
+      }
+
+      const savedData = await res.json();
+      const finalOrderId = savedData.order?.orderId || orderId;
 
       // Attempt to open WhatsApp in a new tab/window
       try {
@@ -124,42 +166,15 @@ export default function CheckoutForm() {
         console.warn("Direct window.open blocked by browser; user can click the manual link", e);
       }
 
-      // Persist order asynchronously to Atelier database
-      fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          customerName: result.data.name,
-          phone: result.data.phone,
-          address: result.data.address,
-          city: result.data.city,
-          paymentMethod: result.data.paymentMethod || "Cash on Delivery (COD)",
-          notes: result.data.notes || "",
-          items: items.map((it) => ({
-            productId: it.id,
-            name: it.name,
-            slug: it.slug,
-            price: it.price,
-            quantity: it.quantity,
-            image: it.image,
-            material: it.material,
-          })),
-          subtotal,
-          deliveryFee: 180,
-          total: subtotal + 180,
-        }),
-      }).catch((err) => console.error("Background order save notification:", err));
-
       setPreparedOrder({
-        orderId,
+        orderId: finalOrderId,
         whatsappURL,
         messageText,
-        total: subtotal,
+        total: orderTotal,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Checkout submission error:", error);
-      alert("There was an error preparing your order. Please check your information and try again.");
+      alert(error.message || "There was an error preparing your order. Please check your information and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -268,8 +283,8 @@ export default function CheckoutForm() {
               <span className="font-medium text-champagne-brass">{formData.paymentMethod}</span>
             </div>
             <div className="flex justify-between items-center pt-1 text-sm font-medium">
-              <span className="text-porcelain">Total Order Value</span>
-              <span className="text-champagne-brass text-base">Rs. {preparedOrder.total.toLocaleString()}</span>
+              <span className="text-porcelain">Total Order Value <span className="text-[11px] text-porcelain/50 font-normal">(incl. Rs. 180 COD delivery)</span></span>
+              <span className="text-champagne-brass text-base font-mono">Rs. {preparedOrder.total.toLocaleString()}</span>
             </div>
           </div>
 

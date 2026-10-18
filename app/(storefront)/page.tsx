@@ -31,7 +31,7 @@ export default async function Home() {
       <BrassLine />
 
       {/* 02. Collection Introduction (stats + brass line draw) */}
-      <CollectionIntro />
+      <CollectionIntro productCount={products.length} />
       <BrassLine />
 
       {/* 03. Shop by Collection (clip-path card reveals + image scale) */}

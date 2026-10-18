@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -62,16 +63,27 @@ export default function AdminSidebar({ isOpen = false, onClose }: AdminSidebarPr
           <Link
             href="/admin"
             onClick={onClose}
-            className="group block"
+            className="group flex items-center gap-3"
           >
-            <span className="font-display text-xl tracking-wider text-porcelain group-hover:text-champagne-brass transition-colors">
-              CUFFKINGS
-            </span>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] tracking-widest text-champagne-brass/80 uppercase font-sans">
-                Atelier Executive Suite
+            <div className="relative w-10 h-10 rounded-md overflow-hidden bg-obsidian-deep/80 border border-champagne-brass/30 p-0.5 shrink-0 group-hover:border-champagne-brass/60 transition-colors shadow-sm">
+              <Image
+                src="/logo.png"
+                alt="CuffKings Crest"
+                fill
+                sizes="40px"
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <span className="font-display text-lg tracking-wider text-porcelain group-hover:text-champagne-brass transition-colors block leading-tight">
+                CUFFKINGS
               </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-[9.5px] tracking-widest text-champagne-brass/80 uppercase font-sans">
+                  Executive Suite
+                </span>
+              </div>
             </div>
           </Link>
 

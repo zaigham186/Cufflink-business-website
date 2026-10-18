@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 interface AdminHeaderProps {
   onToggleSidebar?: () => void;
@@ -33,6 +34,15 @@ export default function AdminHeader({ onToggleSidebar }: AdminHeaderProps) {
         </button>
 
         <div className="flex items-center space-x-2.5 min-w-0">
+          <div className="relative w-6 h-6 rounded overflow-hidden bg-obsidian-deep border border-champagne-brass/30 shrink-0 lg:hidden">
+            <Image
+              src="/logo.png"
+              alt="CK"
+              fill
+              sizes="24px"
+              className="object-contain"
+            />
+          </div>
           <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
           <span className="text-xs uppercase tracking-widest text-champagne-brass font-medium truncate">
             <span className="hidden sm:inline">Cuffkings </span>Atelier Desk

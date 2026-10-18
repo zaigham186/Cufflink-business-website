@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     "cash on delivery cufflinks",
     "CuffKings",
   ],
-  authors: [{ name: "CuffKings Atelier", url: "https://cuffkings.pk" }],
+  authors: [{ name: "CuffKings", url: "https://cuffkings.pk" }],
   creator: "CuffKings",
   publisher: "CuffKings",
   robots: {

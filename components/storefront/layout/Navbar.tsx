@@ -133,9 +133,23 @@ export default function Navbar() {
             {/* 1. Logo */}
             <Link
               href="/"
-              className="text-sm sm:text-base font-medium tracking-[0.3em] text-porcelain hover:text-champagne-brass transition-colors duration-200 flex-shrink-0"
+              className="flex items-center gap-2.5 sm:gap-3 text-porcelain hover:text-champagne-brass transition-all duration-200 flex-shrink-0 group py-1"
             >
-              CUFFKINGS
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300">
+                <Image
+                  src="/logo.png"
+                  alt="CuffKings Royal Crown Monogram"
+                  fill
+                  sizes="36px"
+                  priority
+                  className="object-contain"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs sm:text-sm font-display font-medium tracking-[0.25em] text-porcelain group-hover:text-champagne-brass transition-colors leading-tight">
+                  CUFFKINGS
+                </span>
+              </div>
             </Link>
 
             {/* 2. Desktop Navigation: Home / About / Shop / Contact */}
@@ -289,12 +303,12 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* 5. Atelier Admin Portal Login Link */}
+              {/* 5. Admin Portal Login Link */}
               <Link
                 href="/admin"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] uppercase tracking-widest font-medium text-champagne-brass border border-champagne-brass/35 hover:border-champagne-brass hover:bg-champagne-brass/10 transition-all duration-200 rounded-[2px]"
-                title="Atelier Admin Portal"
-                aria-label="Atelier Admin Portal"
+                title="Admin Portal"
+                aria-label="Admin Portal"
               >
                 <svg
                   className="w-3.5 h-3.5"
@@ -356,9 +370,22 @@ export default function Navbar() {
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-medium tracking-[0.3em] text-porcelain"
+              className="flex items-center gap-2.5 text-porcelain"
             >
-              CUFFKINGS
+              <div className="relative w-8 h-8 rounded overflow-hidden flex-shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="CuffKings Royal Crown Monogram"
+                  fill
+                  sizes="32px"
+                  className="object-contain"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-display font-medium tracking-[0.25em] leading-tight">
+                  CUFFKINGS
+                </span>
+              </div>
             </Link>
 
             <div className="flex items-center space-x-4">

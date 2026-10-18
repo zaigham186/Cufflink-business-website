@@ -8,13 +8,11 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-const stats = [
-  { value: "67", label: "Unique Pieces", suffix: "+" },
-  { value: "3", label: "Collections", suffix: "" },
-  { value: "100", label: "Handcrafted", suffix: "%" },
-];
+interface CollectionIntroProps {
+  productCount?: number;
+}
 
-export default function CollectionIntro() {
+export default function CollectionIntro({ productCount = 46 }: CollectionIntroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const tagRef = useRef<HTMLDivElement>(null);
@@ -22,6 +20,12 @@ export default function CollectionIntro() {
   const textRef = useRef<HTMLParagraphElement>(null);
   const statsRef = useRef<(HTMLDivElement | null)[]>([]);
   const statLineRef = useRef<HTMLDivElement>(null);
+
+  const stats = [
+    { value: `${productCount}`, label: "Unique Pieces", suffix: "+" },
+    { value: "3", label: "Collections", suffix: "" },
+    { value: "100", label: "Hand-Inspected", suffix: "%" },
+  ];
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
@@ -165,11 +169,10 @@ export default function CollectionIntro() {
           {/* Body */}
           <p
             ref={textRef}
-            className="text-xl opacity-0 leading-relaxed max-w-2xl text-warm-charcoal/80"
+            className="text-lg sm:text-xl opacity-0 leading-relaxed max-w-2xl text-warm-charcoal/80"
           >
-            Every cufflink begins as a flat blank of raw metal — cut, shaped,
-            then finished by hand across three collections: Classical, Signature,
-            and Premium.
+            Three collections built around solid brass, enamel work, and crystal setting.
+            From boardroom-ready Classical pieces to wedding-grade Premium sets.
           </p>
 
           {/* Stats row */}

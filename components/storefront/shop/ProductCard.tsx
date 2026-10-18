@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Product } from "@/types/product";
-import Badge from "@/components/ui/Badge";
+import { useCartStore } from "@/store/cartStore";
 
 interface ProductCardProps {
   product: Product;
@@ -18,132 +18,173 @@ export default function ProductCard({
   showCollectionBadge = true,
 }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [added, setAdded] = useState(false);
+  const addItem = useCartStore((state) => state.addItem);
+  const openDrawer = useCartStore((state) => state.openDrawer);
 
   const hasMultipleImages = product.images && product.images.length > 1;
   const hasDiscount = Boolean(product.compareAtPrice && product.compareAtPrice > product.price);
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const isOutOfStock = product.stock === 0;
 
-  // Collection badge styling
-  const collectionColors = {
-    Classical: "border-champagne-brass/30 text-champagne-brass/90 bg-obsidian/80",
-    Signature: "border-champagne-brass/50 text-champagne-brass bg-obsidian/80",
-    Premium: "border-champagne-brass text-champagne-brass bg-obsidian/90 font-medium",
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock) return;
+
+    addItem({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      price: product.price,
+      image: product.images[0] || "/products/classic1.jpeg",
+      material: product.material || "Solid Brass",
+    });
+
+    setAdded(true);
+    openDrawer();
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
-    <Link
-      href={`/product/${product.slug}`}
-      data-cursor="view"
+    <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group block bg-obsidian border border-champagne-brass/20 hover:border-champagne-brass/70 transition-all duration-300 overflow-hidden transform hover:-translate-y-1.5 shadow-lg hover:shadow-2xl hover:shadow-champagne-brass/5 ${className}`}
+      className={`group relative flex flex-col justify-between bg-[#111215] border border-champagne-brass/25 hover:border-champagne-brass transition-all duration-300 rounded-[2px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-champagne-brass/5 ${className}`}
     >
-      {/* Image Container with secondary image hover flip */}
-      <div className="aspect-square relative overflow-hidden bg-obsidian select-none">
+      {/* 1. Clickable Image Container - Refined Square Aspect */}
+      <Link
+        href={`/product/${product.slug}`}
+        className="block relative aspect-square w-full overflow-hidden bg-[#0c0d10] select-none cursor-pointer"
+        aria-label={`View details of ${product.name}`}
+      >
         {/* Primary Image */}
         <Image
           src={product.images[0] || "/products/classic1.jpeg"}
           alt={product.name}
           fill
-          className={`object-cover transition-all duration-700 ease-out ${
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className={`object-cover transition-all duration-500 ease-out ${
             hasMultipleImages && isHovered
               ? "opacity-0 scale-105"
               : "opacity-100 group-hover:scale-105"
           }`}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
 
-        {/* Secondary Angle Image (if exists) */}
+        {/* Secondary Image hover flip */}
         {hasMultipleImages && product.images[1] && (
           <Image
             src={product.images[1]}
             alt={`${product.name} alternate view`}
             fill
-            className={`object-cover transition-all duration-700 ease-out ${
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className={`object-cover transition-all duration-500 ease-out ${
               isHovered ? "opacity-100 scale-105" : "opacity-0 scale-100"
             }`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         )}
 
-        {/* Badges Top-Left */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+        {/* Badges Overlay */}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10 pointer-events-none">
           {showCollectionBadge && (
-            <span
-              className={`text-[10px] tracking-widest uppercase px-2 py-0.5 border ${
-                collectionColors[product.category] || "border-champagne-brass/30 text-champagne-brass"
-              }`}
-            >
+            <span className="text-[9px] sm:text-[10px] tracking-widest uppercase font-semibold px-2 py-0.5 bg-obsidian/90 backdrop-blur-sm border border-champagne-brass/40 text-champagne-brass rounded-[1px]">
               {product.category}
             </span>
           )}
-          {hasDiscount && <Badge variant="sale">Sale</Badge>}
-          {isLowStock && <Badge variant="limited">Low stock</Badge>}
+          {hasDiscount && (
+            <span className="text-[9px] tracking-wider uppercase font-medium px-1.5 py-0.5 bg-deep-wine text-porcelain rounded-[1px]">
+              Sale
+            </span>
+          )}
+          {isLowStock && (
+            <span className="text-[9px] tracking-wider uppercase font-medium px-1.5 py-0.5 bg-champagne-brass/20 text-champagne-brass border border-champagne-brass/40 rounded-[1px]">
+              Low Stock
+            </span>
+          )}
         </div>
 
-        {/* Multiple angles indicator tag */}
+        {/* 2 Angles Tag */}
         {hasMultipleImages && (
-          <div className="absolute bottom-3 right-3 text-[9px] tracking-wider text-porcelain/60 bg-obsidian/80 px-1.5 py-0.5 border border-champagne-brass/20">
-            2 ANGLES
+          <div className="absolute bottom-2.5 right-2.5 text-[8.5px] tracking-wider uppercase text-porcelain/70 bg-obsidian/85 px-1.5 py-0.5 border border-champagne-brass/20 rounded-[1px] pointer-events-none">
+            2 Views
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* Product Details Block */}
-      <div className="p-5 lg:p-6 space-y-3 bg-obsidian text-porcelain border-t border-champagne-brass/10">
+      {/* 2. Compact, Professional Product Details */}
+      <div className="p-3.5 sm:p-4 bg-[#111215] border-t border-champagne-brass/15 flex flex-col justify-between flex-1 gap-2.5">
         <div>
-          <h3 className="text-base font-display text-porcelain group-hover:text-champagne-brass transition-colors duration-200 line-clamp-1">
+          {/* Title */}
+          <Link
+            href={`/product/${product.slug}`}
+            className="block text-xs sm:text-sm font-display font-medium text-porcelain group-hover:text-champagne-brass transition-colors line-clamp-1 leading-snug"
+            title={product.name}
+          >
             {product.name}
-          </h3>
-          <p className="text-xs text-porcelain/60 mt-1 line-clamp-1">
-            {product.material} • {product.finish}
+          </Link>
+
+          {/* Material */}
+          <p className="text-[10.5px] sm:text-[11px] text-porcelain/60 mt-0.5 line-clamp-1 font-sans">
+            {product.material}
           </p>
         </div>
 
-        {/* Price & Stock status */}
+        {/* Price & Status Row */}
         <div className="flex items-baseline justify-between pt-1 border-t border-white/5">
-          <div className="flex items-baseline space-x-2">
-            <span className="text-sm sm:text-base font-medium text-champagne-brass">
+          <div className="flex items-baseline gap-2">
+            <span className="text-xs sm:text-sm font-semibold text-champagne-brass font-mono">
               Rs. {product.price.toLocaleString()}
             </span>
             {hasDiscount && (
-              <span className="text-xs text-porcelain/40 line-through">
+              <span className="text-[10px] sm:text-[11px] text-porcelain/40 line-through font-mono">
                 Rs. {product.compareAtPrice?.toLocaleString()}
               </span>
             )}
           </div>
 
-          <span
-            className={`text-[11px] ${
+          <span className={`text-[10px] font-sans ${isOutOfStock ? "text-deep-wine font-medium" : "text-emerald-400/90"}`}>
+            {isOutOfStock ? "Sold out" : "In stock"}
+          </span>
+        </div>
+
+        {/* Dedicated Instant Add to Cart Action Button - Always visible on all devices */}
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={handleQuickAdd}
+            disabled={isOutOfStock}
+            aria-label={isOutOfStock ? "Sold out" : `Add ${product.name} to cart`}
+            className={`w-full py-2 sm:py-2.5 px-3 text-[11px] sm:text-xs font-semibold tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-1.5 rounded-[2px] shadow-sm select-none ${
               isOutOfStock
-                ? "text-deep-wine font-medium"
-                : isLowStock
-                ? "text-champagne-brass"
-                : "text-porcelain/50"
+                ? "bg-white/5 text-porcelain/30 border border-white/10 cursor-not-allowed"
+                : added
+                ? "bg-emerald-600 text-white border border-emerald-500 shadow-emerald-900/30"
+                : "bg-champagne-brass text-obsidian hover:bg-champagne-brass-light border border-champagne-brass active:scale-[0.99] cursor-pointer"
             }`}
           >
-            {isOutOfStock
-              ? "Sold out"
-              : isLowStock
-              ? `${product.stock} remaining`
-              : "In stock"}
-          </span>
+            {isOutOfStock ? (
+              <span>Sold Out</span>
+            ) : added ? (
+              <span className="flex items-center gap-1.5 font-bold">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Added to Cart ✓
+              </span>
+            ) : (
+              <>
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span>Add to Cart</span>
+              </>
+            )}
+          </button>
         </div>
 
-        {/* Hover action indicator */}
-        <div className="pt-2 flex items-center justify-between text-xs text-champagne-brass/80 group-hover:text-champagne-brass transition-colors">
-          <span className="text-[11px] tracking-wider uppercase font-medium">
-            View piece
-          </span>
-          <span className="transform group-hover:translate-x-1 transition-transform duration-300">
-            →
-          </span>
-        </div>
-
-        {/* Animated Gold Rule on hover */}
-        <div className="h-0.5 w-0 bg-champagne-brass group-hover:w-full transition-all duration-500 ease-out" />
+        {/* Gold Accent Line that expands on card hover */}
+        <div className="h-0.5 w-0 bg-champagne-brass group-hover:w-full transition-all duration-300 ease-out" />
       </div>
-    </Link>
+    </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
 import {
   generateWhatsAppURL,
@@ -194,20 +195,14 @@ export default function CheckoutForm() {
         <div className="bg-deep-petrol border border-champagne-brass/40 p-6 sm:p-8 lg:p-10 space-y-8 text-porcelain">
           {/* Header */}
           <div className="text-center space-y-3">
-            <div className="w-16 h-16 mx-auto bg-champagne-brass/15 border border-champagne-brass/40 flex items-center justify-center text-champagne-brass">
-              <svg
-                className="w-8 h-8"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+            <div className="relative w-16 h-16 mx-auto rounded-xl overflow-hidden bg-obsidian-deep border border-champagne-brass/50 p-1 shadow-[0_0_25px_rgba(198,161,91,0.2)]">
+              <Image
+                src="/logo.png"
+                alt="CuffKings Royal Seal"
+                fill
+                sizes="64px"
+                className="object-contain"
+              />
             </div>
             <div>
               <span className="text-[11px] tracking-[0.2em] uppercase text-champagne-brass font-medium">

@@ -32,24 +32,23 @@ export default function FeaturedCollectionsShowcase({
 
   const tabs: TabType[] = ["All", "Classical", "Signature", "Premium"];
 
-  // Category counts calculated from live catalog
+  // Category counts calculated from live database catalog
   const counts = useMemo(() => {
     return {
-      All: products.length || 67,
-      Classical: products.filter((p) => p.category === "Classical").length || 17,
-      Signature: products.filter((p) => p.category === "Signature").length || 33,
-      Premium: products.filter((p) => p.category === "Premium").length || 17,
+      All: products.length,
+      Classical: products.filter((p) => p.category === "Classical").length,
+      Signature: products.filter((p) => p.category === "Signature").length,
+      Premium: products.filter((p) => p.category === "Premium").length,
     };
   }, [products]);
 
-  // Filter products for the showcase
+  // Filter products for the showcase (8 items in balanced 4-column grid)
   const displayedProducts = useMemo(() => {
     if (activeTab === "All") {
-      // Prioritize featured products, fallback to first 6
       const featured = products.filter((p) => p.featured);
-      return (featured.length >= 6 ? featured : products).slice(0, 6);
+      return (featured.length >= 8 ? featured : products).slice(0, 8);
     }
-    return products.filter((p) => p.category === activeTab).slice(0, 6);
+    return products.filter((p) => p.category === activeTab).slice(0, 8);
   }, [products, activeTab]);
 
   const getCollectionHref = () => {
@@ -59,20 +58,7 @@ export default function FeaturedCollectionsShowcase({
     return "/shop";
   };
 
-  const getTabSubtitle = () => {
-    switch (activeTab) {
-      case "Classical":
-        return `Turned brass essentials • Rs. 700–800 • ${counts.Classical} pieces calibrated for boardroom tailoring`;
-      case "Signature":
-        return `Vitreous enamel & guilloché • Rs. 1,000–1,400 • ${counts.Signature} pieces with tactile surface relief`;
-      case "Premium":
-        return `Austrian crystals & relief engraving • Rs. 1,500–2,500 • ${counts.Premium} ceremonial evening pieces`;
-      default:
-        return `Archive highlights • Rs. 700–2,500 • 67 distinct pieces across three handcrafted tiers`;
-    }
-  };
-
-  // Header entrance
+  // Header entrance animation
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -116,7 +102,7 @@ export default function FeaturedCollectionsShowcase({
     return () => ctx.revert();
   }, []);
 
-  // CTA entrance
+  // CTA entrance animation
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -162,7 +148,7 @@ export default function FeaturedCollectionsShowcase({
               ref={tagRef}
               className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-2 opacity-0"
             >
-              The Atelier Showcase
+              The Collection
             </div>
             <h2
               id="featured-showcase-title"
@@ -170,10 +156,10 @@ export default function FeaturedCollectionsShowcase({
               className="text-3xl sm:text-4xl lg:text-5xl font-display text-porcelain opacity-0"
               style={{ willChange: "transform" }}
             >
-              Distinguished Pieces
+              Our Cufflinks
             </h2>
             <p className="text-xs sm:text-sm text-porcelain/70 mt-2 max-w-xl font-sans">
-              {getTabSubtitle()}
+              Rs. 700–2,500 • Classical, Signature and Premium • Nationwide cash on delivery
             </p>
           </div>
 
@@ -223,14 +209,14 @@ export default function FeaturedCollectionsShowcase({
           style={{ transform: "scaleX(0)", transformOrigin: "left" }}
         />
 
-        {/* 6-Grid of Professional Product Cards with dynamic key transition */}
+        {/* 8-Grid of Professional Product Cards with identical 4-column dimensions */}
         <div
           key={activeTab}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5 lg:gap-6 items-stretch"
         >
           {displayedProducts.map((product, index) => (
-            <Reveal key={product.id} delay={index * 0.06} direction="up">
-              <ProductCard product={product} />
+            <Reveal key={product.id} delay={index * 0.06} direction="up" className="h-full">
+              <ProductCard product={product} className="h-full" />
             </Reveal>
           ))}
         </div>
@@ -246,15 +232,15 @@ export default function FeaturedCollectionsShowcase({
           >
             <span>
               {activeTab === "All"
-                ? `Explore Entire ${counts.All}-Piece Archive`
-                : `View All ${counts[activeTab]} ${activeTab} Pieces`}
+                ? `View All ${counts.All} Cufflinks`
+                : `View All ${counts[activeTab]} ${activeTab} Cufflinks`}
             </span>
             <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">
               →
             </span>
           </Link>
 
-          {/* Luxury Assurance Badges */}
+          {/* Brand Assurances */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[11px] sm:text-xs text-porcelain/60 uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
               <span className="text-champagne-brass">✓</span> Nationwide Cash on Delivery
@@ -274,4 +260,3 @@ export default function FeaturedCollectionsShowcase({
     </section>
   );
 }
-

@@ -1,169 +1,209 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import Reveal from "@/components/motion/Reveal";
-import ImageReveal from "@/components/motion/ImageReveal";
-import MoreAboutCufflinks from "@/components/storefront/home/MoreAboutCufflinks";
 import Magnetic from "@/components/motion/Magnetic";
 import CollectionExplainer from "@/components/storefront/about/CollectionExplainer";
 
 export const metadata: Metadata = {
-  title: "About — CuffKings",
+  title: "Our Story — CuffKings",
   description:
-    "Cufflinks built around polished metal, considered patterns and the details of formal dressing. Handcrafted in Peshawar, Pakistan.",
+    "Cufflinks built around solid brass, enamel work, and crystal setting. Handcrafted and inspected in Peshawar, Pakistan with nationwide cash on delivery.",
 };
+
+const SPECIFICATIONS = [
+  {
+    num: "01",
+    title: "Solid Jeweler's Brass",
+    description:
+      "Every piece begins with a solid brass substrate, weighted between 14g and 18g. Never hollow stampings or lightweight zinc alloys.",
+  },
+  {
+    num: "02",
+    title: "Cold-Cured Enamel",
+    description:
+      "Mineral enamel fills are poured by hand, cured, and leveled flush against beveled metal borders to prevent chipping or dulling.",
+  },
+  {
+    num: "03",
+    title: "Tested Swivel Bar",
+    description:
+      "Tension springs undergo positive-lock cycle checks to guarantee sleeves stay neatly anchored throughout long formal gatherings.",
+  },
+  {
+    num: "04",
+    title: "Peshawar Inspection",
+    description:
+      "Each pair is hand-cleaned, micro-wax sealed against oxidation, and nestled into a protective presentation box prior to dispatch.",
+  },
+];
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-obsidian text-porcelain pt-20">
-      {/* 1. Header Block */}
-      <section className="py-20 lg:py-28 border-b border-champagne-brass/20">
-        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
-          <Reveal direction="up" delay={0.1} className="max-w-3xl space-y-6">
-            <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium">
-              CUFFKINGS ATELIER
+      {/* 1. Hero Block (Dark Obsidian) */}
+      <section className="py-24 lg:py-32 border-b border-champagne-brass/20 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 space-y-8">
+          <Reveal direction="up" delay={0.1}>
+            <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-6">
+              CUFFKINGS — PESHAWAR, PAKISTAN
             </div>
-            <h1 className="text-display font-display leading-[0.95]">
-              The detail changes everything.
+
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display leading-[1.2] text-porcelain max-w-3xl mx-auto italic">
+              &ldquo;A cufflink should anchor a cuff<br className="hidden sm:inline" /> without pulling the fabric.&rdquo;
             </h1>
-            <p className="text-body text-porcelain/80 leading-relaxed max-w-2xl pt-2">
-              CuffKings focuses on men&apos;s accessories for formal dressing.
-              Crafted across three collections — Classical, Signature, and Premium —
-              every pair starts with solid metal, filed surfaces and hand-set
-              enamel, finished and inspected in Peshawar before it is packed.
+
+            <p className="text-sm sm:text-base text-porcelain/75 pt-6 tracking-wide font-sans">
+              Three collections. Solid brass. Nationwide delivery.
             </p>
           </Reveal>
         </div>
       </section>
 
-      {/* 2. Large Editorial Photography Break with ImageReveal */}
-      <section className="relative w-full aspect-[21/9] min-h-[350px] bg-obsidian border-b border-champagne-brass/20 overflow-hidden">
-        <ImageReveal direction="up" duration={1.3} className="w-full h-full">
-          <div className="relative w-full h-[45vw] min-h-[350px]">
-            <Image
-              src="/editorial/craftsmanship-detail.jpg"
-              alt="Cufflink hand finishing and filing in Peshawar workshop"
-              fill
-              priority
-              className="object-cover"
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-obsidian/30" />
-          </div>
-        </ImageReveal>
-      </section>
-
-      {/* 3. Narrative & Materials on Porcelain */}
+      {/* 2. What We Make (Porcelain Background, Two Columns, No Images) */}
       <section className="bg-porcelain text-warm-charcoal py-24 lg:py-32">
         <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-            {/* Left Column: Peshawar & Craft */}
-            <div className="lg:col-span-6 space-y-8">
+            {/* Left Headline */}
+            <div className="lg:col-span-5 space-y-4">
               <Reveal direction="up" delay={0.1}>
-                <h2 className="text-h2 font-display leading-[1.05] text-warm-charcoal">
-                  Based in Peshawar. Focused on formal dressing.
+                <div className="h-px w-16 bg-champagne-brass mb-6" />
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display leading-[1.1] text-warm-charcoal">
+                  Based in Peshawar.<br />
+                  Focused on formal dressing.
                 </h2>
               </Reveal>
-              <Reveal direction="up" delay={0.2} className="space-y-5 text-body text-warm-charcoal/80 leading-relaxed">
+            </div>
+
+            {/* Right Body Text (3 Paragraphs) */}
+            <div className="lg:col-span-7 space-y-6 text-base sm:text-lg text-warm-charcoal/80 leading-relaxed">
+              <Reveal direction="up" delay={0.2}>
                 <p>
-                  Formal dressing leaves little room for excess. When a suit fits
-                  and a shirt cuff sits right at the wrist, the cufflink is the
-                  single point where craftsmanship, weight, and metal finish meet.
-                </p>
-                <p>
-                  Operating from Peshawar, Pakistan, we work closely with
-                  metalworkers and enamel craftspeople. We focus on finishing:
-                  filing sharp burrs, balancing weight so the cuff hangs cleanly,
-                  and testing toggle backings for reliable tension.
+                  CuffKings makes cufflinks for men who dress with intention. Every pair is built on a solid brass substrate — not lightweight zinc stampings — and finished across three collections: Classical, Signature, and Premium.
                 </p>
               </Reveal>
 
-              <div className="pt-4 border-t border-warm-charcoal/15 flex items-center space-x-4">
-                <div className="h-px w-16 bg-champagne-brass" />
-                <span className="text-xs text-warm-charcoal/60 uppercase tracking-wider">
-                  Khyber Pakhtunkhwa, Pakistan
-                </span>
+              <Reveal direction="up" delay={0.25}>
+                <p>
+                  Classical pieces use clean geometric silhouettes in mirror-polished or brushed brass. Signature pieces add hand-applied mineral enamel — sapphire blue, jet black, ivory — leveled flush with the metal border. Premium pieces carry hand-set Austrian crystals and deep relief engraving, calibrated for weddings and formal evening wear.
+                </p>
+              </Reveal>
+
+              <Reveal direction="up" delay={0.3}>
+                <p>
+                  We ship nationally across Pakistan with cash on delivery. Every pair is hand-inspected and packed in a presentation box before dispatch from Peshawar.
+                </p>
+              </Reveal>
+            </div>
+          </div>
+
+          {/* Three-Item Horizontal Fact Row */}
+          <div className="mt-20 pt-12 border-t border-warm-charcoal/15 grid grid-cols-1 sm:grid-cols-3 gap-8">
+            <Reveal direction="up" delay={0.35}>
+              <div className="text-center sm:text-left">
+                <div className="text-3xl sm:text-4xl font-display text-warm-charcoal font-medium">
+                  14–22g
+                </div>
+                <div className="text-xs sm:text-sm text-warm-charcoal/60 mt-1 uppercase tracking-wider">
+                  Calibrated pair weight
+                </div>
               </div>
-            </div>
+            </Reveal>
 
-            {/* Right Column: Materials Breakdown */}
-            <div className="lg:col-span-6 space-y-10">
-              <Reveal direction="up" delay={0.1} className="space-y-3 pb-6 border-b border-warm-charcoal/15">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className="text-xl font-display text-warm-charcoal">
-                    Solid metal surfaces
-                  </h3>
-                  <span className="text-xs uppercase tracking-wider text-warm-charcoal/60 font-medium">
-                    (Classical and above)
-                  </span>
+            <Reveal direction="up" delay={0.4}>
+              <div className="text-center sm:text-left">
+                <div className="text-3xl sm:text-4xl font-display text-warm-charcoal font-medium">
+                  3
                 </div>
-                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
-                  Gold-tone, silver-tone, and matte gunmetal. Each surface is
-                  filed and mirror-polished or wire-brushed so light reflects
-                  cleanly across edges.
-                </p>
-              </Reveal>
+                <div className="text-xs sm:text-sm text-warm-charcoal/60 mt-1 uppercase tracking-wider">
+                  Focused collections
+                </div>
+              </div>
+            </Reveal>
 
-              <Reveal direction="up" delay={0.2} className="space-y-3 pb-6 border-b border-warm-charcoal/15">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className="text-xl font-display text-warm-charcoal">
-                    Deep mineral enamel
-                  </h3>
-                  <span className="text-xs uppercase tracking-wider text-warm-charcoal/60 font-medium">
-                    (Signature and above)
-                  </span>
+            <Reveal direction="up" delay={0.45}>
+              <div className="text-center sm:text-left">
+                <div className="text-3xl sm:text-4xl font-display text-warm-charcoal font-medium">
+                  COD
                 </div>
-                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
-                  Sapphire blue, black, and ivory fills. Set flush with the
-                  cufflink perimeter to eliminate ridges that catch on fabric.
-                </p>
-              </Reveal>
-
-              <Reveal direction="up" delay={0.3} className="space-y-3">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <h3 className="text-xl font-display text-warm-charcoal">
-                    Engraving and crystal pavé
-                  </h3>
-                  <span className="text-xs uppercase tracking-wider text-warm-charcoal/60 font-medium">
-                    (Premium)
-                  </span>
+                <div className="text-xs sm:text-sm text-warm-charcoal/60 mt-1 uppercase tracking-wider">
+                  Nationwide cash on delivery
                 </div>
-                <p className="text-xs sm:text-sm text-warm-charcoal/75 leading-relaxed">
-                  Geometric repeats, trellis lattice, and floral engraving cut
-                  deep enough to provide tactile texture without ostentation.
-                </p>
-              </Reveal>
-            </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* 3b. Three Collections, One Standard of Finish */}
+      {/* 3. The Three Collections (Dark Obsidian Background) */}
       <CollectionExplainer />
 
-      {/* 4. Atelier Weight & Sartorial Anatomy */}
-      <MoreAboutCufflinks />
+      {/* 4. Why Brass, Enamel, and Crystal (Porcelain Background, 2x2 Grid) */}
+      <section className="bg-porcelain text-warm-charcoal py-24 lg:py-32">
+        <div className="max-w-container mx-auto px-6 sm:px-8 lg:px-12">
+          <Reveal direction="up" delay={0.1} className="max-w-3xl mb-16">
+            <div className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase mb-4">
+              CONSTRUCTION & SPECIFICATIONS
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-display leading-[1.1] text-warm-charcoal">
+              Solid brass, cold-cured enamel, and tested mechanics.
+            </h2>
+          </Reveal>
 
-      {/* 5. Concluding Atelier CTA */}
-      <section className="bg-obsidian text-porcelain py-20 lg:py-28 border-t border-champagne-brass/20 text-center">
-        <div className="max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 space-y-6">
-          <Reveal direction="up">
-            <h3 className="text-2xl sm:text-3xl font-display text-porcelain">
-              Finished for the occasion.
-            </h3>
-            <p className="text-sm text-porcelain/80 leading-relaxed max-w-xl mx-auto pt-2">
-              Whether selected for a wedding, evening formalwear, or black-tie
-              dress, our pieces are built to remain understated and sharp.
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {SPECIFICATIONS.map((spec, i) => (
+              <Reveal key={spec.num} direction="up" delay={0.15 + i * 0.1}>
+                <div className="p-8 bg-white border border-warm-charcoal/15 hover:border-champagne-brass transition-colors duration-300 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="text-xs font-mono text-champagne-brass mb-3">
+                      {spec.num}
+                    </div>
+                    <h3 className="text-xl font-display text-warm-charcoal mb-3">
+                      {spec.title}
+                    </h3>
+                    <p className="text-sm text-warm-charcoal/75 leading-relaxed">
+                      {spec.description}
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. Contact Strip (Dark Obsidian Background) */}
+      <section className="bg-obsidian text-porcelain py-24 lg:py-32 border-t border-champagne-brass/20 text-center">
+        <div className="max-w-3xl mx-auto px-6 sm:px-8 lg:px-12 space-y-6">
+          <Reveal direction="up" delay={0.1}>
+            <div className="h-px w-20 bg-champagne-brass mx-auto mb-8" />
+
+            <h2 className="text-3xl sm:text-4xl font-display text-porcelain">
+              Order by WhatsApp or on the site.
+            </h2>
+
+            <p className="text-sm sm:text-base text-porcelain/80 leading-relaxed max-w-xl mx-auto pt-2">
+              Browse the collection online or message us directly at +92 371 9145871.
+              <br />
+              Cash on delivery available across all major cities in Pakistan.
             </p>
-            <div className="pt-6">
+
+            <div className="pt-8 flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Magnetic>
                 <Link
                   href="/shop"
                   className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
                 >
-                  Explore the pieces
+                  Browse the collection
                 </Link>
               </Magnetic>
+              <a
+                href="https://wa.me/923719145871"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-3.5 bg-transparent text-porcelain text-sm font-medium border border-porcelain/30 hover:border-champagne-brass hover:text-champagne-brass transition-all duration-200"
+              >
+                Message on WhatsApp
+              </a>
             </div>
           </Reveal>
         </div>

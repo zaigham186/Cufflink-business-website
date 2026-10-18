@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 
 export default function ContactHero() {
@@ -61,7 +62,16 @@ export default function ContactHero() {
             style={{ transform: "scaleX(0)", transformOrigin: "center" }}
           />
 
-          <div className="inline-block">
+          <div className="flex flex-col items-center">
+            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-obsidian-deep border border-champagne-brass/40 p-1 mb-3 shadow-[0_0_20px_rgba(198,161,91,0.15)]">
+              <Image
+                src="/logo.png"
+                alt="CuffKings Royal Emblem"
+                fill
+                sizes="48px"
+                className="object-contain"
+              />
+            </div>
             <span
               ref={tagRef}
               className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase opacity-0"

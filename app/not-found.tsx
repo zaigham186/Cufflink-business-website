@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import Reveal from "@/components/motion/Reveal";
 import Magnetic from "@/components/motion/Magnetic";
 
@@ -8,7 +9,16 @@ export default function NotFound() {
   return (
     <div className="bg-obsidian text-porcelain min-h-screen flex items-center justify-center pt-20 pb-20">
       <Reveal direction="up" delay={0.1} className="max-w-md mx-auto px-6 text-center space-y-8">
-        <div className="space-y-4">
+        <div className="space-y-4 flex flex-col items-center">
+          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-obsidian-deep border border-champagne-brass/40 p-1 mb-2 shadow-[0_0_25px_rgba(198,161,91,0.15)]">
+            <Image
+              src="/logo.png"
+              alt="CuffKings Royal Monogram"
+              fill
+              sizes="64px"
+              className="object-contain"
+            />
+          </div>
           <div className="inline-block border border-champagne-brass/30 px-6 py-2">
             <span className="text-3xl font-display text-champagne-brass">
               404

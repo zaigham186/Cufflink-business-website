@@ -42,7 +42,6 @@ export default function BrandStory() {
   const lineRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const quoteRef = useRef<HTMLQuoteElement>(null);
   const pillarsRef = useRef<HTMLDivElement>(null);
   const accentRef = useRef<HTMLDivElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
@@ -98,28 +97,6 @@ export default function BrandStory() {
           { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
           "-=0.7"
         );
-
-      // Pull quote reveal
-      gsap.fromTo(
-        quoteRef.current,
-        {
-          opacity: 0,
-          x: -25,
-          clipPath: "inset(0% 100% 0% 0%)",
-        },
-        {
-          opacity: 1,
-          x: 0,
-          clipPath: "inset(0% 0% 0% 0%)",
-          duration: 1,
-          ease: "power4.out",
-          scrollTrigger: {
-            trigger: quoteRef.current,
-            start: "top 80%",
-            once: true,
-          },
-        }
-      );
 
       // Craftsmanship pillars reveal
       if (pillarsRef.current) {
@@ -188,7 +165,7 @@ export default function BrandStory() {
               ref={tagRef}
               className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase opacity-0"
             >
-              The Atelier & Heritage
+              Our Story
             </div>
 
             {/* Brass line */}
@@ -217,20 +194,7 @@ export default function BrandStory() {
             </div>
           </div>
 
-          {/* Pull quote */}
-          <blockquote
-            ref={quoteRef}
-            className="border-l-2 border-champagne-brass pl-6 py-3 my-8 opacity-0 bg-obsidian/30 pr-4"
-          >
-            <p className="text-lg sm:text-xl font-display italic text-porcelain/90 leading-relaxed">
-              &ldquo;A cufflink should never shout across a room. It should invite a quiet second look only when your hands rest upon the table.&rdquo;
-            </p>
-            <cite className="block text-xs uppercase tracking-widest text-champagne-brass/80 mt-3 not-italic">
-              — CuffKings Workshop Principle • Peshawar
-            </cite>
-          </blockquote>
-
-          {/* 4 Craftsmanship Pillars */}
+          {/* 4 Craftsmanship Pillars - Uniform 2x2 Grid */}
           <div
             ref={pillarsRef}
             className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 border-t border-champagne-brass/20"
@@ -238,17 +202,19 @@ export default function BrandStory() {
             {CRAFTSMANSHIP_PILLARS.map((pillar) => (
               <div
                 key={pillar.num}
-                className="p-5 bg-obsidian/40 border border-champagne-brass/20 hover:border-champagne-brass/50 transition-colors duration-300"
+                className="p-6 sm:p-7 bg-obsidian/50 border border-champagne-brass/25 hover:border-champagne-brass/60 transition-colors duration-300 flex flex-col justify-between"
               >
-                <div className="text-xs font-mono tracking-wider text-champagne-brass mb-2">
-                  {pillar.num}
+                <div>
+                  <div className="text-xs font-mono tracking-wider text-champagne-brass mb-3">
+                    {pillar.num}
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-display text-porcelain mb-2">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-porcelain/75 leading-relaxed">
+                    {pillar.description}
+                  </p>
                 </div>
-                <h3 className="text-lg font-display text-porcelain mb-2">
-                  {pillar.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-porcelain/70 leading-relaxed">
-                  {pillar.description}
-                </p>
               </div>
             ))}
           </div>
@@ -270,13 +236,13 @@ export default function BrandStory() {
                 href="/about"
                 className="text-xs tracking-wider uppercase text-porcelain hover:text-champagne-brass transition-colors underline underline-offset-4"
               >
-                Read atelier story →
+                Read our story →
               </Link>
               <Link
                 href="/shop"
                 className="px-5 py-2.5 bg-champagne-brass text-obsidian text-xs font-semibold tracking-wider uppercase hover:bg-porcelain transition-colors"
               >
-                Browse Archive
+                Browse Collection
               </Link>
             </div>
           </div>
@@ -285,4 +251,3 @@ export default function BrandStory() {
     </section>
   );
 }
-

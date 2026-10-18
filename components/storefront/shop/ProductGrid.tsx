@@ -389,12 +389,12 @@ export default function ProductGrid({ products }: ProductGridProps) {
         {/* Product Grid Area */}
         <div className="flex-1">
           {filteredAndSortedProducts.length > 0 ? (
-            /* 12-column Asymmetric Desktop Grid, 1-2 columns on mobile */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8 transition-opacity duration-300">
+            /* Uniform 2-column mobile, 3-column desktop beside filter sidebar */
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5 lg:gap-6 transition-opacity duration-300">
               {filteredAndSortedProducts.map((product, index) => (
-                <div key={product.id} className={getCardSpan(index)}>
-                  <Reveal delay={(index % 6) * 0.08} direction="up" className="h-full">
-                    <ProductCard product={product} />
+                <div key={product.id} className="h-full">
+                  <Reveal delay={(index % 6) * 0.06} direction="up" className="h-full">
+                    <ProductCard product={product} className="h-full" />
                   </Reveal>
                 </div>
               ))}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -12,9 +13,22 @@ export default function Footer() {
           <div className="space-y-4">
             <Link
               href="/"
-              className="inline-block text-sm font-medium tracking-[0.3em] text-porcelain hover:text-champagne-brass transition-colors"
+              className="inline-flex items-center gap-3 group"
             >
-              CUFFKINGS
+              <div className="relative w-10 h-10 rounded-md overflow-hidden bg-obsidian-deep/80 border border-champagne-brass/30 p-0.5 shadow-sm group-hover:border-champagne-brass/60 transition-colors shrink-0">
+                <Image
+                  src="/logo.png"
+                  alt="CuffKings Logo"
+                  fill
+                  sizes="40px"
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <span className="block text-sm font-medium tracking-[0.3em] text-porcelain group-hover:text-champagne-brass transition-colors">
+                  CUFFKINGS
+                </span>
+              </div>
             </Link>
             <p className="text-sm text-porcelain/70 leading-relaxed max-w-xs">
               Cufflinks built around polished metal, considered patterns and the

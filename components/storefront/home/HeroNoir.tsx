@@ -47,7 +47,6 @@ const KEN_BURNS_SLIDES = [
 export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps) {
   const heroRef = useRef<HTMLElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
-  const wordmarkRef = useRef<HTMLDivElement>(null);
   const headlineLine1Ref = useRef<HTMLSpanElement>(null);
   const headlineLine2Ref = useRef<HTMLSpanElement>(null);
   const sublineRef = useRef<HTMLParagraphElement>(null);
@@ -55,7 +54,11 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
   const brassRuleRef = useRef<HTMLDivElement>(null);
   const contentWrapRef = useRef<HTMLDivElement>(null);
 
-  // Slide refs for Ken Burns sequence
+  // Configurable video background from environment variable or prop
+  const videoSrc = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || heroVideo || "/videos/hero-bg.mp4";
+  const [videoAvailable, setVideoAvailable] = useState(false);
+
+  // Slide refs for Ken Burns sequence fallback
   const slidesRef = useRef<(HTMLDivElement | null)[]>([]);
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -66,8 +69,7 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
     ).matches;
 
     if (prefersReducedMotion) {
-      if (mediaRef.current) gsap.set(mediaRef.current, { opacity: 0.45, scale: 1, clipPath: "inset(0 0 0% 0)" });
-      if (wordmarkRef.current) gsap.set(wordmarkRef.current, { opacity: 0.8, y: 0 });
+      if (mediaRef.current) gsap.set(mediaRef.current, { opacity: 0.5, scale: 1 });
       if (headlineLine1Ref.current) gsap.set(headlineLine1Ref.current, { opacity: 1, y: 0 });
       if (headlineLine2Ref.current) gsap.set(headlineLine2Ref.current, { opacity: 1, y: 0 });
       if (sublineRef.current) gsap.set(sublineRef.current, { opacity: 0.85, y: 0 });
@@ -83,37 +85,30 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
       });
 
       tl.fromTo(
-        wordmarkRef.current,
-        { opacity: 0, y: -15 },
-        { opacity: 0.8, y: 0, duration: 0.8 }
+        mediaRef.current,
+        { scale: 1.05, opacity: 0 },
+        {
+          scale: 1,
+          opacity: 0.45,
+          duration: 1.2,
+          ease: "power4.out",
+        }
       )
         .fromTo(
-          mediaRef.current,
-          { clipPath: "inset(0 0 100% 0)", scale: 1.08, opacity: 0 },
+          [headlineLine1Ref.current, headlineLine2Ref.current],
+          { opacity: 0, y: 40 },
           {
-            clipPath: "inset(0 0 0% 0)",
-            scale: 1,
-            opacity: 0.5,
-            duration: 1.2,
-            ease: "power4.out",
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "power3.out",
           },
-          "-=0.5"
-        )
-        .fromTo(
-          headlineLine1Ref.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
-          "-=0.7"
-        )
-        .fromTo(
-          headlineLine2Ref.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" },
           "-=0.7"
         )
         .fromTo(
           sublineRef.current,
-          { opacity: 0, y: 25 },
+          { opacity: 0, y: 20 },
           { opacity: 0.85, y: 0, duration: 0.8 },
           "-=0.5"
         )
@@ -121,36 +116,26 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
           ctaGroupRef.current,
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.7 },
-          "-=0.4"
+          "-=0.5"
         )
         .fromTo(
           brassRuleRef.current,
-          { scaleX: 0 },
-          { scaleX: 1, duration: 1.0, ease: "power3.inOut" },
+          { scaleX: 0, opacity: 0 },
+          { scaleX: 1, opacity: 1, duration: 1.1, ease: "power3.inOut" },
           "-=0.5"
         );
 
-      // Scroll-out via GSAP ScrollTrigger
-      if (heroRef.current) {
-        gsap.to(mediaRef.current, {
-          scale: 1.1,
-          opacity: 0.2,
-          scrollTrigger: {
-            trigger: heroRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: true,
-          },
-        });
-
+      // Scroll-Out Parallax / Fade
+      if (heroRef.current && contentWrapRef.current) {
         gsap.to(contentWrapRef.current, {
-          y: -80,
-          opacity: 0.2,
+          y: -70,
+          opacity: 0.1,
+          ease: "none",
           scrollTrigger: {
             trigger: heroRef.current,
             start: "top top",
             end: "bottom top",
-            scrub: true,
+            scrub: 1.2,
           },
         });
       }
@@ -159,114 +144,123 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
     return () => ctx.revert();
   }, []);
 
-  // 2. Ken Burns Sequence (slow pan/zoom, crossfading across stills when heroVideo is absent)
+  // 2. Ken Burns Sequence (cycles through slides if video is not playing)
   useEffect(() => {
-    if (heroVideo) return;
+    if (videoAvailable) return;
 
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (prefersReducedMotion) return;
 
-    let current = 0;
-    const total = KEN_BURNS_SLIDES.length;
-    const duration = 6.5; // seconds per slide
-
-    // Initialize first slide
-    const firstSlide = slidesRef.current[0];
-    if (firstSlide) {
-      gsap.set(firstSlide, { opacity: 1, scale: 1.04, x: 0 });
-      gsap.to(firstSlide, {
-        scale: 1.14,
-        x: -15,
-        duration: duration + 1.5,
-        ease: "sine.inOut",
-      });
-    }
-
     const interval = setInterval(() => {
-      const next = (current + 1) % total;
-      const prevEl = slidesRef.current[current];
-      const nextEl = slidesRef.current[next];
+      setActiveSlide((prev) => (prev + 1) % KEN_BURNS_SLIDES.length);
+    }, 5500);
 
-      if (prevEl && nextEl) {
-        // Prepare next slide
-        const randomX = (next % 2 === 0 ? 1 : -1) * 20;
-        gsap.fromTo(
-          nextEl,
-          { opacity: 0, scale: 1.04, x: randomX },
-          {
-            opacity: 1,
-            scale: 1.14,
-            x: -randomX / 2,
-            duration: duration + 1.5,
-            ease: "sine.inOut",
-          }
-        );
+    return () => clearInterval(interval);
+  }, [videoAvailable]);
 
-        // Fade out previous slide
-        gsap.to(prevEl, {
+  // Handle slide transitions with GSAP
+  useEffect(() => {
+    if (videoAvailable) return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const currentSlideEl = slidesRef.current[activeSlide];
+    if (!currentSlideEl) return;
+
+    // Reset transform on incoming slide
+    gsap.set(currentSlideEl, { scale: 1, x: 0, y: 0 });
+
+    // Fade in and slow zoom (Ken Burns)
+    gsap.to(currentSlideEl, {
+      opacity: 1,
+      duration: 1.5,
+      ease: "power2.inOut",
+    });
+
+    gsap.to(currentSlideEl, {
+      scale: 1.12,
+      x: activeSlide % 2 === 0 ? 15 : -15,
+      y: activeSlide % 3 === 0 ? -10 : 10,
+      duration: 6,
+      ease: "none",
+    });
+
+    // Fade out others
+    slidesRef.current.forEach((el, index) => {
+      if (index !== activeSlide && el) {
+        gsap.to(el, {
           opacity: 0,
-          duration: 1.8,
+          duration: 1.5,
           ease: "power2.inOut",
         });
       }
-
-      current = next;
-      setActiveSlide(next);
-    }, duration * 1000);
-
-    return () => clearInterval(interval);
-  }, [heroVideo]);
+    });
+  }, [activeSlide, videoAvailable]);
 
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-[100svh] min-h-[600px] bg-obsidian text-porcelain flex items-center overflow-hidden"
+      className="relative min-h-[100svh] h-[100svh] w-full flex items-center overflow-hidden bg-obsidian text-porcelain select-none"
+      aria-label="CuffKings Hero"
     >
-      {/* Background Media: Video if provided, else Ken Burns crossfading product sequence */}
+      {/* Background Media Container */}
       <div
         ref={mediaRef}
-        className="absolute inset-0 z-0 origin-center will-change-transform pointer-events-none overflow-hidden"
-        data-cursor="explore"
+        className="absolute inset-0 w-full h-full overflow-hidden will-change-transform pointer-events-none"
       >
-        {heroVideo ? (
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src={heroVideo} type="video/mp4" />
-          </video>
-        ) : (
-          <div className="relative w-full h-full overflow-hidden">
-            {KEN_BURNS_SLIDES.map((slide, index) => (
-              <div
-                key={slide.src}
-                ref={(el) => {
-                  slidesRef.current[index] = el;
-                }}
-                className={`absolute inset-0 transition-none will-change-transform ${
-                  index === 0 ? "opacity-100" : "opacity-0"
-                }`}
-              >
-                <Image
-                  src={slide.src}
-                  alt={slide.alt}
-                  fill
-                  priority={index === 0}
-                  className="object-cover"
-                  sizes="100vw"
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Video Element */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/products/premium 1.jpeg"
+          onLoadedData={() => setVideoAvailable(true)}
+          onError={() => setVideoAvailable(false)}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+            videoAvailable ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <source src={videoSrc} type="video/mp4" />
+        </video>
+
+        {/* Fallback Ken Burns image slideshow */}
+        {/* TODO: Replace with hero-bg.mp4 when video is ready */}
+        <div
+          className={`relative w-full h-full overflow-hidden transition-opacity duration-1000 ${
+            videoAvailable ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          {KEN_BURNS_SLIDES.map((slide, index) => (
+            <div
+              key={slide.src}
+              ref={(el) => {
+                slidesRef.current[index] = el;
+              }}
+              className={`absolute inset-0 transition-none will-change-transform ${
+                index === 0 ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                fill
+                priority={index === 0}
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
+          ))}
+        </div>
 
         {/* Obsidian dark overlay for high contrast & elegance */}
-        <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-obsidian/75" />
+        <div className="absolute inset-0 bg-gradient-to-b from-obsidian/85 via-obsidian/60 to-obsidian" />
       </div>
 
       {/* Hero Content */}
@@ -275,16 +269,8 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
         className="relative z-10 max-w-container mx-auto px-6 sm:px-8 lg:px-12 w-full pt-16 will-change-transform"
       >
         <div className="max-w-4xl">
-          {/* Wordmark */}
-          <div
-            ref={wordmarkRef}
-            className="mb-8 text-champagne-brass text-xs sm:text-sm tracking-[0.3em] font-medium"
-          >
-            CUFFKINGS
-          </div>
-
-          {/* Headline: "Cufflinks, finished the way formalwear demands." - Decent, refined size */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-display leading-[1.15] tracking-tight mb-6 max-w-2xl">
+          {/* Headline */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-display leading-[1.15] tracking-tight mb-6 max-w-2xl">
             {headline ? (
               <span ref={headlineLine1Ref} className="block">
                 {headline}
@@ -292,25 +278,30 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
             ) : (
               <>
                 <span ref={headlineLine1Ref} className="block">
-                  Cufflinks, finished the way
+                  Premium men&apos;s cufflinks.
                 </span>
                 <span ref={headlineLine2Ref} className="block text-porcelain/95">
-                  formalwear demands.
+                  Built to last a decade.
                 </span>
               </>
             )}
           </h1>
 
-          {/* Subline */}
+          {/* Subheading */}
           <p
             ref={sublineRef}
-            className="text-body max-w-xl text-porcelain/85 mb-10 leading-relaxed"
+            className="text-body max-w-xl text-porcelain/85 mb-10 leading-relaxed text-sm sm:text-base"
           >
-            {subtext ||
-              "Cufflinks built around polished metal, considered patterns and the details of formal dressing."}
+            {subtext || (
+              <>
+                Three collections — Classical, Signature, and Premium.
+                <br className="hidden sm:inline" /> Solid brass, cold-cured enamel, and hand-set crystals.
+                <br className="hidden sm:inline" /> Shipped nationwide with cash on delivery.
+              </>
+            )}
           </p>
 
-          {/* CTAs */}
+          {/* Action Buttons */}
           <div
             ref={ctaGroupRef}
             className="flex flex-col sm:flex-row gap-4 mb-12 items-start sm:items-center"
@@ -320,14 +311,14 @@ export default function HeroNoir({ heroVideo, headline, subtext }: HeroNoirProps
                 href="/shop"
                 className="inline-block px-8 py-3.5 bg-champagne-brass text-obsidian text-sm font-medium border border-champagne-brass hover:bg-champagne-brass/90 transition-all duration-200"
               >
-                Shop the collection
+                Shop the Collection
               </Link>
             </Magnetic>
             <Link
-              href="/shop"
+              href="/about"
               className="inline-block px-8 py-3.5 bg-transparent text-porcelain text-sm font-medium border border-porcelain/30 hover:border-porcelain hover:text-porcelain transition-all duration-200"
             >
-              Explore the pieces
+              Our Story
             </Link>
           </div>
 

@@ -11,7 +11,6 @@ if (typeof window !== "undefined") {
 
 export default function FinalCTA() {
   const sectionRef = useRef<HTMLElement>(null);
-  const tagRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const btnsRef = useRef<HTMLDivElement>(null);
@@ -52,17 +51,10 @@ export default function FinalCTA() {
           { scaleX: 0, transformOrigin: "center" },
           { scaleX: 1, duration: 0.8, ease: "power3.inOut" }
         )
-        // Tag
-        .fromTo(
-          tagRef.current,
-          { opacity: 0, y: 12 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-          "-=0.4"
-        )
         // Title rises with skew
         .fromTo(
           titleRef.current,
-          { opacity: 0, y: 60, skewY: 2 },
+          { opacity: 0, y: 50, skewY: 1.5 },
           {
             opacity: 1,
             y: 0,
@@ -70,13 +62,13 @@ export default function FinalCTA() {
             duration: 1.1,
             ease: "power4.out",
           },
-          "-=0.3"
+          "-=0.4"
         )
         // Body text
         .fromTo(
           textRef.current,
           { opacity: 0, y: 30 },
-          { opacity: 0.8, y: 0, duration: 0.8, ease: "power3.out" },
+          { opacity: 0.85, y: 0, duration: 0.8, ease: "power3.out" },
           "-=0.7"
         )
         // Buttons scale in
@@ -122,14 +114,6 @@ export default function FinalCTA() {
         />
 
         <div className="space-y-8">
-          {/* Tag */}
-          <div
-            ref={tagRef}
-            className="text-xs tracking-[0.25em] text-champagne-brass font-medium uppercase opacity-0"
-          >
-            The Standard
-          </div>
-
           <h2
             ref={titleRef}
             className="text-h2 font-display opacity-0"
@@ -140,7 +124,7 @@ export default function FinalCTA() {
 
           <p
             ref={textRef}
-            className="text-xl max-w-2xl mx-auto leading-relaxed opacity-0"
+            className="text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed opacity-0 text-porcelain/80"
           >
             Classical, Signature and Premium — each finished to the same level
             of care, priced for where you want to start.

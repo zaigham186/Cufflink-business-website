@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -47,7 +48,17 @@ export default function AdminLoginPage() {
       {/* Login Card */}
       <div className="w-full max-w-md bg-obsidian border border-champagne-brass/25 p-8 sm:p-10 relative z-10 shadow-2xl">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block group mb-3">
+          <Link href="/" className="inline-flex flex-col items-center group mb-3">
+            <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-obsidian-deep border border-champagne-brass/40 p-1 mb-3 shadow-[0_0_25px_rgba(198,161,91,0.15)] group-hover:border-champagne-brass/70 group-hover:shadow-[0_0_35px_rgba(198,161,91,0.25)] transition-all">
+              <Image
+                src="/logo.png"
+                alt="CuffKings Royal Monogram"
+                fill
+                sizes="64px"
+                className="object-contain"
+                priority
+              />
+            </div>
             <span className="font-display text-2xl tracking-widest text-porcelain group-hover:text-champagne-brass transition-colors">
               CUFFKINGS
             </span>
